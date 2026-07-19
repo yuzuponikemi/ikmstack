@@ -1,0 +1,33 @@
+# ローカル作業用データ(正本は Google Drive — AGENTS.md 参照)
+experiments/**/data/
+experiments/**/logs_dev_pc/**/*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Claude Code ローカル設定
+.claude/settings.local.json
+
+# 報告デッキ等のバイナリ生成物(再現は deckgen.py / 正本・編集後は Drive — exp-deck 参照)
+experiments/**/outputs/*.pptx
+experiments/**/outputs/*.pdf
+
+# 再生成される図・自動レポート(regenerate.ps1 でローカル再現。git には入れない / 正本は Drive)
+#   git は「テキスト + 生成スクリプト」だけを持ち、図は各自ローカルで再生成してプレビューする
+#   (AGENTS.md 三大原則#1 / 各実験の regenerate.ps1 参照)。※gitignore は行末コメント不可
+
+# 新規実験の規約: 再生成物はここへ(図付きレポートのプレビュー用)
+experiments/**/_generated/
+# 図の出力先(実験既定)。図は git に載せず regenerate.ps1 でローカル再生成する
+experiments/**/figures/
+# レポート隣に図を出す場合の置き場
+experiments/**/reports/plots_*/
+
+# ローカル設定ファイル
+.lab-config.json
+
+.claude/settings.json

@@ -1,0 +1,17 @@
+{
+  "notebook_name": "{{NOTEBOOK}}",
+  "harness": "ikmstack",
+  "mode": "hybrid",
+  "experiment_id_pattern": "^E\\d+_[a-z0-9-]+$",
+  "experiment_id_prefix": "E",
+  "google_drive_root": "G:\\Shared drives\\<your-drive>\\{{NOTEBOOK}}\\experiments\\",
+  "allowed_figure_roots": [
+    "_generated",
+    "figures"
+  ],
+  "harness_repo_path": "../ikmstack",
+  "sidecar": {
+    "enabled": false,
+    "_note": "サイドカー経路（プロダクト repo での決定/ログをここへ集約）は今後実装。有効化時に routing 先を定義する。"
+  }
+}

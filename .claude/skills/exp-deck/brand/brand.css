@@ -1,0 +1,55 @@
+/* Brand Theme — 再利用可能スライド/ドキュメント スタイル.
+   自動生成: brand/tokens.py が単一ソース。手で編集せず tokens.py を直して再生成すること。
+   使い方(HTML): <link rel="stylesheet" href="brand.css"> し、.brand-slide / .brand-band /
+   .brand-title / .brand-h / .brand-accent / .brand-tradeoff / .brand-footer / .brand-source を使う。 */
+:root {
+  --brand-purple:       #531872;
+  --brand-purple-deep:  #3D1259;
+  --brand-purple-head:  #6C2A87;
+  --brand-green:        #4E9D69;
+  --brand-green-disp:   #5FA873;
+  --brand-ink:          #313131;
+  --brand-gray:         #6B6B6B;
+  --brand-footer-bg:    #EAEAEA;
+  --brand-orange:       #E89A51;
+  --brand-red:          #C0392B;
+  --brand-font: "Segoe UI", "Meiryo", system-ui, sans-serif;
+}
+
+.brand-slide {
+  position: relative; box-sizing: border-box;
+  width: 100%; max-width: 1280px; aspect-ratio: 16 / 9; margin: 0 auto;
+  background: #fff; color: var(--brand-ink);
+  font-family: var(--brand-font); padding: 3.2% 4% 5%;
+}
+
+/* 表紙/ディバイダのグラデ帯(背景画像を入れるなら background-image を足す) */
+.brand-band {
+  background: linear-gradient(105deg, var(--brand-purple-deep) 0%, var(--brand-purple) 55%, var(--brand-purple-head) 100%);
+  color: #fff;
+}
+.brand-slide--title { padding: 0; }
+.brand-slide--title .brand-band { height: 55%; padding: 5% 4%; }
+
+/* コンテンツ見出し: 濃色タイトル + テーマカラーの細罫 */
+.brand-title { font-size: 2.0rem; font-weight: 700; color: var(--brand-ink); margin: 0 0 .35rem; }
+.brand-title::after { content: ""; display: block; height: 3px; background: var(--brand-purple); margin-top: .4rem; }
+.brand-eyebrow { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-gray); }
+
+.brand-h        { color: var(--brand-purple-head); font-weight: 700; }   /* 見出し(navy相当) */
+.brand-accent   { color: var(--brand-green); font-weight: 700; }         /* 緑の強調・区切り */
+.brand-display  { color: var(--brand-green-disp); font-weight: 700; font-size: 2.4rem; }
+.brand-tradeoff { color: var(--brand-red); font-weight: 700; }           /* 制約/トレードオフ・要注意 */
+.brand-muted    { color: var(--brand-gray); }
+
+/* 図/表の出典(自己完結の来歴) */
+.brand-source { font-size: .62rem; color: var(--brand-gray); line-height: 1.35; }
+
+/* フッター: 左ロゴ(別途 img)・右ページ番号 */
+.brand-footer {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 6%;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5%; font-size: .6rem; color: var(--brand-gray);
+  border-top: 1px solid var(--brand-footer-bg);
+}
+.brand-footer img { height: 60%; }

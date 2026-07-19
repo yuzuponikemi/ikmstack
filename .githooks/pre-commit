@@ -1,0 +1,37 @@
+#!/bin/sh
+# report フロントマター ↔ INDEX.md のドリフトをコミット前に検出する。
+# 仕組み: tools/report_meta.py が各 report.md / reports/*.md のフロントマターから
+# INDEX 表(マーカ間)を生成できるか --check する。不一致なら commit を止める。
+#
+# 有効化(クローンごと): git config core.hooksPath .githooks
+# 一時的に無視したい場合のみ: git commit --no-verify
+
+# python3 を優先解決（現代 macOS は `python` を提供しない）。無ければ検査をスキップ。
+PY=$(command -v python3 || command -v python || true)
+if [ -z "$PY" ]; then
+  echo "⚠ pre-commit: python3/python が見つからないため INDEX/図リンク検査をスキップします。" >&2
+  exit 0
+fi
+
+out=$("$PY" tools/report_meta.py --check 2>&1)
+status=$?
+if [ "$status" -ne 0 ]; then
+  echo "$out"
+  echo
+  echo "✗ report のフロントマターと INDEX.md が一致していません(または不備があります)。"
+  echo "  → python tools/report_meta.py で INDEX を再生成し、変更を git add してから再コミットしてください。"
+  exit 1
+fi
+
+# 図リンクが再生成出力先(_generated/ 等の gitignored)を指すか検査(三大原則#1 R3)。
+# 出力先とずれた図リンクは clone + regen でプレビューに出ない。
+out=$("$PY" tools/check_report_figures.py --check 2>&1)
+status=$?
+if [ "$status" -ne 0 ]; then
+  echo "$out"
+  echo
+  echo "✗ レポートの図リンクが再生成出力先を指していません(AGENTS.md 三大原則#1 R3)。"
+  echo "  → 図リンクを ../_generated/<plots>/… 等(.gitignore 済の出力先)に直してください。"
+  exit 1
+fi
+exit 0

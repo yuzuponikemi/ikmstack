@@ -1,0 +1,33 @@
+# ── ハーネス（① ikmstack）の symlink — git には入れない ──────────────
+# `ikmstack/setup --notebook .` が張る。記録層は記録だけを追跡する。
+/tools
+/.githooks
+
+# ── ローカル設定（実体。雛形は .lab-config.json.template）──────────
+# gitignore は行末コメント不可。パターンは単独行で書く。
+.lab-config.json
+.claude/settings.json
+.claude/settings.local.json
+
+# ── 生データ・大容量（正本は Google Drive — AGENTS.md 参照）──────────
+experiments/**/data/
+experiments/**/logs_dev_pc/**/*.csv
+
+# ── 再生成される図・自動レポート（regenerate.ps1 でローカル再現。git 不可）──
+experiments/**/_generated/
+experiments/**/figures/
+experiments/**/reports/plots_*/
+
+# ── 報告デッキ等のバイナリ生成物（deckgen.py で再現／正本は Drive）──────
+experiments/**/outputs/*.pptx
+experiments/**/outputs/*.pdf
+
+# ── Python ────────────────────────────────────────────────
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# ── macOS ─────────────────────────────────────────────────
+.DS_Store

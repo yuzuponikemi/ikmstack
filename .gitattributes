@@ -1,0 +1,13 @@
+# Notebooks are stored as TEXT (source) with outputs cleared.
+# The `nbstrip` clean filter strips outputs/execution counts on `git add`,
+# so committed .ipynb stay small and diff-friendly. See AGENTS.md「Notebook 規約」.
+# One-time per clone (the filter command is not committed, only the attribute is):
+#   git config filter.nbstrip.clean "python3 tools/strip_nb_outputs.py"
+#   git config filter.nbstrip.smudge cat
+*.ipynb filter=nbstrip
+
+# Shell scripts + git hooks MUST be LF. CRLF breaks the shebang on Unix
+# (`/bin/sh^M: bad interpreter`). This lineage has Windows-CRLF heritage.
+*.sh        text eol=lf
+setup       text eol=lf
+.githooks/* text eol=lf

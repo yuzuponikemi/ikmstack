@@ -1,0 +1,235 @@
+#!/usr/bin/env bash
+# ikmstack setup — install the ① harness (skills + agents) globally so any
+# repo can consume it, and wire a ② records notebook (ikmnote) to the harness.
+#
+# Usage:
+#   ./setup                      global install: skills → ~/.claude/skills,
+#                                agents → ~/.claude/agents (idempotent)
+#   ./setup --prefix ikm-        namespace skills as ikm-<name>
+#   ./setup --init-notebook <dir>  scaffold a NEW records notebook (② layer)
+#                                from scratch: structure + template + docs +
+#                                git init + wiring. One command, reproducible.
+#   ./setup --notebook <dir>     wire an EXISTING records repo: symlink tools/ +
+#                                .githooks/ from this install (gitignored) so the
+#                                harness skills' relative `tools/…` calls + the
+#                                figure/INDEX pre-commit hook work in the notebook
+#   ./setup --status             report install health: skills/agents symlinks,
+#                                install-path, registered notebook, verdict
+#   ./setup --uninstall          remove the global symlinks this script created
+#
+# The harness is never vendored into the notebook's git history — the notebook
+# tracks records only; tools/ + .githooks/ are gitignored symlinks to here.
+set -e
+
+SRC="$(cd "$(dirname "$0")" && pwd -P)"
+SKILLS_DST="$HOME/.claude/skills"
+AGENTS_DST="$HOME/.claude/agents"
+STATE_DIR="$HOME/.ikmstack"
+
+PREFIX=""
+MODE="install"
+NOTEBOOK=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --prefix) PREFIX="${2:-ikm-}"; shift 2 ;;
+    --prefix=*) PREFIX="${1#--prefix=}"; shift ;;
+    --notebook) MODE="notebook"; NOTEBOOK="$2"; shift 2 ;;
+    --init-notebook) MODE="init-notebook"; NOTEBOOK="$2"; shift 2 ;;
+    --status) MODE="status"; shift ;;
+    --uninstall) MODE="uninstall"; shift ;;
+    *) echo "unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
+# ── link helper: never clobber a real (non-symlink) dir we don't own ──────────
+_link() {
+  local target="$1" link="$2"
+  if [ -L "$link" ] || [ ! -e "$link" ]; then
+    ln -snf "$target" "$link"
+    return 0
+  fi
+  echo "  skip (exists, not a symlink): $link" >&2
+  return 1
+}
+
+skill_link_name() {
+  local dir="$1" name
+  name="$(basename "$dir")"
+  local fname
+  fname=$(grep -m1 '^name:' "$dir/SKILL.md" 2>/dev/null | sed 's/^name:[[:space:]]*//' | tr -d '[:space:]')
+  [ -n "$fname" ] && name="$fname"
+  printf '%s%s' "$PREFIX" "$name"
+}
+
+# ── wire a records notebook to this harness install ───────────────────────────
+# Symlinks tools/ + .githooks/ (gitignored) so the skills' relative `tools/…`
+# calls and the INDEX/figure pre-commit hook work from the notebook's cwd.
+wire_notebook() {
+  local NB="$1"
+  _link "$SRC/tools" "$NB/tools" || true
+  _link "$SRC/.githooks" "$NB/.githooks" || true
+  git -C "$NB" config core.hooksPath .githooks 2>/dev/null || true
+  local gi="$NB/.gitignore" pat
+  for pat in "/tools" "/.githooks"; do
+    grep -qxF "$pat" "$gi" 2>/dev/null || printf '%s\n' "$pat" >> "$gi"
+  done
+  # register this notebook so sidecar routing (tools/sidecar.py) can find it
+  # from any product repo. v1: single active notebook (last wired).
+  mkdir -p "$STATE_DIR"
+  printf '%s\n' "$NB" > "$STATE_DIR/notebook"
+  echo "  wired: tools/ → $SRC/tools, .githooks/ → $SRC/.githooks (gitignored, hooksPath set)"
+  echo "  registered notebook → $STATE_DIR/notebook (sidecar routing target)"
+}
+
+# ── scaffold a NEW records notebook from scratch ──────────────────────────────
+init_notebook() {
+  local NB_ARG="$1"
+  local NB NAME TPL="$SRC/notebook-template"
+  NB="$NB_ARG"
+  case "$NB" in /*) : ;; *) NB="$PWD/$NB" ;; esac   # absolutize
+  NAME="$(basename "$NB")"
+  if [ -e "$NB" ] && [ -n "$(ls -A "$NB" 2>/dev/null)" ]; then
+    echo "refusing: $NB already exists and is not empty" >&2; exit 1
+  fi
+  [ -d "$TPL" ] || { echo "missing notebook-template in $SRC" >&2; exit 1; }
+
+  mkdir -p "$NB/experiments" "$NB/logs/$(date +%Y)" "$NB/tips" "$NB/decisions"
+  # experiment scaffold + empty registry come from the harness
+  cp -R "$SRC/experiments/_template" "$NB/experiments/_template"
+  rm -f "$NB/experiments/_template/.DS_Store"
+  cp "$SRC/experiments/INDEX.md" "$NB/experiments/INDEX.md"
+  : > "$NB/logs/$(date +%Y)/.gitkeep"; : > "$NB/tips/.gitkeep"; : > "$NB/decisions/.gitkeep"
+
+  # notebook docs (substitute {{NOTEBOOK}} → dir basename)
+  for f in README.md AGENTS.md CLAUDE.md; do
+    sed "s/{{NOTEBOOK}}/$NAME/g" "$TPL/$f" > "$NB/$f"
+  done
+  sed "s/{{NOTEBOOK}}/$NAME/g" "$TPL/gitignore" > "$NB/.gitignore"
+  sed "s/{{NOTEBOOK}}/$NAME/g" "$TPL/lab-config.json.template" > "$NB/.lab-config.json.template"
+  cp "$NB/.lab-config.json.template" "$NB/.lab-config.json"
+
+  git -C "$NB" init -q -b main
+  wire_notebook "$NB"
+
+  echo "notebook scaffolded: $NB"
+  echo ""
+  echo "Next:"
+  echo "  1. cd $NB && git add -A && git commit -m 'init: $NAME (records layer)'"
+  echo "  2. gh repo create <owner>/$NAME --private --source=. --remote=origin --push"
+  echo "  3. start working: /exp-new (experiment) or /lab-log (daily log)"
+}
+
+case "$MODE" in
+  install)
+    mkdir -p "$SKILLS_DST" "$AGENTS_DST" "$STATE_DIR"
+    linked=()
+    for d in "$SRC"/.claude/skills/*/; do
+      [ -f "$d/SKILL.md" ] || continue
+      name="$(skill_link_name "$d")"
+      if _link "$d" "$SKILLS_DST/$name"; then linked+=("$name"); fi
+    done
+    for a in "$SRC"/.claude/agents/*.md; do
+      [ -f "$a" ] || continue
+      _link "$a" "$AGENTS_DST/$(basename "$a")" || true
+    done
+    printf '%s\n' "$SRC" > "$STATE_DIR/install-path"
+    echo "ikmstack installed."
+    echo "  skills → $SKILLS_DST : ${linked[*]}"
+    echo "  agents → $AGENTS_DST : $(ls "$SRC"/.claude/agents 2>/dev/null | tr '\n' ' ')"
+    echo "  install path recorded → $STATE_DIR/install-path"
+    echo ""
+    echo "Next: wire a records notebook with  ./setup --notebook <path-to-ikmnote>"
+    ;;
+
+  notebook)
+    [ -n "$NOTEBOOK" ] || { echo "usage: ./setup --notebook <dir>" >&2; exit 1; }
+    NB="$(cd "$NOTEBOOK" && pwd -P)" || { echo "notebook dir not found: $NOTEBOOK" >&2; exit 1; }
+    echo "wiring notebook: $NB"
+    wire_notebook "$NB"
+    ;;
+
+  init-notebook)
+    [ -n "$NOTEBOOK" ] || { echo "usage: ./setup --init-notebook <dir>" >&2; exit 1; }
+    init_notebook "$NOTEBOOK"
+    ;;
+
+  status)
+    echo "ikmstack status"
+    echo "  harness (this repo) : $SRC"
+    miss=0; ok=0
+    # install-path
+    ip=$(cat "$STATE_DIR/install-path" 2>/dev/null || echo "")
+    if [ -z "$ip" ]; then
+      echo "  install-path        : (未記録) — 未 install"; miss=$((miss+1))
+    elif [ "$ip" = "$SRC" ]; then
+      echo "  install-path        : $ip ✓"
+    else
+      echo "  install-path        : $ip ⚠ この repo と不一致（別の場所を install 済み）"
+    fi
+    # skills
+    echo "  skills (~/.claude/skills):"
+    for d in "$SRC"/.claude/skills/*/; do
+      [ -f "$d/SKILL.md" ] || continue
+      name="$(skill_link_name "$d")"; link="$SKILLS_DST/$name"; want="${d%/}"
+      if [ -L "$link" ] && [ ! -e "$link" ]; then
+        echo "    ✗ $name (切れリンク)"; miss=$((miss+1))
+      elif [ -L "$link" ]; then
+        tgt="$(readlink "$link")"; tgt="${tgt%/}"
+        if [ "$tgt" = "$want" ]; then echo "    ✓ $name"; ok=$((ok+1))
+        else echo "    ⚠ $name (別を指す: $tgt)"; miss=$((miss+1)); fi
+      elif [ -e "$link" ]; then
+        echo "    ⚠ $name (symlink でない実体)"; miss=$((miss+1))
+      else
+        echo "    ✗ $name (未配置)"; miss=$((miss+1))
+      fi
+    done
+    # agents
+    echo "  agents (~/.claude/agents):"
+    for a in "$SRC"/.claude/agents/*.md; do
+      [ -f "$a" ] || continue
+      link="$AGENTS_DST/$(basename "$a")"
+      if [ -L "$link" ] && [ "$(readlink "$link")" = "$a" ]; then
+        echo "    ✓ $(basename "$a")"
+      else
+        echo "    ✗ $(basename "$a")"; miss=$((miss+1))
+      fi
+    done
+    # notebook
+    nb=$(cat "$STATE_DIR/notebook" 2>/dev/null || echo "")
+    if [ -z "$nb" ]; then
+      echo "  notebook            : (未登録) — ./setup --notebook <dir> または --init-notebook <dir>"
+    elif [ ! -d "$nb" ]; then
+      echo "  notebook            : $nb ✗ 存在しない"
+    elif [ -L "$nb/tools" ] && [ -L "$nb/.githooks" ]; then
+      echo "  notebook            : $nb ✓ 配線済"
+    else
+      echo "  notebook            : $nb ⚠ 未配線（./setup --notebook $nb）"
+    fi
+    # verdict
+    echo ""
+    if [ "$miss" -eq 0 ]; then
+      echo "  verdict: ✅ インストール済み（skills $ok 個 OK）"
+    elif [ -z "$ip" ]; then
+      echo "  verdict: ❌ 未インストール → 実行:  ./setup"
+    else
+      echo "  verdict: ⚠ 一部欠落 $miss 件 → 再実行して修復:  ./setup"
+    fi
+    ;;
+
+  uninstall)
+    removed=0
+    for d in "$SRC"/.claude/skills/*/; do
+      [ -f "$d/SKILL.md" ] || continue
+      link="$SKILLS_DST/$(skill_link_name "$d")"
+      if [ -L "$link" ] && [ "$(readlink "$link")" = "${d%/}" ] || [ "$(readlink "$link")" = "$d" ]; then
+        rm -f "$link"; removed=$((removed+1))
+      fi
+    done
+    for a in "$SRC"/.claude/agents/*.md; do
+      [ -f "$a" ] || continue
+      link="$AGENTS_DST/$(basename "$a")"
+      [ -L "$link" ] && [ "$(readlink "$link")" = "$a" ] && { rm -f "$link"; removed=$((removed+1)); }
+    done
+    echo "uninstalled $removed symlink(s)."
+    ;;
+esac
