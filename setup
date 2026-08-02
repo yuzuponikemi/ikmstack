@@ -13,8 +13,10 @@
 #                                .githooks/ from this install (gitignored) so the
 #                                harness skills' relative `tools/…` calls + the
 #                                figure/INDEX pre-commit hook work in the notebook
+#   ./setup --forget-notebook <dir>  unregister a notebook (records untouched);
+#                                the default falls back to the last one wired
 #   ./setup --status             report install health: skills/agents symlinks,
-#                                install-path, registered notebook, verdict
+#                                install-path, registered notebooks, verdict
 #   ./setup --uninstall          remove the global symlinks this script created
 #
 # The harness is never vendored into the notebook's git history — the notebook
@@ -35,6 +37,7 @@ while [ $# -gt 0 ]; do
     --prefix=*) PREFIX="${1#--prefix=}"; shift ;;
     --notebook) MODE="notebook"; NOTEBOOK="$2"; shift 2 ;;
     --init-notebook) MODE="init-notebook"; NOTEBOOK="$2"; shift 2 ;;
+    --forget-notebook) MODE="forget-notebook"; NOTEBOOK="$2"; shift 2 ;;
     --status) MODE="status"; shift ;;
     --uninstall) MODE="uninstall"; shift ;;
     *) echo "unknown arg: $1" >&2; exit 1 ;;
@@ -74,11 +77,14 @@ wire_notebook() {
     grep -qxF "$pat" "$gi" 2>/dev/null || printf '%s\n' "$pat" >> "$gi"
   done
   # register this notebook so sidecar routing (tools/sidecar.py) can find it
-  # from any product repo. v1: single active notebook (last wired).
+  # from any product repo. `notebooks` = all wired (wire order, deduped);
+  # `notebook` = the default = last wired (where sidecar records land).
   mkdir -p "$STATE_DIR"
   printf '%s\n' "$NB" > "$STATE_DIR/notebook"
+  touch "$STATE_DIR/notebooks"
+  grep -qxF "$NB" "$STATE_DIR/notebooks" 2>/dev/null || printf '%s\n' "$NB" >> "$STATE_DIR/notebooks"
   echo "  wired: tools/ → $SRC/tools, .githooks/ → $SRC/.githooks (gitignored, hooksPath set)"
-  echo "  registered notebook → $STATE_DIR/notebook (sidecar routing target)"
+  echo "  registered notebook → $STATE_DIR/notebooks (default → $STATE_DIR/notebook)"
 }
 
 # ── scaffold a NEW records notebook from scratch ──────────────────────────────
@@ -153,6 +159,22 @@ case "$MODE" in
     init_notebook "$NOTEBOOK"
     ;;
 
+  forget-notebook)
+    # 登録の解除だけ。notebook の中身（記録）には一切触らない
+    [ -n "$NOTEBOOK" ] || { echo "usage: ./setup --forget-notebook <dir>" >&2; exit 1; }
+    NB="$(cd "$NOTEBOOK" 2>/dev/null && pwd -P)" || NB="$NOTEBOOK"
+    if [ -f "$STATE_DIR/notebooks" ]; then
+      grep -vxF "$NB" "$STATE_DIR/notebooks" > "$STATE_DIR/notebooks.tmp" 2>/dev/null || true
+      mv "$STATE_DIR/notebooks.tmp" "$STATE_DIR/notebooks"
+    fi
+    if [ "$(cat "$STATE_DIR/notebook" 2>/dev/null)" = "$NB" ]; then
+      # 既定が消えたら残りの最後（＝直近に wire したもの）を既定に繰り上げる
+      tail -n 1 "$STATE_DIR/notebooks" 2>/dev/null > "$STATE_DIR/notebook" || : > "$STATE_DIR/notebook"
+    fi
+    echo "forgot notebook: ${NB}（登録の解除のみ。記録そのものは削除していない）"
+    echo "  default → $(cat "$STATE_DIR/notebook" 2>/dev/null || echo '(なし)')"
+    ;;
+
   status)
     echo "ikmstack status"
     echo "  harness (this repo) : $SRC"
@@ -194,16 +216,25 @@ case "$MODE" in
         echo "    ✗ $(basename "$a")"; miss=$((miss+1))
       fi
     done
-    # notebook
+    # notebooks（複数対応。* が既定 = sidecar 記録の集約先）
     nb=$(cat "$STATE_DIR/notebook" 2>/dev/null || echo "")
-    if [ -z "$nb" ]; then
-      echo "  notebook            : (未登録) — ./setup --notebook <dir> または --init-notebook <dir>"
-    elif [ ! -d "$nb" ]; then
-      echo "  notebook            : $nb ✗ 存在しない"
-    elif [ -L "$nb/tools" ] && [ -L "$nb/.githooks" ]; then
-      echo "  notebook            : $nb ✓ 配線済"
+    all=$(cat "$STATE_DIR/notebooks" 2>/dev/null || echo "")
+    [ -n "$nb" ] && all=$(printf '%s\n%s\n' "$all" "$nb" | grep -v '^$' | awk '!seen[$0]++')
+    if [ -z "$all" ]; then
+      echo "  notebooks           : (未登録) — ./setup --notebook <dir> または --init-notebook <dir>"
     else
-      echo "  notebook            : $nb ⚠ 未配線（./setup --notebook $nb）"
+      echo "  notebooks (* = 既定 / sidecar 集約先):"
+      while IFS= read -r n; do
+        [ -n "$n" ] || continue
+        mark=" "; [ "$n" = "$nb" ] && mark="*"
+        if [ ! -d "$n" ]; then
+          echo "   $mark $n ✗ 存在しない"; miss=$((miss+1))
+        elif [ -L "$n/tools" ] && [ -L "$n/.githooks" ]; then
+          echo "   $mark $n ✓ 配線済"
+        else
+          echo "   $mark $n ⚠ 未配線（./setup --notebook ${n}）"; miss=$((miss+1))
+        fi
+      done <<< "$all"
     fi
     # verdict
     echo ""

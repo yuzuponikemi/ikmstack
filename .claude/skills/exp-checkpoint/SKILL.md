@@ -12,6 +12,20 @@ description: At a milestone for an experiment, bring its uppercase living docs a
 > ドキュメントの同期を開始する前に、必ず詳細な確認対象と手順が記載された以下のリファレンスドキュメントを `view_file` で読み込んでください。
 > - [exp-checkpoint 同期手順・詳細](references/checkpoint_procedure.md)
 
+## Step 0: 作業ディレクトリを解決（必須）
+
+同期対象は**記録層（ノート）の中**の実験。プロダクト repo から起動された場合も、
+まずノート根へ移動する（③ プロダクトを汚さない）:
+
+```bash
+cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
+```
+
+以降の相対パス（`tools/…` / `experiments/…`）はここから解決する。ただし手順3の
+**日次ログだけは `lab-log` 規約に従いサイドカー分岐する**（起動元 repo に紐づくため。
+`sidecar.py ensure` が返すディレクトリに書く）。詳細は
+[記録のルーティング規約](../../../docs/conventions/record-routing.md)。
+
 ## 実行の流れ
 
 1. **リビング文書 (大文字系) の同期**:

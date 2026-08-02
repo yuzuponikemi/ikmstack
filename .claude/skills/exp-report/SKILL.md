@@ -12,6 +12,19 @@ description: Author and register an experiment report using the lab house style 
 > レポート作成および INDEX の更新を開始する前に、必ず詳細な命名規約や YAML フロントマターの記述例が記載された以下のリファレンスドキュメントを `view_file` で読み込んでください。
 > - [exp-report 詳細ガイド・テンプレート](references/exp_report_guide.md)
 
+## Step 0: 作業ディレクトリを解決（必須）
+
+レポートは**記録層（ノート）の中**の実験ディレクトリに書く。プロダクト repo から
+起動された場合も、まずノート根へ移動する（③ プロダクトを汚さない）:
+
+```bash
+cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
+```
+
+以降の相対パス（`tools/…` / `experiments/…`）はここから解決する。詳細は
+[記録のルーティング規約](../../../docs/conventions/record-routing.md)。
+`notebook 未登録` エラーなら `./setup --notebook <dir>` の実行を案内する。
+
 ## レポート作成手順
 
 1. **構成の決定とファイル作成**:

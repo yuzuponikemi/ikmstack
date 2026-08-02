@@ -70,12 +70,17 @@ cd ~/source/personal/ikmstack && ./setup           # install（1回）
 | `./setup --prefix ikm-` | skills を `ikm-<name>` で名前空間化（衝突回避したいとき） |
 | `./setup --init-notebook <dir>` | **記録層をゼロから作る**：構造＋`experiments/_template`＋INDEX＋README/AGENTS/CLAUDE＋.gitignore＋.lab-config＋`git init`＋配線。空でない dir は拒否（安全） |
 | `./setup --notebook <dir>` | **既存**記録層を配線：`tools/`＋`.githooks/` を gitignore された symlink で張り、`core.hooksPath` を設定 |
-| `./setup --status` | **install 状態を確認**：skills/agents の symlink 健全性、install-path、登録 notebook、総合判定を表示。「入ってるか分からない」時はこれ |
+| `./setup --forget-notebook <dir>` | notebook の**登録だけ**を解除（記録は消さない）。既定は直近に wire したものへ繰り上がる |
+| `./setup --status` | **install 状態を確認**：skills/agents の symlink 健全性、install-path、登録 notebook 一覧（`*` が既定）、総合判定を表示。「入ってるか分からない」時はこれ |
 | `./setup --uninstall` | この install が張った global symlink を削除 |
 
 記録層は `tools/` と `.githooks/` を**この install への gitignore された symlink**として持つ。
 だから記録層の git には**記録だけ**が入り、skill の相対 `tools/…` 呼び出しと
 INDEX/図リンクの pre-commit フックはそのまま動く。
+
+**notebook は複数登録できる**（`--notebook` を複数回）。**その notebook の中で作業していれば
+そこに書かれ**、プロダクト repo から書くときだけ「既定 = 最後に wire したもの」に集約される。
+明示したいときは `--notebook <path|名前>` か環境変数 `IKMSTACK_NOTEBOOK`。
 
 ---
 
@@ -95,6 +100,11 @@ INDEX/図リンクの pre-commit フックはそのまま動く。
 | `/regen-outputs` | 図・自動レポートをローカル再生成（図は git に入れない） |
 
 agent：`dr-verifier`（主張を独立検証、`/dr-audit` が使う）。
+
+**どこで起動しても正しい場所に着地する**（[記録のルーティング規約](docs/conventions/record-routing.md)）：
+実験系（`/exp-new` `/exp-report` `/exp-checkpoint` `/exp-deck` `/regen-outputs`）は
+起動元がどこでも**ノート根**で動く（プロダクト repo に `experiments/` を作らない）。
+`/lab-log` だけは起動元に紐づけ、プロダクト repo なら `sidecar/<slug>/logs/` に集約する。
 
 ---
 
@@ -120,7 +130,10 @@ git commit ... && git push
 .claude/skills/<skill>/SKILL.md   スキル本体（8個）
 .claude/agents/*.md               サブエージェント（dr-verifier）
 tools/                            report_meta.py / check_report_figures.py /
+                                  sidecar.py（記録のルーティング）/
                                   strip_nb_outputs.py / dr/*（dr-audit 用）
+docs/conventions/                 reporting / figures-regen / repository-rules /
+                                  record-routing（どこで起動しても正しく着地する規約）
 .githooks/pre-commit              INDEX↔フロントマター・図リンク検査（LF・実行可）
 experiments/_template/            実験の雛形（/exp-new がコピー）
 experiments/INDEX.md              実験レジストリの空雛形（report_meta が生成）

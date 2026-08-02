@@ -16,6 +16,19 @@ description: Generate a shareable, peer-review-ready slide deck (.pptx) from an 
 > 本スキルを実行・適用する前に、必ず詳細なデザイン原則、Subagent への指示プロンプトテンプレート、および検証手順が記載された以下のリファレンスドキュメントを `view_file` で読み込んでください。
 > - [exp-deck 詳細ガイド・デザイン原則](references/deck_design_principles.md)
 
+## Step 0: 作業ディレクトリを解決（必須。Subagent にも引き継ぐ）
+
+対象の実験・`deck.py`・図はすべて**記録層（ノート）の中**にある。プロダクト repo から
+起動された場合も、まずノート根へ移動する:
+
+```bash
+cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
+```
+
+`deckgen.py` は install 先の `.claude/skills/exp-deck/` にあるため、ノート根から呼ぶ場合は
+`"$(cat ~/.ikmstack/install-path)/.claude/skills/exp-deck/deckgen.py"` を使う。詳細は
+[記録のルーティング規約](../../../docs/conventions/record-routing.md)。
+
 ## 概要と基本手順 (Subagent への指示概要)
 
 1. **`deck.py` の新規作成**: 
@@ -26,7 +39,9 @@ description: Generate a shareable, peer-review-ready slide deck (.pptx) from an 
 
 2. **PowerPoint スライドの生成**:
    ```sh
-   uv run --with python-pptx .claude/skills/exp-deck/deckgen.py experiments/<ID>/deck.py
+   uv run --with python-pptx \
+     "$(cat ~/.ikmstack/install-path)/.claude/skills/exp-deck/deckgen.py" \
+     experiments/<ID>/deck.py
    ```
 
 3. **目視確認と配布**:

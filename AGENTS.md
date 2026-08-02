@@ -29,6 +29,11 @@ AI コーディングエージェント向けのリポジトリ規約。
 **リトマス**：「再利用できる仕組みか」→① ikmstack /「知見・記録か」→② ikmnote /「出荷ソースか」→③ プロダクト。
 
 - ハーネス改善は必ず ① ikmstack で行い、`setup` の再実行で各マシン・各記録層に反映する。実体で直して急ぐ場合も、汎用部分は後で ikmstack へ backport する（cherry-pick。実体固有のコンテンツ・ブランドは混ぜない）。
+- **記録の書き先は起動場所に依らず自動で決まる**（skill が `tools/sidecar.py` で解決する）。
+  実験一式は**常にノート根**（cross-repo なので `sidecar/` に閉じ込めない。関与 repo は
+  `MANIFEST.md` に書く）、日次ログだけは起動元 repo に紐づけて
+  `sidecar/<slug>/logs/` に集約する。**③ プロダクトには絶対に書かない**。
+  規約は [docs/conventions/record-routing.md](docs/conventions/record-routing.md)。
 - 背景の詳細は ikmnote の `tips/method-harness-record-product-architecture.md` を参照。
 
 ## 三大原則

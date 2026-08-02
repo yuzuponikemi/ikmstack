@@ -12,6 +12,17 @@ Git 管理外の図や自動生成レポートを、生データと `regenerate.
 > 再生成を実行する前に、必ず Drive の同期ルールや出力先規約が記載された以下のリファレンスドキュメントを `view_file` で読み込んでください。
 > - [regen-outputs 詳細ガイド・規約](references/regen_guide.md)
 
+## Step 0: 作業ディレクトリを解決（必須）
+
+対象の実験は**記録層（ノート）の中**にある。プロダクト repo から起動された場合も、
+まずノート根へ移動する（出力先の `.gitignore` 規約もノート側にあるため）:
+
+```bash
+cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
+```
+
+詳細は [記録のルーティング規約](../../../docs/conventions/record-routing.md)。
+
 ## 再生成の実行コマンド
 
 1. **Google Drive データの同期確認**:

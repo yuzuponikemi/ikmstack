@@ -8,6 +8,20 @@ description: Scaffold a new experiment in this lab repo — copy experiments/_te
 AGENTS.md「実験のワークフロー」手順を一括実行する。漏れやすいのは
 **SHA 記録**と **Drive ミラー作成**なので必ず両方やる。
 
+## Step 0: 作業ディレクトリを解決（必須）
+
+実験は**記録層（ノート）の中**に作る。プロダクト repo から起動された場合も、
+まずノート根へ移動する（③ プロダクトに `experiments/` を作らない）:
+
+```bash
+cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
+```
+
+以降の相対パス（`tools/…` / `experiments/…`）はここから解決する。実験は cross-repo
+なので `sidecar/<slug>/` ではなく**常にノート根**（関与 repo は MANIFEST に書く）。
+詳細は [記録のルーティング規約](../../../docs/conventions/record-routing.md)。
+`notebook 未登録` エラーなら `./setup --notebook <dir>` の実行を案内する。
+
 ## 入力(ユーザーに確認。引数で与えられていれば省略)
 
 1. **topic スラッグ**(英数ケバブ、実験番号を含める。例: `E001_stage-tension`)

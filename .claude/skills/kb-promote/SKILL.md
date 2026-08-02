@@ -9,6 +9,17 @@ description: Promote settled findings from an experiment to a shared Knowledge B
 
 ## 手順
 
+### 0. 昇格元（実験）の場所を解決
+
+昇格元の `REPORT.md` は**記録層（ノート）の中**にある。別 repo から起動された場合は
+まずノート根を解決してから読む（昇格先の KB repo はそのまま別 repo として扱う）:
+
+```bash
+NB="$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"   # 昇格元 = $NB/experiments/...
+```
+
+詳細は [記録のルーティング規約](../../../docs/conventions/record-routing.md)。
+
 ### 1. 昇格対象の抽出
 
 - 実験の `REPORT.md`(現状サマリ＝唯一の権威)から**確定事実のみ**抽出。

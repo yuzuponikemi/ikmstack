@@ -24,7 +24,25 @@ python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" ensure
   に書く。**プロダクト repo は一切汚さない**（記録はすべて記録層に集約）。`slug` は
   その repo の git remote から決まる。`ensure` はディレクトリと（サイドカー時は）
   `README.md` も用意する。
+- notebook が複数登録されていても、**その中で作業していればその notebook** に書かれる
+  （既定は最後に wire したもの）。明示したいときは `--notebook <path|名前>` か
+  環境変数 `IKMSTACK_NOTEBOOK`。詳細は
+  [記録のルーティング規約](../../../docs/conventions/record-routing.md)。
 - `notebook 未登録` エラーなら「ikmstack で `./setup --notebook <dir>` を実行」を案内する。
+
+## Step 0.5: 過去の記録を確認（resurfacing）
+
+**書き始める前に**、同じ文脈の過去記録を必ず見る（重複ファイルを作らない・継続作業を
+見失わないため）:
+
+```bash
+python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" recent --limit 5
+```
+
+- 直近ログ（新しい順）と、`MANIFEST.md` がこの repo に言及している**関連実験**が返る。
+- **同日・同トピックのファイルがあれば新規作成せず追記**する。
+- 前回の「次にやること」が今日の作業に繋がっているなら、冒頭でその継続である旨に触れる。
+- 関連実験があれば、ログから `experiments/<ID>/` へリンクを張る。
 
 ## 手順
 

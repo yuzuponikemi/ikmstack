@@ -16,19 +16,32 @@ description: レポートの事実・数値を独立検証する。主張台帳(
 > 本プロセスを実行する前に、必ず詳細な手順、Subagent への指示プロンプトテンプレート、および切り分け基準が記載された以下のリファレンスドキュメントを `view_file` で読み込んでください。
 > - [dr-audit 事実検証プロトコル詳細](references/dr_audit_protocol.md)
 
+## Step 0: 検証ツールの場所を解決（必須。Subagent にも引き継ぐ）
+
+検証対象の台帳・レポートは記録層にもプロダクト repo にもあり得るので、この skill は
+**cd せず**、ツール側を install-path で絶対解決する（プロダクト repo には `tools/` の
+symlink が無く、相対呼びは落ちるため）:
+
+```bash
+DR="$(cat ~/.ikmstack/install-path)/tools/dr"
+```
+
+以降の `$DR/...` はこれ。詳細は
+[記録のルーティング規約](../../../docs/conventions/record-routing.md)。
+
 ## 概要と検証手順 (Subagent への指示概要)
 
 1. **台帳の準備・スキーマ検証**:
    - レポートの数値を `claims.jsonl` に書き起こし、スキーマを確認します。
-   - `python3 tools/dr/validate_ledger.py <台帳>`
+   - `python3 "$DR/validate_ledger.py" <台帳>`
 
 2. **独立検証の実行**:
    - `risk=decision_driving` の主張について `dr-verifier` エージェントを個別に呼び出し、検証結果を台帳に反映します。
-   - 補足主張は `python3 tools/dr/sampling_select.py <台帳>` に基づきサンプリング検証します。
+   - 補足主張は `python3 "$DR/sampling_select.py" <台帳>` に基づきサンプリング検証します。
 
 3. **派生値と散文の検証**:
-   - 派生値再計算: `python3 tools/dr/numeric_compare.py <台帳>`
-   - 散文との整合: `python3 tools/dr/ledger_to_prose_check.py <散文> <台帳>`
+   - 派生値再計算: `python3 "$DR/numeric_compare.py" <台帳>`
+   - 散文との整合: `python3 "$DR/ledger_to_prose_check.py" <散文> <台帳>`
 
 4. **受入ゲートによる判定 (必須)**:
-   - `python3 tools/dr/dr_gate.py <台帳>` を実行し、PASS するまで修正と検証を繰り返します。
+   - `python3 "$DR/dr_gate.py" <台帳>` を実行し、PASS するまで修正と検証を繰り返します。
