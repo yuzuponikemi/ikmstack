@@ -31,3 +31,7 @@ experiments/**/reports/plots_*/
 .lab-config.json
 
 .claude/settings.json
+
+# Understand-Anything の解析キャッシュ(/understand で再生成。docs/ONBOARDING.md がその成果物)
+#   knowledge-graph/fingerprints/中間生成物・ダッシュボードのトークン入りログが入るため git には載せない
+.ua/

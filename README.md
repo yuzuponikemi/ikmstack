@@ -127,7 +127,11 @@ experiments/INDEX.md              実験レジストリの空雛形（report_met
 notebook-template/                記録層の雛形（--init-notebook が {{NOTEBOOK}} 置換で展開）
 setup                             install / --init-notebook / --notebook / --uninstall
 AGENTS.md                         規約の正本（実験ID・レポート/ログ書式・Drive・KB）
+docs/ONBOARDING.md                新規参加者向けの読む順（層構成・ツアー・複雑箇所）
 ```
+
+初めてこの repo を読むなら [docs/ONBOARDING.md](docs/ONBOARDING.md) が最短経路
+（`/understand` のナレッジグラフから生成。グラフ本体 `.ua/` は生成物なので git には入れない）。
 
 ---
 
