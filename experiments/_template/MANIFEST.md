@@ -13,7 +13,8 @@
 
 ## データの所在(Google Drive)
 
-Drive ルート: `G:\Shared drives\YourCompany\ExperimentData\tr-lab\experiments\<この実験の ID>\`
+Drive ルート: `.lab-config.json` の `google_drive_root` 配下の `<この実験の ID>/`
+（生データ・大容量成果物が無い実験は **N/A** と明記する）
 
 | ファイル / フォルダ | 内容 | サイズ目安 | 取得日 |
 |---|---|---|---|

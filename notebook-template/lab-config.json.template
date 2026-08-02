@@ -11,7 +11,7 @@
   ],
   "harness_repo_path": "../ikmstack",
   "sidecar": {
-    "enabled": false,
-    "_note": "サイドカー経路（プロダクト repo での決定/ログをここへ集約）は今後実装。有効化時に routing 先を定義する。"
+    "enabled": true,
+    "_note": "記録のルーティングは tools/sidecar.py が担う（ikmstack/docs/conventions/record-routing.md）。実験は常にノート根、日次ログは起動元 repo なら sidecar/<slug>/logs/ へ。"
   }
 }
