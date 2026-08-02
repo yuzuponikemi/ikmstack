@@ -5,7 +5,7 @@
 
 ## 関与リポジトリ(着手時の commit SHA)
 
-記録コマンド: `git -C ..\..\..\<repo> rev-parse --short HEAD`
+記録コマンド: `git -C ../../../<repo> rev-parse --short HEAD`
 
 | リポジトリ | branch | commit SHA | 記録日 |
 |---|---|---|---|

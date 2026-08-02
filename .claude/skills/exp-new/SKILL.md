@@ -12,7 +12,7 @@ AGENTS.md「実験のワークフロー」手順を一括実行する。漏れ�
 
 1. **topic スラッグ**(英数ケバブ、実験番号を含める。例: `E001_stage-tension`)
 2. **目的・仮説**(PLAN.md に書く一行ずつでよい)
-3. **関与リポジトリ**(`..\` の隣接リポジトリ名。workspace-map.CLAUDE.md 参照)
+3. **関与リポジトリ**(`../` の隣接リポジトリ名。ワークスペース地図 = 親フォルダの CLAUDE.md 参照)
 
 ## 手順
 
@@ -22,7 +22,7 @@ AGENTS.md「実験のワークフロー」手順を一括実行する。漏れ�
 2. **PLAN.md** に記入: 目的 / 仮説 / 手順(分かる範囲) / 関与リポジトリ / 関連チケット等 (設定されている場合)
 3. **MANIFEST.md** に関与リポジトリの commit SHA を記録:
    ```
-   git -C ..\<repo> rev-parse --short HEAD
+   git -C ../<repo> rev-parse --short HEAD
    ```
    再現性はこれで担保する(サブモジュールは使わない)
 4. **Drive ミラー**を作成: `.lab-config.json` に設定されている Google Drive ルート配下の `experiments/<実験ID>_<topic>/`
