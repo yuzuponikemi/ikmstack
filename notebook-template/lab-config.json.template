@@ -9,6 +9,8 @@
     "_generated",
     "figures"
   ],
+  "jira_enabled": false,
+  "retraction_rule_epoch": "0000-00-00",
   "harness_repo_path": "../ikmstack",
   "sidecar": {
     "enabled": true,

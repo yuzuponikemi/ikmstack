@@ -4,7 +4,7 @@
 
 > **この表は手で編集しない。** 正本は [policy-registry.json](policy-registry.json)、
 > 表は `python tools/policy_gate.py --write-map` が生成する(マーカ間のみ書き換わる)。
-> 同期は pre-commit の policy_gate が検証する(FL990)。
+> 同期は pre-commit の policy_gate が検証する。
 
 <!-- gen:policy-map:start -->
 

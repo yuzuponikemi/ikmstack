@@ -7,13 +7,13 @@
 #   入力 : Drive 正本の生データ(R1: PC 固有ローカルパスを入力にしない。差はドライブレターのみ)
 #   出力 : _generated/(plots_*/ と自動生成 .md。.gitignore 済 = ローカル専用)(R2: 出力先は1つに揃える)
 #   使い方: pwsh experiments/E###_<topic>/regenerate.ps1
-#           別ドライブ: pwsh ... regenerate.ps1 -DriveRoot 'H:\Shared drives\...\tr-lab'
+#           別ドライブ: pwsh ... regenerate.ps1 -DriveRoot 'H:\Shared drives\...\<notebook>'
 #           生成後、reports/ 内の .md を開けば図付きでプレビューできる(図は ../_generated/)。
 #           共有用の完成版(図付き)は exp-deck / Drive へ。
 param(
-    # Drive 上の tr-lab ルート。既定は共有ドライブの正準パス。env LAB_DRIVE でも上書き可。
+    # Drive 上のノートのルート。既定は共有ドライブの正準パス。env LAB_DRIVE でも上書き可。
     [string]$DriveRoot = $(if ($env:LAB_DRIVE) { $env:LAB_DRIVE } else {
-        'G:\Shared drives\YourCompany\ExperimentData\tr-lab' })
+        'G:\Shared drives\YourCompany\ExperimentData\<notebook>' })
 )
 
 $ErrorActionPreference = 'Continue'

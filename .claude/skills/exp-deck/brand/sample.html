@@ -54,54 +54,55 @@ ul.b li.tradeoff + li.sub{color:#C0392B}
   <section class="slide title" aria-label="表紙">
     <div class="band"><img src="assets/background.png" alt=""></div>
     <div class="tx">
-      <h1>流体抵抗チェックの<br>全装置横断解析 — 総論</h1>
-      <p class="sub">継続測定で何が言えて、何が言えないか — 「相対評価」という到達点と今後</p>
+      <h1>推論ランタイムの<br>横断ベンチマーク — 総論</h1>
+      <p class="sub">同一プロンプトで何が言えて、何が言えないか — 「相対比較」という到達点と今後</p>
     </div>
-    <div class="meta">FL-959　・　全12装置　・　データ範囲 2025-04〜2026-06</div>
+    <div class="meta">E001　・　5 条件　・　データ範囲 2026-05〜2026-07</div>
     <img class="logo" src="assets/logo.png" alt="Logo">
   </section>
 
   <!-- 2. CONTENT (figure + bullets + source) -->
   <section class="slide" aria-label="到達点">
     <div class="pad">
-      <h2 class="h">到達点 — できるのは「相対評価」だった</h2>
+      <h2 class="h">到達点 — できるのは「相対比較」だった</h2>
       <div class="rule"></div>
       <div class="cols">
         <div>
-<svg class="chart" viewBox="0 0 520 300" role="img" aria-label="robust CV by metric">
+<svg class="chart" viewBox="0 0 520 300" role="img" aria-label="throughput by runtime">
   <line x1="60" y1="250" x2="500" y2="250" stroke="#bbb" stroke-width="1"/>
   <line x1="60" y1="40" x2="60" y2="250" stroke="#bbb" stroke-width="1"/>
   <line x1="60" y1="208" x2="500" y2="208" stroke="#eee" stroke-width="1"/><line x1="60" y1="166" x2="500" y2="166" stroke="#eee" stroke-width="1"/><line x1="60" y1="124" x2="500" y2="124" stroke="#eee" stroke-width="1"/><line x1="60" y1="82" x2="500" y2="82" stroke="#eee" stroke-width="1"/>
   <text x="20" y="254" font-size="11" fill="#6B6B6B">0</text>
-  <text x="14" y="86" font-size="11" fill="#6B6B6B">4%</text>
-  <text x="32" y="30" font-size="12" fill="#313131" font-weight="700">robust CV</text>
-  <!-- bars: raw(gray), 枝/共有, S1/S2, P/C(purple), Outlet床(green) -->
+  <text x="8" y="86" font-size="11" fill="#6B6B6B">40</text>
+  <text x="32" y="30" font-size="12" fill="#313131" font-weight="700">tok/s</text>
+  <!-- bars: baseline(gray), 中間条件(purple), 最良(green) -->
   <g font-size="11" fill="#313131" text-anchor="middle">
-    <rect x="92"  y="86.20000000000002" width="46" height="163.79999999999998" fill="#9a9a9a"/>
-    <text x="115" y="268">絶対(raw)</text>
-    <rect x="170" y="174.39999999999998" width="46" height="75.60000000000001" fill="#6C2A87"/>
-    <text x="193" y="268">枝/共有</text>
-    <rect x="248" y="199.6" width="46" height="50.4" fill="#531872"/>
-    <text x="271" y="268">S1/S2</text>
-    <rect x="326" y="216.4" width="46" height="33.6" fill="#531872"/>
-    <text x="349" y="268">P/C</text>
-    <rect x="404" y="236.56" width="46" height="13.44" fill="#4E9D69"/>
-    <text x="427" y="268">Outlet床</text>
+    <rect x="92"  y="199.6" width="46" height="50.4" fill="#9a9a9a"/>
+    <text x="115" y="268">baseline</text>
+    <rect x="170" y="170.2" width="46" height="79.8" fill="#6C2A87"/>
+    <text x="193" y="268">条件 A</text>
+    <rect x="248" y="140.8" width="46" height="109.2" fill="#531872"/>
+    <text x="271" y="268">条件 B</text>
+    <rect x="326" y="119.79999999999998" width="46" height="130.20000000000002" fill="#531872"/>
+    <text x="349" y="268">条件 C</text>
+    <rect x="404" y="90.4" width="46" height="159.6" fill="#4E9D69"/>
+    <text x="427" y="268">最良</text>
   </g>
 </svg>
-<p class="cap">絶対(raw) 3.9% に対し、同種ペアの比は ~1% まで精度向上(個体内に絞ると更に低下)。</p></div>
+<p class="cap">baseline 12 tok/s に対し、最良条件は 38 tok/s(同一機・同一プロンプトでの比較)。</p></div>
         <ul class="b">
-          <li class="head">■ 比をとれば共有成分は打ち消える</li>
-          <li class="sub">・ 絶対値は諦めても、比なら高い信頼性(SN)で測れる。</li>
-          <li class="head">■ 比は温度・ドリフトに不感</li>
-          <li class="sub">・ 温度やセンサのゆらぎを除き、<span class="accent">真の健全性変化だけ</span>を抜き出せる。</li>
+          <li class="head">■ 条件を揃えれば環境差は打ち消える</li>
+          <li class="sub">・ 絶対スループットは機種に依存するが、同一機での比なら安定して測れる。</li>
+          <li class="head">■ 比は熱・電源状態に不感</li>
+          <li class="sub">・ サーマルスロットリングや電源設定のゆらぎを除き、<span class="accent">設定の効果だけ</span>を抜き出せる。</li>
           <li class="tradeoff">■ 制約/トレードオフ: 絶対値は捨てている</li>
-          <li class="sub">・ 製造公差の合否判定はできない(絶対評価は別系統)。</li>
+          <li class="sub">・ 他機種との絶対比較・SLA 判定には使えない(別系統の測定が要る)。</li>
         </ul>
       </div>
-      <p class="src">データ: washparallel_runs.csv(各装置の生の流体ログ〔FluidSysLog_*〕から抵抗チェック1回=1行に整理した中間データ)を全12装置で集計し、絶対と各比の robust CV を棒で比較。比でコモンモードを消すと相対精度が上がることを示す意図。(生成: scripts/relative_fleet.py)</p>
+      <p class="src">データ: runs.csv(各実行のログから 1 実行 = 1 行に整理した中間データ)を 5 条件で集計し、
+      baseline と各条件の tok/s を棒で比較。共通の環境要因を消すと相対精度が上がることを示す意図。(生成: scripts/bench_summary.py)</p>
     </div>
-    <div class="ft"><span class="cf">Confidential</span><span class="pg">FL-959 ・ 2</span></div>
+    <div class="ft"><span class="cf">Confidential</span><span class="pg">E001 ・ 2</span></div>
   </section>
 
   <!-- 3. DISCUSSION (full footer with logo) -->
@@ -111,14 +112,14 @@ ul.b li.tradeoff + li.sub{color:#C0392B}
       <div class="rule"></div>
       <ul class="b">
         <li class="head">■ 未解決の課題(Future Work)</li>
-        <li class="sub">・ シース減算の適用ゲート(相関≥0.8)は本データの経験則 → 装置・期間を増やして再校正。</li>
-        <li class="sub">・ 相対監視を装置ファームに載せる際のしきい値設計・誤検知許容度はこれから。</li>
+        <li class="sub">・ 適用条件のしきい値は本データの経験則 → 機種・期間を増やして再校正。</li>
+        <li class="sub">・ 常時モニタに載せる際のしきい値設計・誤検知許容度はこれから。</li>
         <li class="tradeoff">■ チームに問いたい論点(Discussion)</li>
-        <li class="sub">・ 監視しきい値は実測床(~0.3〜0.9%)まで攻めてよいか? 現場の誤検知許容度は?</li>
-        <li class="sub">・ 絶対のトレーサブル評価(製造公差)は専用評価系 PoC に投資すべきか?</li>
+        <li class="sub">・ 監視しきい値は実測床まで攻めてよいか? 運用側の誤検知許容度は?</li>
+        <li class="sub">・ 絶対値のトレーサブルな評価系に投資すべきか?</li>
       </ul>
     </div>
-    <div class="ft"><img src="assets/logo.png" alt="Logo"><span class="pg">FL-959 ・ 3</span></div>
+    <div class="ft"><img src="assets/logo.png" alt="Logo"><span class="pg">E001 ・ 3</span></div>
   </section>
 
 </div>

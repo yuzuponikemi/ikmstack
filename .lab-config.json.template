@@ -1,13 +1,15 @@
 {
+  "_role": "① ハーネス repo 自身の設定の雛形。② 記録層の雛形は notebook-template/lab-config.json.template",
   "experiment_id_pattern": "^E\\d+_[a-z0-9-]+$",
   "experiment_id_prefix": "E",
   "jira_enabled": false,
   "jira_base_url": "https://your-company.atlassian.net/browse/",
   "jira_project_key": "PROJ",
-  "google_drive_root": "G:\\Shared drives\\YourCompany\\ExperimentData\\tr-lab\\experiments\\",
+  "google_drive_root": "G:\\Shared drives\\YourCompany\\ExperimentData\\<notebook>\\experiments\\",
   "allowed_figure_roots": [
     "_generated",
     "figures"
   ],
-  "template_repo_path": "../tr-lab"
+  "retraction_rule_epoch": "0000-00-00",
+  "harness_repo_path": "."
 }

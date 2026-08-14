@@ -210,14 +210,14 @@ def _selftest() -> int:
     check(
         "all fields",
         provenance_text(script="foo.py", data_era="2026-06 set A",
-                        sha="abc1234", repo="Ikemi-lab", generated="2026-07-16"),
-        "foo.py  |  data: 2026-06 set A  |  Ikemi-lab@abc1234  |  generated 2026-07-16",
+                        sha="abc1234", repo="mynote", generated="2026-07-16"),
+        "foo.py  |  data: 2026-06 set A  |  mynote@abc1234  |  generated 2026-07-16",
     )
     check(
         "no data_era, no date",
         provenance_text(script="foo.py", data_era=None, sha="abc1234",
-                        repo="Ikemi-lab", generated=False),
-        "foo.py  |  Ikemi-lab@abc1234",
+                        repo="mynote", generated=False),
+        "foo.py  |  mynote@abc1234",
     )
     check(
         "script only",

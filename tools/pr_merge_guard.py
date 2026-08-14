@@ -18,9 +18,8 @@ Decision (PreToolUse hookSpecificOutput.permissionDecision):
   * gh pr create で --draft/-d 無し -> deny (--draft を付けて再実行させる)
   * それ以外                        -> 何も出さない(通常フローに委ねる)
 
-History: push-to-main の ask 判定は 2026-07-27 に撤去した。グローバル CLAUDE.md
-「push は常に許可(2026-07-11)」および Ikemi-lab の main 直コミット規約と衝突し、
-承認プロンプトの主因(audit 46/49 件)になっていたため。main 保護は本ガードの
+Note: push-to-main の ask 判定は意図的に持たない。記録層は main 直コミット運用で、
+そこに ask を挟むと承認プロンプトの主因になるため。main 保護は本ガードの
 マージ deny + draft 強制(PR レビュー経路)で担う。
 
 Fail-safe by construction: 例外時・パース不能時は何も emit せず終了する。

@@ -34,8 +34,8 @@ def main() -> int:
     drive_path = ""
     if drive_root:
         # Resolve the base folder of google_drive_root (strip 'experiments/' if present)
-        # e.g., "G:\\Shared drives\\YourCompany\\ExperimentData\\tr-lab\\experiments\\"
-        # -> "G:\\Shared drives\\YourCompany\\ExperimentData\\tr-lab\\"
+        # e.g., "G:\\Shared drives\\YourCompany\\ExperimentData\\<notebook>\\experiments\\"
+        # -> "G:\\Shared drives\\YourCompany\\ExperimentData\\<notebook>\\"
         p = Path(drive_root)
         if p.name == "experiments":
             drive_path = str(p.parent)
