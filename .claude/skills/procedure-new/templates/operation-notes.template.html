@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  手順書ひな型 ③  OPERATION NOTES（統合層 / 熟練者の暗黙知ログ）
+  ============================================================================
+  E2E Runbook が「冷たい機械の一本道」なら、これはその真逆。現場の臨機応変な判断、
+  違和感の正体、五感、歴史的経緯を、熟練者の言葉のまま残す「熱いコンテキストのログ」。
+  職人の野帳 / ポストモーテム / 技術Wiki の Tips に相当する。読み手が「E2Eをなぞるだけの人」から
+  「状況に適応できるプロ」へ育つための土壌。
+
+  ▼ 4つの構成要素（各エントリに埋める）
+   1. 背景(Why)   … なぜこの作業/順番か。過去にそれを変えた歴史的経緯。
+   2. 感覚指標    … 手触り・音・見た目の違和感。数値化しにくい熟練者のセンサーを比喩で言語化。
+   3. 罠(Pitfall) … 初心者が必ず一度はやる失敗と、その理由。NG行動。
+   4. 応用/例外   … 季節・環境・エラー時など状況別の臨機応変な引き出し。
+
+  ▼ 書き方
+   - 追記型。新しい知見は上（または下）に足していく。古いものは消さず残す。
+   - 各エントリに【日付】と【記録者】を必ず入れる（暗黙知は誰の経験かで重みが変わる）。
+   - E2E の各ステップから「🔗 なぜ/注意を見る」で潜れるよう、アンカー(id)を対応させると良い。
+   - <div class="authoring-guide"> は書き終えたら削除。
+  ============================================================================
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operation Notes — [[対象手順]]</title>
+<style>
+  :root {
+    --tc-purple:#531872; --tc-purple-head:#6C2A87; --tc-green:#4E9D69; --tc-ink:#313131;
+    --tc-gray:#6B6B6B; --tc-orange:#E89A51; --tc-red:#C0392B;
+    --tc-font:"Segoe UI","Meiryo",system-ui,sans-serif;
+    /* この層のアクセント = 紫（統合 / 熟練知 / KNOWLEDGE） */
+    --accent:#6C2A87; --accent-ink:#7d3a99;
+    --bg:#ffffff; --panel:#f7f4f9; --panel-2:#efe8f3; --border:#e2d8e8;
+    --ink:var(--tc-ink); --muted:var(--tc-gray); --code-bg:#eceff1; --code-ink:#1f2d33;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --accent:#A971C4; --accent-ink:#c297d8;
+      --bg:#16121a; --panel:#1e1824; --panel-2:#28202f; --border:#3a2f44;
+      --ink:#e9e4ee; --muted:#a397ab; --code-bg:#0f1417; --code-ink:#cfe3ea; }
+  }
+  :root[data-theme="dark"] { --accent:#A971C4; --accent-ink:#c297d8;
+    --bg:#16121a; --panel:#1e1824; --panel-2:#28202f; --border:#3a2f44;
+    --ink:#e9e4ee; --muted:#a397ab; --code-bg:#0f1417; --code-ink:#cfe3ea; }
+  :root[data-theme="light"] { --accent:#6C2A87; --accent-ink:#7d3a99;
+    --bg:#ffffff; --panel:#f7f4f9; --panel-2:#efe8f3; --border:#e2d8e8;
+    --ink:var(--tc-ink); --muted:var(--tc-gray); --code-bg:#eceff1; --code-ink:#1f2d33; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--tc-font);
+    line-height:1.7; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:900px; margin:0 auto; padding:0 20px 80px; }
+
+  .doctype { border-top:6px solid var(--accent); background:var(--panel);
+             border-bottom:1px solid var(--border); }
+  .doctype .inner { max-width:900px; margin:0 auto; padding:14px 20px;
+             display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; }
+  .badge { display:inline-flex; align-items:center; gap:8px; font-weight:700; color:#fff;
+           background:var(--accent); padding:4px 12px; border-radius:999px; font-size:.82rem; }
+  .badge .num { background:rgba(255,255,255,.3); border-radius:999px; padding:0 7px; }
+  .doctype .role { font-size:.86rem; color:var(--muted); }
+  .nav { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; font-size:.78rem; }
+  .nav a { text-decoration:none; color:var(--muted); border:1px solid var(--border);
+           padding:3px 9px; border-radius:6px; }
+  .nav a.here { color:#fff; background:var(--accent); border-color:var(--accent); }
+
+  header.doc { padding-top:26px; }
+  h1 { font-size:1.9rem; margin:.1em 0; color:var(--ink); }
+  h1::after { content:""; display:block; height:3px; background:var(--accent); margin-top:.4rem; }
+  .meta { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+          gap:8px 18px; margin:16px 0; font-size:.86rem; }
+  .meta div { border-left:3px solid var(--border); padding-left:10px; }
+  .meta .k { color:var(--muted); font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; }
+  .meta .v { font-weight:600; }
+
+  .authoring-guide { border:1.5px dashed var(--accent); background:var(--panel-2);
+    border-radius:10px; padding:12px 16px; margin:18px 0; font-size:.84rem; color:var(--muted); }
+  .authoring-guide b { color:var(--accent-ink); }
+  .authoring-guide::before { content:"✎ 執筆ガイド（書き終えたら削除）"; display:block;
+    font-weight:700; color:var(--accent-ink); margin-bottom:6px; }
+
+  /* ---- エントリ（追記型カード）---- */
+  .note { border:1px solid var(--border); border-left:5px solid var(--accent);
+    border-radius:0 10px 10px 0; background:var(--panel); padding:14px 18px; margin:16px 0; }
+  .note > .head { display:flex; flex-wrap:wrap; gap:6px 12px; align-items:baseline;
+    margin-bottom:6px; }
+  .note h2 { font-size:1.15rem; color:var(--accent-ink); margin:0; }
+  .note .stamp { font-size:.76rem; color:var(--muted); margin-left:auto; }
+  .facet { margin:10px 0; padding-left:30px; position:relative; }
+  .facet .lab { font-weight:700; display:block; margin-bottom:2px; }
+  .facet.why  .lab { color:var(--accent-ink); }
+  .facet.sense .lab { color:#2f6b45; }
+  .facet.trap .lab { color:var(--tc-red); }
+  .facet.apply .lab { color:#a5631d; }
+  .facet::before { position:absolute; left:0; top:0; font-size:1.05rem; }
+  .facet.why::before   { content:"❓"; }
+  .facet.sense::before { content:"✋"; }
+  .facet.trap::before  { content:"⚠️"; }
+  .facet.apply::before { content:"🔀"; }
+  kbd,.lbl { font-family:ui-monospace,"Consolas",monospace; background:var(--code-bg);
+    color:var(--code-ink); border:1px solid var(--border); border-radius:5px;
+    padding:1px 7px; font-size:.9em; font-weight:600; }
+  .quote { font-style:italic; color:var(--ink); background:var(--panel-2);
+    border-radius:6px; padding:2px 8px; }
+
+  footer.doc { margin-top:30px; padding-top:14px; border-top:1px solid var(--border);
+    font-size:.75rem; color:var(--muted); display:flex; justify-content:space-between;
+    flex-wrap:wrap; gap:8px; }
+  .xlinks { margin-top:22px; font-size:.85rem; }
+  .xlinks a { color:var(--accent-ink); }
+
+  @media print { .authoring-guide,.nav { display:none; } body { background:#fff; color:#000; }
+    .note { break-inside:avoid; } }
+</style>
+</head>
+<body>
+
+<div class="doctype"><div class="inner">
+  <span class="badge"><span class="num">③</span> OPERATION NOTES</span>
+  <span class="role">統合層 — 背景・五感・罠・応用（熟練者の暗黙知ログ・追記型）</span>
+  <nav class="nav">
+    <a href="[[e2e-runbook.html]]">① Runbook</a>
+    <a href="[[principles-triage.html]]">② Principles &amp; Triage</a>
+    <a class="here" href="#">③ Operation Notes</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="doc">
+  <h1>[[対象手順]]：Operation Notes</h1>
+  <div class="meta">
+    <div><div class="k">対象手順</div><div class="v">[[① E2E Runbook 名]]</div></div>
+    <div><div class="k">担当領域</div><div class="v">[[流体/光学/検出 等]]</div></div>
+    <div><div class="k">最終追記</div><div class="v">[[YYYY-MM-DD]]</div></div>
+  </div>
+
+  <div class="authoring-guide">
+    <b>追記型</b>。知見が増えたら消さずに足す。各エントリに<b>4面</b>を埋める：
+    <b>❓背景(Why)</b> / <b>✋感覚指標(五感)</b> / <b>⚠️罠(Pitfall)</b> / <b>🔀応用・例外</b>。
+    <b>日付と記録者</b>を必ず入れる（暗黙知は誰の経験かで重みが変わる）。
+    ①の各ステップから潜れるよう <code>id</code> を対応させると良い。
+  </div>
+</header>
+
+<!-- ↓ エントリの雛形。1トピック=1カードで足していく。不要な面は削ってよい -->
+<article class="note" id="[[step-3-wait]]">
+  <div class="head">
+    <h2>[[トピック：例）ステップ3の「10分待ち」について]]</h2>
+    <span class="stamp">2026-07-09 ・ 記録: [[氏名]]</span>
+  </div>
+
+  <div class="facet why">
+    <span class="lab">背景（なぜ）</span>
+    [[例）2025年のアップデート以降、バルブBの圧力安定に内部の微小熱膨張が絡むようになった。
+    このインターバルはその対策。歴史的経緯も残す。]]
+  </div>
+
+  <div class="facet sense">
+    <span class="lab">感覚指標（手触り・音・見た目）</span>
+    [[例）正常ロック時は <span class="quote">「カチッ」</span>ではなく
+    <span class="quote">「ヌプッ」とした抵抗感</span>のある手応え。「カチッ」と鳴ったら
+    パッキン噛み込みの疑い。]]
+  </div>
+
+  <div class="facet trap">
+    <span class="lab">罠（初心者が必ずやる失敗）</span>
+    [[例）<span class="lbl">[確定]</span> ボタンは押下後の内部処理に3秒かかる。反応が無いと思って
+    連打すると二重コミットでフリーズ。「押したら3秒手を離す」。]]
+  </div>
+
+  <div class="facet apply">
+    <span class="lab">応用・例外（状況別の引き出し）</span>
+    [[例）室温28℃超の夏場は初期圧力が上がりやすい。①のステップ1をスキップし、
+    最初からバイパス管を開けて始めた方が安定する。]]
+  </div>
+</article>
+
+<article class="note">
+  <div class="head">
+    <h2>[[次のトピック]]</h2>
+    <span class="stamp">[[YYYY-MM-DD]] ・ 記録: [[氏名]]</span>
+  </div>
+  <div class="facet why"><span class="lab">背景（なぜ）</span>[[…]]</div>
+  <div class="facet sense"><span class="lab">感覚指標</span>[[…]]</div>
+  <div class="facet trap"><span class="lab">罠</span>[[…]]</div>
+  <div class="facet apply"><span class="lab">応用・例外</span>[[…]]</div>
+</article>
+
+<div class="xlinks">
+  実行の一本道 → <a href="[[e2e-runbook.html]]">① E2E Runbook</a>
+  ／ 判断・エスカレーション → <a href="[[principles-triage.html]]">② Principles &amp; Triage</a>
+</div>
+
+<footer class="doc">
+  <span>この Notes は熟練者の一次経験。確度が上がった恒久知識は tips → KB へ昇格を検討(/kb-promote)。</span>
+  </footer>
+</div>
+
+</body>
+</html>

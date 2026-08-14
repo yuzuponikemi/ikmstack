@@ -29,6 +29,7 @@ cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
 
 1. **構成の決定とファイル作成**:
    - 単一レポートは `REPORT.md`、複数に渡る場合は `reports/` 下に一次記録ファイル（`E###-R###_...`）を作成します。
+   <!-- policy:report-naming-numbering@eb565f44 -->
    - `references/exp_report_guide.md` に記載されている YAML フロントマター（メタデータ）を先頭に必ず記述します。
 
 2. **INDEX の自動生成**:

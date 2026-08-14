@@ -94,10 +94,18 @@ INDEX/図リンクの pre-commit フックはそのまま動く。
 | `/exp-report` | ハウススタイルでレポートを執筆・INDEX 登録 |
 | `/exp-checkpoint` | 一区切りで living docs＋INDEX＋ログをまとめて最新化 |
 | `/lab-log` | 日次ログ（目的/やったこと/わかったこと/次にやること） |
+<!-- policy:lab-log-format@a0eca25e -->
 | `/dr-audit` | レポートの事実・数値を独立検証（主張台帳→出典照合→受入ゲート） |
 | `/kb-promote` | 確定知見を共有ナレッジベースへ昇格 |
+<!-- policy:kb-promotion@d1b964ea -->
 | `/exp-deck` | レポートから共有用スライド（.pptx）を生成 |
 | `/regen-outputs` | 図・自動レポートをローカル再生成（図は git に入れない） |
+| `/report-checksum` | レポート1本の数値と図の計算過程を独立再計算で検算（左右2ペイン HTML） |
+| `/readability-review` | そのレポート1本だけで読めるか（自走性）を隔離レビューで検査 |
+| `/procedure-new` | 手順書を3層（Runbook / Principles / Notes）に起こす |
+| `/runbook-review` | Runbook が「知らない人でも実行できる」原子性を満たすか関門にする |
+| `/pr-review-doc` | 実装 PR を図解 HTML のレビューガイドにする（読者レベル較正あり） |
+| `/harness-edit` | ハーネス自身（skill・AGENTS・conventions）を正本/写しの規律で改訂する |
 
 agent：`dr-verifier`（主張を独立検証、`/dr-audit` が使う）。
 
@@ -121,20 +129,29 @@ git commit ... && git push
 
 - skill は `python3 tools/…` を相対で呼ぶ（記録層の cwd から解決される）。
 - 記録層で見つけたハーネス不具合も**ここで**直す（例：`python`→`python3`、フック改行/実行ビット）。
+- **規約・スキルを直すときは `/harness-edit`**。1ルール=1正本＋写しのピン留めを
+  `tools/policy_gate.py` が pre-commit で守る（対応表は `docs/conventions/policy-map.md`）。
+  部品を足したら `python3 tools/harness_map.py` で棚卸しを再生成する。
 
 ---
 
 ## リポジトリ地図
 
 ```
-.claude/skills/<skill>/SKILL.md   スキル本体（8個）
+.claude/skills/<skill>/SKILL.md   スキル本体（棚卸しは docs/harness-map.md が生成）
 .claude/agents/*.md               サブエージェント（dr-verifier）
 tools/                            report_meta.py / check_report_figures.py /
                                   sidecar.py（記録のルーティング）/
                                   strip_nb_outputs.py / dr/*（dr-audit 用）
+                                  policy_gate.py / harness_map.py（ハーネス自己保守）/
+                                  log_draft.py / retractions.py / synthesis_*.py /
+                                  index_html.py / report_readview.py（読みビュー）
 docs/conventions/                 reporting / figures-regen / repository-rules /
-                                  record-routing（どこで起動しても正しく着地する規約）
-.githooks/pre-commit              INDEX↔フロントマター・図リンク検査（LF・実行可）
+                                  record-routing（どこで起動しても正しく着地する規約）/
+                                  policy-map + policy-registry.json（1ルール=1正本）
+docs/harness-map.md               ハーネスの全体像と棚卸し（生成部は harness_map.py）
+.githooks/pre-commit              INDEX↔フロントマター・図リンク・スクリプト encoding・
+                                  opt-in ゲート（.dr-gate / .numbers-gate）・ハーネス規約
 experiments/_template/            実験の雛形（/exp-new がコピー）
 experiments/INDEX.md              実験レジストリの空雛形（report_meta が生成）
 notebook-template/                記録層の雛形（--init-notebook が {{NOTEBOOK}} 置換で展開）
@@ -142,6 +159,8 @@ setup                             install / --init-notebook / --notebook / --uni
 AGENTS.md                         規約の正本（実験ID・レポート/ログ書式・Drive・KB）
 docs/ONBOARDING.md                新規参加者向けの読む順（層構成・ツアー・複雑箇所）
 ```
+<!-- policy:nb-strip-outputs@3ca1441e -->
+<!-- policy:dr-gate-opt-in@fd4434e1 -->
 
 初めてこの repo を読むなら [docs/ONBOARDING.md](docs/ONBOARDING.md) が最短経路
 （`/understand` のナレッジグラフから生成。グラフ本体 `.ua/` は生成物なので git には入れない）。

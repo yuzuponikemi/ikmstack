@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  手順書ひな型 ①  E2E RUNBOOK（実行層 / QRH形式）
+  ============================================================================
+  これは「思考停止で一本道に完了させる」ための手順書。非熟練者が迷わず、
+  解釈の余地なく最後まで突き抜けるためのもの。航空業界の QRH
+  (Quick Reference Handbook) の記述規律に従う。
+
+  ▼ 書き方の 5 ルール（QRH）
+   1. 1文1アクション   … 1ステップに動作は1つだけ。「AしてBする」は2ステップに割る。
+   2. 肯定・命令形のみ  … 「〜せよ」「〜を確認せよ」。否定形(「〜しないこと」)は
+                          パニック時に逆の行動を想起させるので使わない。
+   3. 表記の完全一致    … 画面の項目名・物理ラベルは [ ] で囲み、見たままを1字も違えず書く。
+   4. 分岐はインデント  … 「IF 条件:」で字下げし、次に飛ぶ先を「→ GO TO ...」で明示。
+                          該当しない枝は視覚的に読み飛ばせる。
+   5. 曖昧語を排除      … 「適宜」「なるべく」「しばらく」を使わない。数値・回数で書く。
+
+  ▼ 使い方
+   - このファイルを複製し、下の [[...]] プレースホルダを埋める。
+   - <div class="authoring-guide"> の枠は書き終えたら削除する（読み手には不要）。
+   - 「なぜそうするのか(Why)」「異常時の判断」「手触り・罠」はここに書かない。
+     → それらは ② Principles & Triage と ③ Operation Notes へ外出しする（下部リンク）。
+   - 外部ファイル依存なし・1枚で完結。ブラウザで開く / 印刷する / PDF化する、いずれも可。
+  ============================================================================
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E2E Runbook — [[手順のタイトル]]</title>
+<style>
+  :root {
+    --tc-purple:#531872; --tc-purple-head:#6C2A87; --tc-green:#4E9D69;
+    --tc-ink:#313131; --tc-gray:#6B6B6B; --tc-orange:#E89A51; --tc-red:#C0392B;
+    --tc-font:"Segoe UI","Meiryo",system-ui,sans-serif;
+    /* この層のアクセント = 緑（実行 / GO / 一本道） */
+    --accent:var(--tc-green); --accent-ink:#2f6b45;
+    --bg:#ffffff; --panel:#f6f7f6; --panel-2:#eef1ee; --border:#dfe3df;
+    --ink:var(--tc-ink); --muted:var(--tc-gray); --code-bg:#eceff1; --code-ink:#1f2d33;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --accent:#5FB37D; --accent-ink:#8fd6a6;
+      --bg:#14171a; --panel:#1c2024; --panel-2:#232830; --border:#333a42;
+      --ink:#e6e8ea; --muted:#9aa3ab; --code-bg:#0f1417; --code-ink:#cfe3ea;
+    }
+  }
+  :root[data-theme="dark"] {
+    --accent:#5FB37D; --accent-ink:#8fd6a6;
+    --bg:#14171a; --panel:#1c2024; --panel-2:#232830; --border:#333a42;
+    --ink:#e6e8ea; --muted:#9aa3ab; --code-bg:#0f1417; --code-ink:#cfe3ea;
+  }
+  :root[data-theme="light"] {
+    --accent:var(--tc-green); --accent-ink:#2f6b45;
+    --bg:#ffffff; --panel:#f6f7f6; --panel-2:#eef1ee; --border:#dfe3df;
+    --ink:var(--tc-ink); --muted:var(--tc-gray); --code-bg:#eceff1; --code-ink:#1f2d33;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--bg); color:var(--ink); font-family:var(--tc-font);
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:900px; margin:0 auto; padding:0 20px 80px; }
+
+  /* ---- doc-type banner (層バッジ + 兄弟層ナビ) ---- */
+  .doctype { border-top:6px solid var(--accent); background:var(--panel);
+             border-bottom:1px solid var(--border); }
+  .doctype .inner { max-width:900px; margin:0 auto; padding:14px 20px;
+             display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; }
+  .badge { display:inline-flex; align-items:center; gap:8px; font-weight:700;
+           color:#fff; background:var(--accent); padding:4px 12px; border-radius:999px;
+           font-size:.82rem; letter-spacing:.03em; }
+  .badge .num { background:rgba(255,255,255,.28); border-radius:999px; padding:0 7px; }
+  .doctype .role { font-size:.86rem; color:var(--muted); }
+  .nav { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; font-size:.78rem; }
+  .nav a { text-decoration:none; color:var(--muted); border:1px solid var(--border);
+           padding:3px 9px; border-radius:6px; }
+  .nav a.here { color:#fff; background:var(--accent); border-color:var(--accent); }
+
+  /* ---- header ---- */
+  header.doc { padding-top:26px; }
+  h1 { font-size:1.9rem; margin:.1em 0 .1em; color:var(--ink); }
+  h1::after { content:""; display:block; height:3px; width:100%;
+              background:var(--accent); margin-top:.4rem; }
+  .meta { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+          gap:8px 18px; margin:16px 0; font-size:.86rem; }
+  .meta div { border-left:3px solid var(--border); padding-left:10px; }
+  .meta .k { color:var(--muted); font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; }
+  .meta .v { font-weight:600; }
+
+  /* ---- authoring guide (消す前提) ---- */
+  .authoring-guide { border:1.5px dashed var(--accent); background:var(--panel-2);
+    border-radius:10px; padding:12px 16px; margin:18px 0; font-size:.84rem; color:var(--muted); }
+  .authoring-guide b { color:var(--accent-ink); }
+  .authoring-guide::before { content:"✎ 執筆ガイド（書き終えたらこの枠ごと削除）"; display:block;
+    font-weight:700; color:var(--accent-ink); margin-bottom:6px; }
+
+  /* ---- prerequisites / safety ---- */
+  .prereq { background:var(--panel); border:1px solid var(--border); border-radius:10px;
+            padding:12px 16px; margin:16px 0; }
+  .prereq h2, .steps h2 { font-size:1.05rem; color:var(--accent-ink); margin:.2em 0 .5em; }
+  .safety { border:1px solid var(--tc-red); background:rgba(192,57,43,.08);
+            border-left:6px solid var(--tc-red); border-radius:8px; padding:10px 14px;
+            margin:16px 0; font-weight:600; }
+  .safety::before { content:"⛔ "; }
+
+  /* ---- ⟦FILL⟧ プレースホルダ（原子性ゲート未通過の穴。runbook-review スキル）---- */
+  .fill { background:rgba(192,57,43,.13); color:#b23124; border:1px dashed var(--tc-red);
+    border-radius:5px; padding:1px 6px; font-weight:700; font-size:.92em; }
+  @media (prefers-color-scheme:dark){ .fill{ color:#ff9a8f; border-color:#ff9a8f; background:rgba(255,143,132,.14);} }
+  :root[data-theme="dark"] .fill{ color:#ff9a8f; border-color:#ff9a8f; background:rgba(255,143,132,.14); }
+  .gate { border:2px solid var(--tc-red); background:rgba(192,57,43,.10); border-radius:10px;
+    padding:12px 16px; margin:16px 0; }
+  .gate .t { font-weight:800; color:var(--tc-red); }
+
+  /* ---- steps (T型: 番号|チェック|アクション) ---- */
+  ol.steps-list { list-style:none; counter-reset:step; margin:0; padding:0; }
+  ol.steps-list > li { counter-increment:step; display:grid;
+    grid-template-columns:2.2rem 1.4rem 1fr; gap:10px; align-items:start;
+    padding:11px 12px; border:1px solid var(--border); border-radius:9px;
+    margin:8px 0; background:var(--bg); }
+  ol.steps-list > li::before { content:counter(step); font-weight:800; color:var(--accent);
+    text-align:right; font-variant-numeric:tabular-nums; font-size:1.05rem; }
+  .chk { width:1.15rem; height:1.15rem; border:2px solid var(--accent); border-radius:4px;
+         margin-top:.2rem; }
+  .action { font-size:1rem; }
+  /* 見たまま一致させる UI/物理ラベル */
+  kbd, .lbl { font-family:ui-monospace,"Consolas",monospace; background:var(--code-bg);
+    color:var(--code-ink); border:1px solid var(--border); border-radius:5px;
+    padding:1px 7px; font-size:.9em; font-weight:600; }
+  .verify { color:var(--accent-ink); font-weight:600; }
+  .verify::before { content:"✔ "; }
+
+  /* ---- IF 分岐ブロック ---- */
+  .branch { margin:8px 0 8px 2.2rem; border-left:3px solid var(--tc-orange);
+            background:rgba(232,154,81,.08); border-radius:0 8px 8px 0; padding:8px 14px; }
+  .branch .cond { font-weight:800; color:var(--tc-orange); }
+  .goto { font-weight:700; color:var(--tc-orange); }
+  .goto::before { content:"→ GO TO "; }
+
+  /* ---- done checklist ---- */
+  .done { margin-top:22px; border:1px solid var(--accent); border-radius:10px;
+          padding:12px 16px; background:var(--panel); }
+  .done h2 { color:var(--accent-ink); margin:.1em 0 .4em; font-size:1.05rem; }
+  .done ul { list-style:none; padding:0; margin:0; }
+  .done li { padding:4px 0 4px 26px; position:relative; }
+  .done li::before { content:"☐"; position:absolute; left:0; color:var(--accent);
+    font-size:1.1rem; line-height:1.4; }
+
+  /* ---- footer ---- */
+  footer.doc { margin-top:30px; padding-top:14px; border-top:1px solid var(--border);
+    font-size:.75rem; color:var(--muted); display:flex; justify-content:space-between;
+    flex-wrap:wrap; gap:8px; }
+  .xlinks { margin-top:20px; font-size:.85rem; }
+  .xlinks a { color:var(--accent-ink); }
+
+  @media print {
+    .authoring-guide, .nav { display:none; }
+    body { background:#fff; color:#000; }
+    ol.steps-list > li, .prereq, .done { break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 層バッジ + 兄弟層へのナビ（相互リンクで3層をつなぐ。ファイル名は運用に合わせて調整） -->
+<div class="doctype"><div class="inner">
+  <span class="badge"><span class="num">①</span> E2E RUNBOOK</span>
+  <span class="role">実行層 — 思考停止で一本道に完了させる（QRH形式）</span>
+  <nav class="nav">
+    <a class="here" href="#">① Runbook</a>
+    <a href="[[principles-triage.html]]">② Principles &amp; Triage</a>
+    <a href="[[operation-notes.html]]">③ Operation Notes</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="doc">
+  <h1>[[手順のタイトル：例）消耗品の交換]]</h1>
+
+  <div class="meta">
+    <div><div class="k">対象 / 装置</div><div class="v">[[例）装置名 / 号機]]</div></div>
+    <div><div class="k">所要時間</div><div class="v">[[例）約15分]]</div></div>
+    <div><div class="k">版</div><div class="v">[[v1.0]]</div></div>
+    <div><div class="k">最終更新</div><div class="v">[[YYYY-MM-DD]]</div></div>
+    <div><div class="k">作成者</div><div class="v">[[氏名]]</div></div>
+  </div>
+
+  <!-- 書き終えたら削除 -->
+  <div class="authoring-guide">
+    このドキュメントは<b>実行のためだけ</b>のもの。<b>Why・背景・手触り・トラブルの判断は書かない</b>
+    （書きたくなったら ②③ へ回す）。ステップは <b>1文1アクション・肯定命令形</b>で、
+    画面/物理ラベルは <span class="lbl">[こう]</span> と見たまま一致させる。分岐は「IF …:」＋
+    「→ GO TO …」のインデントで。曖昧語（適宜/なるべく/しばらく）は
+    数値に置き換える。
+    <br><b>原子性ゲート</b>：「取り外す」「調整する」等の複合動詞は、<b>その装置を全く知らない人が
+    手を動かせる粒度</b>（掴む/回す/A→Bへ動かす）まで割る。分からない所は<b>推測で埋めず</b>
+    <span class="fill">⟦FILL: 何が足りないか — 記入者: 役割⟧</span> を置く。⟦FILL⟧ が残る Runbook は
+    <b>未完成（リリース不可）</b>。判定は runbook-review スキルで行う。
+  </div>
+</header>
+
+<!-- 危険がある手順だけ表示。無ければこのブロックごと削除 -->
+<div class="safety">[[人身・装置に重大リスクがある注意。無ければこの行を削除]]</div>
+
+<section class="prereq">
+  <h2>前提（着手前にすべて満たす）</h2>
+  <ul>
+    <li>[[必要な工具 / 消耗品：例）交換用チップ 1103xxx、手袋]]</li>
+    <li>[[必要な権限 / 状態：例）装置は Idle、ドアはロック解除可]]</li>
+    <li>[[前工程の完了条件]]</li>
+  </ul>
+</section>
+
+<section class="steps">
+  <h2>手順</h2>
+  <ol class="steps-list">
+
+    <li>
+      <span class="chk"></span>
+      <span class="action">
+        トグルスイッチ <span class="lbl">[MAIN_PWR]</span> を <span class="lbl">[ON]</span> にする。
+      </span>
+    </li>
+
+    <li>
+      <span class="chk"></span>
+      <span class="action">
+        画面の <span class="lbl">[Status]</span> が <span class="lbl">[Ready]</span> になることを
+        <span class="verify">確認する</span>。
+      </span>
+    </li>
+
+    <li>
+      <span class="chk"></span>
+      <span class="action">
+        圧力計 <span class="lbl">[PT10]</span> が <b>5.0 MPa 以上</b>であることを
+        <span class="verify">確認する</span>。
+        <!-- 分岐の例。不要なら .branch ごと削除 -->
+        <div class="branch">
+          <span class="cond">IF 5.0 MPa 未満:</span>
+          <div>ボタン <span class="lbl">[PRESSURIZE]</span> を押す。</div>
+          <div>30 秒 待つ。</div>
+          <div class="goto">前工程「加圧手順」</div>
+        </div>
+      </span>
+    </li>
+
+    <li>
+      <span class="chk"></span>
+      <span class="action">[[次の1アクション]]</span>
+    </li>
+
+  </ol>
+</section>
+
+<section class="done">
+  <h2>完了確認</h2>
+  <ul>
+    <li>[[終了状態1：例）Status が Idle に戻った]]</li>
+    <li>[[終了状態2：例）廃液・工具を片付けた]]</li>
+    <li>[[記録：例）交換ログに日付とチップ番号を記入した]]</li>
+  </ul>
+</section>
+
+<div class="xlinks">
+  詰まったら → <a href="[[principles-triage.html]]">② Principles &amp; Triage（なぜ・異常時の判断・エスカレーション）</a>
+  ／ 手触り・過去の罠 → <a href="[[operation-notes.html]]">③ Operation Notes</a>
+</div>
+
+<footer class="doc">
+  <span>出典 / 根拠: [[この手順の根拠。例）EOL手順 D1000271、FL-### レポート]]</span>
+  </footer>
+</div>
+
+</body>
+</html>

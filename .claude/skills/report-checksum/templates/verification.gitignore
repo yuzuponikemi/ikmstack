@@ -1,0 +1,5 @@
+# report-checksum (per-report 検算): commit the .py (jupytext percent) as
+# canonical; runtime artifacts are disposable and regenerated on demand.
+*.ipynb
+*.html
+__pycache__/

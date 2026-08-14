@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  手順書ひな型 ②  PRINCIPLES & TRIAGE（橋渡し層 / 判断）
+  ============================================================================
+  これは E2E Runbook（一本道の実行）と Operation Notes（熟練者の暗黙知）の「間」を埋める層。
+  E2E は「すべて順調(正常系)」を前提とするが、現実は異常系の連続。全異常の手順は書けない。
+  そこでここには「なぜそうするのか(Why)」と「異常時にどう考え、何を優先し、誰にいつ渡すか」
+  という【判断のアルゴリズム】を書く。非熟練者が「E2Eの奴隷（手順が変わると何もできない人）」から
+  抜け出すための受け皿。
+
+  ▼ 書き方
+   - 個別の具体手順は書かない（それは ① E2E Runbook）。書くのは判断の「型」。
+   - Why は「因果」で書く（「Aが起きると内部でBになるのでCする」）。
+   - 優先順位を明示する（例：安全 > データ保全 > 品質 > 速度）。迷ったら何を捨てるか。
+   - エスカレーションは「条件 → 誰に → どのチャネル → いつまで」の表で一意に。
+   - <div class="authoring-guide"> は書き終えたら削除。
+  ============================================================================
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Principles &amp; Triage — [[対象手順]]</title>
+<style>
+  :root {
+    --tc-purple:#531872; --tc-green:#4E9D69; --tc-ink:#313131; --tc-gray:#6B6B6B;
+    --tc-orange:#E89A51; --tc-red:#C0392B; --tc-font:"Segoe UI","Meiryo",system-ui,sans-serif;
+    /* この層のアクセント = 橙（判断 / 注意 / CAUTION） */
+    --accent:#D9822B; --accent-ink:#a5631d;
+    --bg:#ffffff; --panel:#f8f6f3; --panel-2:#f1ece4; --border:#e4ddd2;
+    --ink:var(--tc-ink); --muted:var(--tc-gray); --code-bg:#eceff1; --code-ink:#1f2d33;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --accent:#E8A155; --accent-ink:#f0b877;
+      --bg:#17150f; --panel:#211d15; --panel-2:#2a251b; --border:#3d3627;
+      --ink:#ece8df; --muted:#a89f8e; --code-bg:#0f1417; --code-ink:#cfe3ea; }
+  }
+  :root[data-theme="dark"] { --accent:#E8A155; --accent-ink:#f0b877;
+    --bg:#17150f; --panel:#211d15; --panel-2:#2a251b; --border:#3d3627;
+    --ink:#ece8df; --muted:#a89f8e; --code-bg:#0f1417; --code-ink:#cfe3ea; }
+  :root[data-theme="light"] { --accent:#D9822B; --accent-ink:#a5631d;
+    --bg:#ffffff; --panel:#f8f6f3; --panel-2:#f1ece4; --border:#e4ddd2;
+    --ink:var(--tc-ink); --muted:var(--tc-gray); --code-bg:#eceff1; --code-ink:#1f2d33; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--tc-font);
+    line-height:1.65; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:900px; margin:0 auto; padding:0 20px 80px; }
+
+  .doctype { border-top:6px solid var(--accent); background:var(--panel);
+             border-bottom:1px solid var(--border); }
+  .doctype .inner { max-width:900px; margin:0 auto; padding:14px 20px;
+             display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; }
+  .badge { display:inline-flex; align-items:center; gap:8px; font-weight:700; color:#fff;
+           background:var(--accent); padding:4px 12px; border-radius:999px; font-size:.82rem; }
+  .badge .num { background:rgba(255,255,255,.3); border-radius:999px; padding:0 7px; }
+  .doctype .role { font-size:.86rem; color:var(--muted); }
+  .nav { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; font-size:.78rem; }
+  .nav a { text-decoration:none; color:var(--muted); border:1px solid var(--border);
+           padding:3px 9px; border-radius:6px; }
+  .nav a.here { color:#fff; background:var(--accent); border-color:var(--accent); }
+
+  header.doc { padding-top:26px; }
+  h1 { font-size:1.9rem; margin:.1em 0; color:var(--ink); }
+  h1::after { content:""; display:block; height:3px; background:var(--accent); margin-top:.4rem; }
+  h2 { font-size:1.15rem; color:var(--accent-ink); margin:1.6em 0 .4em;
+       border-left:5px solid var(--accent); padding-left:10px; }
+  .meta { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+          gap:8px 18px; margin:16px 0; font-size:.86rem; }
+  .meta div { border-left:3px solid var(--border); padding-left:10px; }
+  .meta .k { color:var(--muted); font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; }
+  .meta .v { font-weight:600; }
+
+  .authoring-guide { border:1.5px dashed var(--accent); background:var(--panel-2);
+    border-radius:10px; padding:12px 16px; margin:18px 0; font-size:.84rem; color:var(--muted); }
+  .authoring-guide b { color:var(--accent-ink); }
+  .authoring-guide::before { content:"✎ 執筆ガイド（書き終えたら削除）"; display:block;
+    font-weight:700; color:var(--accent-ink); margin-bottom:6px; }
+
+  .why { background:var(--panel); border:1px solid var(--border); border-left:5px solid var(--accent);
+    border-radius:0 8px 8px 0; padding:10px 16px; margin:10px 0; }
+  .why .cause { font-weight:600; }
+
+  /* 優先順位バー */
+  .priority { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0; }
+  .priority .p { background:var(--accent); color:#fff; font-weight:700; padding:4px 12px;
+    border-radius:6px; font-size:.86rem; }
+  .priority .gt { color:var(--muted); font-weight:800; }
+
+  /* 判断ツリー */
+  .tree { list-style:none; padding-left:0; margin:.4em 0; }
+  .tree ul { list-style:none; margin:.2em 0 .2em 1.1em; padding-left:1.1em;
+    border-left:2px dashed var(--border); }
+  .tree li { padding:3px 0; }
+  .cond { font-weight:800; color:var(--accent-ink); }
+  .then { color:var(--ink); }
+  kbd,.lbl { font-family:ui-monospace,"Consolas",monospace; background:var(--code-bg);
+    color:var(--code-ink); border:1px solid var(--border); border-radius:5px;
+    padding:1px 7px; font-size:.9em; font-weight:600; }
+
+  /* エスカレーション表 */
+  .tbl-scroll { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; margin:.6em 0; font-size:.9rem; }
+  th,td { border:1px solid var(--border); padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:var(--panel-2); color:var(--accent-ink); }
+
+  /* 正常/異常の見分け */
+  .signs { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:.6em 0; }
+  .signs > div { border:1px solid var(--border); border-radius:8px; padding:10px 14px; background:var(--panel); }
+  .signs .ok { border-top:4px solid var(--tc-green); }
+  .signs .ng { border-top:4px solid var(--tc-red); }
+  .signs h3 { margin:.1em 0 .4em; font-size:.95rem; }
+  .signs .ok h3 { color:#2f6b45; } .signs .ng h3 { color:var(--tc-red); }
+  @media (max-width:640px){ .signs { grid-template-columns:1fr; } }
+
+  footer.doc { margin-top:30px; padding-top:14px; border-top:1px solid var(--border);
+    font-size:.75rem; color:var(--muted); display:flex; justify-content:space-between;
+    flex-wrap:wrap; gap:8px; }
+  .xlinks { margin-top:22px; font-size:.85rem; }
+  .xlinks a { color:var(--accent-ink); }
+
+  @media print { .authoring-guide,.nav { display:none; } body { background:#fff; color:#000; }
+    .why,table,.signs>div { break-inside:avoid; } }
+</style>
+</head>
+<body>
+
+<div class="doctype"><div class="inner">
+  <span class="badge"><span class="num">②</span> PRINCIPLES &amp; TRIAGE</span>
+  <span class="role">橋渡し層 — なぜ・異常時の判断・優先順位・エスカレーション</span>
+  <nav class="nav">
+    <a href="[[e2e-runbook.html]]">① Runbook</a>
+    <a class="here" href="#">② Principles &amp; Triage</a>
+    <a href="[[operation-notes.html]]">③ Operation Notes</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="doc">
+  <h1>[[対象手順]]：判断とトリアージ</h1>
+  <div class="meta">
+    <div><div class="k">対象手順</div><div class="v">[[① E2E Runbook 名]]</div></div>
+    <div><div class="k">版</div><div class="v">[[v1.0]]</div></div>
+    <div><div class="k">最終更新</div><div class="v">[[YYYY-MM-DD]]</div></div>
+    <div><div class="k">担当領域</div><div class="v">[[流体/光学/検出 等]]</div></div>
+  </div>
+
+  <div class="authoring-guide">
+    ここには<b>具体手順を書かない</b>（それは ①）。書くのは<b>判断の型</b>：
+    <b>なぜ(Why)を因果で</b>、<b>優先順位</b>（迷ったら何を捨てるか）、
+    <b>正常/異常の見分け</b>、<b>エスカレーション</b>（条件→誰に→チャネル→いつまで）。
+  </div>
+</header>
+
+<h2>なぜこの手順なのか（Why / 原理）</h2>
+<div class="why">
+  <div class="cause">[[原理1：例）バルブBの圧力が安定するまで内部で微小な熱膨張が起きる]]</div>
+  <div>→ [[だからこうする：例）10分待つ。待たずに進むと Err-402 を高確率で誘発する]]</div>
+</div>
+<div class="why">
+  <div class="cause">[[原理2]]</div>
+  <div>→ [[帰結]]</div>
+</div>
+
+<h2>優先順位（迷ったら上を守り、下を捨てる）</h2>
+<div class="priority">
+  <span class="p">[[安全]]</span><span class="gt">＞</span>
+  <span class="p">[[データ/検体保全]]</span><span class="gt">＞</span>
+  <span class="p">[[品質]]</span><span class="gt">＞</span>
+  <span class="p">[[速度/スループット]]</span>
+</div>
+<p class="muted">[[この優先順位が効く具体例を1〜2行。例）検体を守るためならランを中止してよい]]</p>
+
+<h2>異常時の判断アルゴリズム</h2>
+<ul class="tree">
+  <li><span class="cond">IF [[症状A：例）Status が Ready に戻らない]]</span>
+    <ul>
+      <li><span class="cond">かつ [[条件a：例）PT10 が正常]]</span> →
+        <span class="then">[[判断：例）ソフト再起動を1回だけ試す]]</span></li>
+      <li><span class="cond">かつ [[条件b：例）PT10 が低い]]</span> →
+        <span class="then">[[判断：例）加圧系の異常。ランを止め下記へエスカレーション]]</span></li>
+    </ul>
+  </li>
+  <li><span class="cond">IF [[症状B]]</span> → <span class="then">[[判断]]</span></li>
+</ul>
+
+<h2>正常 / 異常の見分け</h2>
+<div class="signs">
+  <div class="ok"><h3>正常（続行してよい）</h3>
+    <ul><li>[[正常サイン1]]</li><li>[[正常サイン2]]</li></ul></div>
+  <div class="ng"><h3>異常（止めて判断/エスカレーション）</h3>
+    <ul><li>[[異常サイン1]]</li><li>[[異常サイン2]]</li></ul></div>
+</div>
+
+<h2>エスカレーション基準</h2>
+<div class="tbl-scroll">
+<table>
+  <thead><tr><th>条件（これが起きたら）</th><th>誰に</th><th>チャネル</th><th>いつまでに</th></tr></thead>
+  <tbody>
+    <tr><td>[[例）加圧系の異常が疑われる]]</td><td>[[流体系リード]]</td><td>[[連絡先チャンネル]]</td><td>[[即時・ラン停止して]]</td></tr>
+    <tr><td>[[例）2回試して復旧しない]]</td><td>[[担当エンジニア]]</td><td>[[電話]]</td><td>[[15分以内]]</td></tr>
+    <tr><td>[[人身/装置リスク]]</td><td>[[全員 + 責任者]]</td><td>[[口頭 + 記録]]</td><td>[[即時]]</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="xlinks">
+  実行の一本道 → <a href="[[e2e-runbook.html]]">① E2E Runbook</a>
+  ／ 手触り・過去の罠・応用 → <a href="[[operation-notes.html]]">③ Operation Notes</a>
+</div>
+
+<footer class="doc">
+  <span>根拠: [[原理の出典。例）FL-### レポート、装置仕様、過去のインシデント]]</span>
+  </footer>
+</div>
+
+</body>
+</html>

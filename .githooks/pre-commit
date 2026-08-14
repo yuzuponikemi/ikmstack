@@ -1,7 +1,9 @@
 #!/bin/sh
-# report フロントマター ↔ INDEX.md のドリフトをコミット前に検出する。
-# 仕組み: tools/report_meta.py が各 report.md / reports/*.md のフロントマターから
-# INDEX 表(マーカ間)を生成できるか --check する。不一致なら commit を止める。
+# ハーネスのコミット関門。① ハーネス repo(ikmstack)でも、setup で配線した
+# ② 記録層(ノート)でも同じこのフックが走る（.githooks/ は symlink）。
+#
+# 記録層向けの検査は cwd 基準で experiments/ を見る。ハーネス自身の検査
+# (policy gate / harness map) は、そのソースが cwd にあるときだけ走る。
 #
 # 有効化(クローンごと): git config core.hooksPath .githooks
 # 一時的に無視したい場合のみ: git commit --no-verify
@@ -9,10 +11,11 @@
 # python3 を優先解決（現代 macOS は `python` を提供しない）。無ければ検査をスキップ。
 PY=$(command -v python3 || command -v python || true)
 if [ -z "$PY" ]; then
-  echo "⚠ pre-commit: python3/python が見つからないため INDEX/図リンク検査をスキップします。" >&2
+  echo "⚠ pre-commit: python3/python が見つからないため各検査をスキップします。" >&2
   exit 0
 fi
 
+# report フロントマター ↔ INDEX.md のドリフトをコミット前に検出する。
 out=$("$PY" tools/report_meta.py --check 2>&1)
 status=$?
 if [ "$status" -ne 0 ]; then
@@ -21,6 +24,14 @@ if [ "$status" -ne 0 ]; then
   echo "✗ report のフロントマターと INDEX.md が一致していません(または不備があります)。"
   echo "  → python tools/report_meta.py で INDEX を再生成し、変更を git add してから再コミットしてください。"
   exit 1
+fi
+
+# 不備を隔離してスキップした場合(report_meta.py「不備の隔離」)は、commit を止めずに
+# 通知だけする。1 実験の不備で全員の commit を止めないための意図的な非ブロッキング。
+if echo "$out" | grep -q '^WARN:'; then
+  echo "$out"
+  echo
+  echo "⚠ 上記はフロントマター不備のため INDEX から除外されています(commit は継続)。"
 fi
 
 # 図リンクが再生成出力先(_generated/ 等の gitignored)を指すか検査(三大原則#1 R3)。
@@ -34,4 +45,69 @@ if [ "$status" -ne 0 ]; then
   echo "  → 図リンクを ../_generated/<plots>/… 等(.gitignore 済の出力先)に直してください。"
   exit 1
 fi
+
+# 実機/計測系 PowerShell のエンコーディング関門。experiments/<id>/scripts/*.ps1 が
+# 非ASCII かつ BOM 無しだと、日本語 Windows(CP932/PS5.1)で ParseException になる。
+out=$("$PY" tools/check_script_encoding.py 2>&1)
+status=$?
+if [ "$status" -ne 0 ]; then
+  echo "$out"
+  echo
+  echo "✗ 実機/計測系の .ps1 が非ASCIIかつ BOM なしです(CP932/PS5.1 で ParseException)。"
+  echo "  → ASCII 化(推奨)、または UTF-8 BOM 付きで保存してください(AGENTS.md スクリプト規約)。"
+  exit 1
+fi
+
+# 実験ごと opt-in の dr-audit 軽量ゲート。safe-by-construction: staged な実験が
+# .dr-gate マーカを持つときだけ走る(validate + numeric_compare + prose_check)。
+out=$("$PY" tools/dr/dr_gate_precommit.py 2>&1)
+status=$?
+if [ "$status" -ne 0 ]; then
+  echo "$out"
+  echo
+  echo "✗ dr-audit 軽量ゲートが失敗しました(.dr-gate マーカのある実験)。"
+  echo "  → 台帳を直すか、python tools/dr/dr_gate_precommit.py --all --verbose で確認してください。"
+  exit 1
+fi
+
+# 実験ごと opt-in の「追跡できない数値」リンタ。staged な実験が .numbers-gate
+# マーカを持つときだけ走る。値の正しさは見ない(それは上の dr ゲートの役目)。
+out=$("$PY" tools/check_untraceable_numbers.py 2>&1)
+status=$?
+if [ "$status" -ne 0 ]; then
+  echo "$out"
+  echo
+  echo "✗ 出典アンカーの無い数値があります(.numbers-gate のある実験)。"
+  echo "  → リンク / <id>-R### / 図・スクリプトのパス / 出典 / data-era を近くに置くか、"
+  echo "    定義上その必要が無い数値には <!-- numbers-ok: 理由 --> を付けてください。"
+  exit 1
+fi
+
+# ここから下はハーネス自身(① ikmstack)の検査。記録層(② ノート)には規約の正本が
+# 無いので、ソースが cwd にあるときだけ走らせる。
+if [ -f docs/conventions/policy-registry.json ]; then
+  out=$("$PY" tools/policy_gate.py 2>&1)
+  status=$?
+  if [ "$status" -ne 0 ]; then
+    echo "$out"
+    echo
+    echo "✗ ハーネス規約の正本と写しがずれています(policy gate)。"
+    echo "  → python tools/policy_gate.py --all --verbose で確認。正本/レジストリを直したら"
+    echo "    写しのピンを更新(digest は --digest <id>)、マップは --write-map で再生成。"
+    exit 1
+  fi
+fi
+
+if [ -f docs/harness-map.md ]; then
+  out=$("$PY" tools/harness_map.py --check 2>&1)
+  status=$?
+  if [ "$status" -ne 0 ]; then
+    echo "$out"
+    echo
+    echo "✗ ハーネス地図の棚卸し(生成部)がソースとずれています。"
+    echo "  → python tools/harness_map.py で再生成し、git add docs/harness-map.md してください。"
+    exit 1
+  fi
+fi
+
 exit 0

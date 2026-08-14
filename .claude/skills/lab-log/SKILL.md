@@ -4,6 +4,7 @@ description: Write or update a daily lab log with the standard headings (目的/
 ---
 
 # lab-log — 日次ログ作成
+<!-- policy:lab-log-format@a0eca25e -->
 
 セッションの作業を `<logs>/<YYYY>/<YYYY-MM-DD>_<topic>.md` に記録する。
 追記中心・雑多でよい(推敲しない)。1 日に複数トピックあれば複数ファイル。

@@ -34,6 +34,7 @@ tools/                                # リポジトリ共通ユーティリテ�
   report_meta.py                      # report フロントマター → INDEX.md 生成・検証
   check_report_figures.py             # 図リンクが gitignored 出力先を指すか検査
 ```
+<!-- policy:report-naming-numbering@eb565f44 -->
 
 ---
 
@@ -59,7 +60,8 @@ Jupyter Notebook も **git にテキストとしてコミット**します。た
 ## 4. ログの書式
 
 日次ログは `logs/<YYYY>/<YYYY-MM-DD>_<topic>.md` に記述します。1日に複数のトピックがある場合は、それぞれ別ファイルとして切り分けます。
-ログは以下の見出し構成を最低限維持してください。
+最低限の見出しは **目的 / やったこと / わかったこと / 次にやること** の4つです。
+関連する実験ディレクトリ・関連リポジトリ・KB ページがあれば必ずリンクします。
 
 ```markdown
 # YYYY-MM-DD <トピック名>

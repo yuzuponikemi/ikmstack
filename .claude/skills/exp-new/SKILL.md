@@ -52,5 +52,7 @@ cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
   図はローカル再生成でプレビューする(三大原則#1)。**入力は Drive 正本を直読み**(R1。ローカル固有
   パス禁止、差はドライブレターのみ)、**出力は `_generated/` に統一**(R2。.gitignore 済)。
   図リンクは出力先を正しい相対深さで指す(R3。`tools/check_report_figures.py` が pre-commit で検査)
+  <!-- policy:figures-not-in-git@97b4297f -->
 - Notebook はセル出力をクリアして保存(`python3 tools/strip_nb_outputs.py`)
+<!-- policy:nb-strip-outputs@3ca1441e -->
 - レポート作成は **exp-report**、終了時の ナレッジ昇格は **kb-promote** スキルを使う。

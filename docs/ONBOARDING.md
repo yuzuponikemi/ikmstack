@@ -3,6 +3,15 @@
 > 研究・開発方法論を一元管理する **「① ハーネス層」** リポジトリへようこそ。
 > このガイドはナレッジグラフ（`.ua/knowledge-graph.json`）から自動生成しています。
 > 解析コミット: `535ea5e` / 生成日: 2026-07-20
+>
+> ⚠️ **ファイル数・スキル一覧はこの生成時点のもの**で、その後にツール・スキルを追加しています
+> （ハーネス自己保守 `policy_gate` / `harness_map`、日次ログ草稿 `log_draft`、撤回集計
+> `retractions`、横断シンセシス `synthesis_*`、読みビュー `index_html` / `report_readview`、
+> スキル `harness-edit` / `report-checksum` / `readability-review` / `runbook-review` /
+> `procedure-new` / `pr-review-doc`）。
+> **常に最新の棚卸しは [harness-map.md](harness-map.md)**（`python3 tools/harness_map.py` が生成し
+> pre-commit が鮮度を検査）。設計思想は [harness-as-agent-os.md](harness-as-agent-os.md)。
+> 本ガイドを作り直すなら `/understand` を回す。
 
 ---
 

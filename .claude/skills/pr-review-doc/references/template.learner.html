@@ -1,0 +1,275 @@
+<!--
+  pr-review-doc LEARNER-RICH TEMPLATE (mechanism). Copy this file, fill the {{...}} placeholders and
+  the <!-- FILL --> blocks with the PR's specifics, then publish via the Artifact tool.
+  For reviewers UNFAMILIAR with the code area: rich, ordered, terms opened in place.
+  Keep the inline CSS (exp-deck brand tokens) and the 7-section order + fixed TOC. Do NOT add external
+  resources (CSP blocks them). Read the SKILL "初学者リッチ版の構造と作法" before filling.
+  7 sections (fixed reading order = the reviewer's question order):
+    01 目的  02 用語集  03 ファイル毎  04 before/after  05 関数毎の場合分け  06 テスト読み下し  07 検証/要判断+問い
+  ⚠ 05 の「この場合はこうなる」は実差分(git diff <base> <head> -- <file>)を読んで書く。要約から創作しない。
+-->
+<title>PR {{#NNNN}} レビューガイド（初学者リッチ版）— {{一言タイトル}}</title>
+<style>
+  :root{
+    --bg:#f6f7f9;--surface:#fff;--surface-2:#eef1f5;--ink:#1b2130;--ink-soft:#4a5468;--ink-faint:#7b8496;
+    --border:#dde2ea;--accent:#531872;--accent-ink:#6b2b8f;--accent-soft:#f3ecf7;
+    --green:#4E9D69;--green-bg:#edf7f0;--green-line:#d6ecdd;
+    --pend:#b54708;--pend-bg:#fffaeb;--pend-border:#fde3ac;
+    --risk-hi:#C0392B;--risk-hi-bg:#fdeeec;--risk-md:#b54708;--risk-lo:#5a6478;
+    --code-bg:#f2eef6;--shadow:0 1px 2px rgba(20,30,50,.06),0 10px 28px -14px rgba(20,30,50,.16);
+    --mono:ui-monospace,"Cascadia Code","Consolas",monospace;
+    --sans:system-ui,-apple-system,"Segoe UI","Noto Sans JP","Meiryo",sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#0f1216;--surface:#161a21;--surface-2:#1c222b;--ink:#e4e9f0;--ink-soft:#aeb7c5;--ink-faint:#7b8496;
+    --border:#28303b;--accent:#c58ae4;--accent-ink:#d6a8ef;--accent-soft:#241830;
+    --green:#5cc088;--green-bg:#0e2318;--green-line:#1c3a28;
+    --pend:#f5a623;--pend-bg:#241a09;--pend-border:#4a3813;
+    --risk-hi:#f0776b;--risk-hi-bg:#2a1412;--risk-md:#f5a623;--risk-lo:#aeb7c5;
+    --code-bg:#1a1522;--shadow:0 1px 2px rgba(0,0,0,.3),0 12px 34px -16px rgba(0,0,0,.6);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0f1216;--surface:#161a21;--surface-2:#1c222b;--ink:#e4e9f0;--ink-soft:#aeb7c5;--ink-faint:#7b8496;
+    --border:#28303b;--accent:#c58ae4;--accent-ink:#d6a8ef;--accent-soft:#241830;--green:#5cc088;--green-bg:#0e2318;--green-line:#1c3a28;--pend:#f5a623;--pend-bg:#241a09;--pend-border:#4a3813;--risk-hi:#f0776b;--risk-hi-bg:#2a1412;--risk-md:#f5a623;--risk-lo:#aeb7c5;--code-bg:#1a1522;--shadow:0 1px 2px rgba(0,0,0,.3),0 12px 34px -16px rgba(0,0,0,.6);
+  }
+  :root[data-theme="light"]{
+    --bg:#f6f7f9;--surface:#fff;--surface-2:#eef1f5;--ink:#1b2130;--ink-soft:#4a5468;--ink-faint:#7b8496;--border:#dde2ea;--accent:#531872;--accent-ink:#6b2b8f;--accent-soft:#f3ecf7;--green:#4E9D69;--green-bg:#edf7f0;--green-line:#d6ecdd;--pend:#b54708;--pend-bg:#fffaeb;--pend-border:#fde3ac;--risk-hi:#C0392B;--risk-hi-bg:#fdeeec;--risk-md:#b54708;--risk-lo:#5a6478;--code-bg:#f2eef6;--shadow:0 1px 2px rgba(20,30,50,.06),0 10px 28px -14px rgba(20,30,50,.16);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.85}
+  .page{max-width:1180px;margin:0 auto;padding:0 24px 100px;display:grid;grid-template-columns:230px 1fr;gap:44px}
+  nav.toc{position:sticky;top:0;align-self:start;padding:28px 0 0;max-height:100vh;overflow-y:auto}
+  nav.toc .lbl{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 12px}
+  nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+  nav.toc li{margin:0}
+  nav.toc a{counter-increment:t;display:block;padding:7px 10px 7px 34px;border-radius:8px;color:var(--ink-soft);text-decoration:none;font-size:.9rem;position:relative;border-left:2px solid transparent}
+  nav.toc a::before{content:counter(t,decimal-leading-zero);position:absolute;left:9px;top:7px;font-family:var(--mono);font-size:.72rem;color:var(--ink-faint)}
+  nav.toc a:hover{background:var(--accent-soft);color:var(--accent-ink)}
+  .main{min-width:0;padding-top:28px}
+  h1{font-size:clamp(1.55rem,1.1rem+2vw,2.25rem);line-height:1.22;margin:0 0 14px;letter-spacing:-.01em;text-wrap:balance;font-weight:700}
+  .kick{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .kick .tag{border:1px solid var(--border);background:var(--surface);padding:3px 9px;border-radius:999px;color:var(--ink-soft)}
+  .lede{font-size:1.08rem;color:var(--ink-soft);max-width:70ch;margin:0 0 4px}
+  .banner{margin:22px 0 8px;border-radius:12px;padding:15px 18px;font-size:.96rem;border:1px solid var(--pend-border);background:var(--pend-bg);line-height:1.7}
+  .banner .bt{display:block;font-weight:700;color:var(--pend);margin-bottom:3px}
+  section{margin-top:56px;scroll-margin-top:16px}
+  .sh{display:flex;align-items:baseline;gap:13px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--accent-soft)}
+  .sn{font-family:var(--mono);font-size:.82rem;color:#fff;background:var(--accent);border-radius:7px;padding:3px 9px;flex:none;font-weight:600}
+  h2{font-size:1.5rem;margin:0;letter-spacing:-.01em;font-weight:680;text-wrap:balance}
+  h3{font-size:1.06rem;margin:26px 0 6px;font-weight:660}
+  p{margin:13px 0;max-width:74ch}
+  strong{font-weight:680}
+  a{color:var(--accent-ink)}
+  code.inl{font-family:var(--mono);font-size:.84em;background:var(--code-bg);border:1px solid var(--border);padding:1px 6px;border-radius:5px;word-break:break-word}
+  .lead-in{font-size:1rem;color:var(--ink-soft);background:var(--accent-soft);border-radius:10px;padding:12px 16px;margin:0 0 6px;border:1px solid var(--border)}
+  .gloss{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+  .term{border:1px solid var(--border);border-radius:12px;padding:15px 17px;background:var(--surface);box-shadow:var(--shadow)}
+  .term .w{font-family:var(--mono);font-weight:700;color:var(--accent-ink);font-size:.95rem;display:block;margin-bottom:5px}
+  .term p{margin:0;font-size:.93rem;color:var(--ink);max-width:none}
+  .file{border:1px solid var(--border);border-radius:13px;background:var(--surface);box-shadow:var(--shadow);margin:18px 0;overflow:hidden}
+  .file .fh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:14px 18px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+  .file .fn{font-family:var(--mono);font-size:.9rem;font-weight:600;color:var(--ink)}
+  .file .fb{padding:6px 18px 18px}
+  .pill{font-family:var(--mono);font-size:.7rem;padding:2px 9px;border-radius:999px;border:1px solid;white-space:nowrap}
+  .pill.new{color:var(--green);border-color:var(--green);background:var(--green-bg)}
+  .pill.mod{color:var(--accent-ink);border-color:var(--accent);background:var(--accent-soft)}
+  .pill.diff{color:var(--ink-faint);border-color:var(--border);background:var(--surface)}
+  .rk{font-family:var(--mono);font-size:.7rem;padding:2px 9px;border-radius:999px;border:1px solid;margin-left:auto}
+  .rk.hi{color:var(--risk-hi);border-color:var(--risk-hi);background:var(--risk-hi-bg)}
+  .rk.md{color:var(--risk-md);border-color:var(--risk-md)}
+  .rk.lo{color:var(--risk-lo);border-color:var(--border)}
+  .file .check{margin:8px 0 0;padding:11px 14px;background:var(--accent-soft);border-radius:9px;font-size:.9rem;border:1px solid var(--border)}
+  .file .check b{color:var(--accent-ink)}
+  .why{margin:6px 0 0;font-size:.94rem}
+  .cases{margin:12px 0 0;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .cases .ch{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.4fr);background:var(--surface-2)}
+  .cases .ch span{padding:8px 13px;font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint)}
+  .cases .row{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.4fr);border-top:1px solid var(--border)}
+  .cases .cond{padding:10px 13px;font-size:.89rem;font-weight:600;background:var(--surface-2)}
+  .cases .cond.good{border-left:3px solid var(--green)}
+  .cases .cond.bad{border-left:3px solid var(--risk-hi)}
+  .cases .cond.warn{border-left:3px solid var(--pend)}
+  .cases .out{padding:10px 13px;font-size:.89rem;color:var(--ink);line-height:1.7}
+  @media(max-width:900px){.cases .ch{display:none}.cases .row{grid-template-columns:1fr}.cases .out{padding-top:2px}}
+  .diagram{margin:22px 0;padding:22px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+  .lanes{display:grid;gap:14px}
+  .lane{border:1px solid var(--border);border-radius:11px;padding:13px 16px;background:var(--surface-2)}
+  .lane h4{margin:0 0 9px;font-size:.9rem;color:var(--ink);display:flex;gap:8px;align-items:center}
+  .lane .tagm{font-family:var(--mono);font-size:.7rem;color:var(--ink-faint);border:1px solid var(--border);border-radius:5px;padding:1px 6px;background:var(--surface)}
+  .flow{font-size:.9rem;line-height:2.1}
+  .chip{display:inline-block;font-family:var(--mono);font-size:.78rem;padding:3px 9px;border-radius:6px;border:1px solid var(--border);background:var(--surface);margin:2px 0}
+  .chip.new{border-color:var(--green);color:var(--green);font-weight:600;background:var(--green-bg)}
+  .chip.bad{border-color:var(--risk-hi);color:var(--risk-hi);background:var(--risk-hi-bg)}
+  .arr{color:var(--ink-faint);padding:0 3px;font-family:var(--mono)}
+  .diag-note{margin-top:14px;font-size:.88rem;color:var(--ink-soft);border-top:1px dashed var(--border);padding-top:12px}
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+  .ba .box{border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface);box-shadow:var(--shadow)}
+  .ba .box.before{border-top:3px solid var(--risk-hi)}
+  .ba .box.after{border-top:3px solid var(--green)}
+  .ba h4{margin:0 0 8px;font-size:.98rem}
+  .ba .before h4{color:var(--risk-hi)}.ba .after h4{color:var(--green)}
+  .ba ol{margin:0;padding-left:20px}.ba li{margin:7px 0;font-size:.92rem}
+  .tbl-wrap{overflow-x:auto;margin:18px 0;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow)}
+  table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:600px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+  thead th{background:var(--surface-2);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-family:var(--mono)}
+  tbody tr:last-child td{border-bottom:0}
+  .cls{font-family:var(--mono);font-size:.74rem;font-weight:700}
+  .cls.l1{color:var(--green)}.cls.l2{color:var(--risk-md)}.cls.l3{color:var(--risk-hi)}
+  .res{font-family:var(--mono);font-size:.74rem;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .res.pass{color:var(--green);background:var(--green-bg);border:1px solid var(--green-line)}
+  .res.pend{color:var(--pend);background:var(--pend-bg);border:1px solid var(--pend-border)}
+  .readout{font-size:.88rem;color:var(--ink-soft);font-style:italic}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}
+  .col{border:1px solid var(--border);border-radius:12px;padding:16px 19px;background:var(--surface);box-shadow:var(--shadow)}
+  .col h4{margin:0 0 10px;font-size:1rem}
+  .col.ok{border-top:3px solid var(--green)}.col.ok h4{color:var(--green)}
+  .col.jg{border-top:3px solid var(--pend)}.col.jg h4{color:var(--pend)}
+  .col ul{margin:0;padding-left:19px}.col li{margin:9px 0;font-size:.93rem}
+  .callout{margin:20px 0;border-radius:12px;padding:15px 18px;border:1px solid var(--pend-border);background:var(--pend-bg);display:flex;gap:13px}
+  .callout .ic{font-size:1.2rem;flex:none}.callout h4{margin:0 0 4px;font-size:.98rem;color:var(--pend)}.callout p{margin:0;font-size:.92rem;color:var(--ink);max-width:none}
+  .q{counter-reset:q;list-style:none;padding:0;margin:16px 0}
+  .q li{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px 18px 14px 50px;margin-top:12px;position:relative;font-size:.95rem;box-shadow:var(--shadow);line-height:1.75}
+  .q li::before{counter-increment:q;content:"Q"counter(q);position:absolute;left:16px;top:14px;font-family:var(--mono);font-size:.8rem;color:#fff;background:var(--accent);border-radius:6px;padding:2px 7px}
+  footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--border);font-size:.85rem;color:var(--ink-faint);line-height:1.8}
+  footer code{font-family:var(--mono)}
+  @media(max-width:900px){.page{grid-template-columns:1fr;gap:0}nav.toc{position:static;max-height:none;padding-top:20px}.gloss,.ba,.split{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+  <nav class="toc">
+    <p class="lbl">目次</p>
+    <ol>
+      <li><a href="#purpose">この PR は何をするもの</a></li>
+      <li><a href="#terms">先に用語を覚える</a></li>
+      <li><a href="#files">変更したファイル（1つずつ）</a></li>
+      <li><a href="#logic">中心のロジック（before / after）</a></li>
+      <li><a href="#funcs">関数ごとの変更（詳しく）</a></li>
+      <li><a href="#tests">テストで何が確かめられたか</a></li>
+      <li><a href="#judge">見てほしい・判断してほしい点</a></li>
+    </ol>
+  </nav>
+
+  <div class="main">
+    <p class="kick"><span class="tag">{{repo}}</span><span class="tag">PR {{#NNNN}}</span><span class="tag">{{FL-###}}</span><span>初学者向けレビューガイド</span></p>
+    <h1>{{何が壊れ、どう直すかの一言タイトル（用語ゼロで）}}</h1>
+    <p class="lede">この資料は、差分を1行ずつ追う前に「このPRは何を・なぜ・どのファイルで直したのか」を日本語で理解するための読み物です。専門用語はその都度かみ砕きます。最終確認は PR の実差分で（この資料は差分の代わりではなく、差分を読むための地図です）。</p>
+    <!-- FILL: 挙動変化の有無を最初に明示。無害なら文言を「挙動は変わりません」に。 -->
+    <div class="banner"><span class="bt">⚠ {{挙動変化あり / なし}}</span>
+      これまで：{{どうだったか}}。<br>これから：{{どう変わるか}}。{{正常時が不変ならその旨}}。</div>
+
+    <!-- 01 目的：専門用語ゼロで「起きていた問題」「どう直したか」を平易に。 -->
+    <section id="purpose">
+      <div class="sh"><span class="sn">01</span><h2>この PR は何をするもの</h2></div>
+      <p class="lead-in">まず専門用語を使わずに、起きていた問題と直し方を説明します。</p>
+      <p><strong>起きていた問題。</strong> {{FILL: 用語ゼロで。何が・どんな条件で・どう困ったか}}</p>
+      <p><strong>どう直したか。</strong> {{FILL: 考え方を一言で。技術的な核（新規部品/主要な変更）を平易に}}</p>
+    </section>
+
+    <!-- 02 用語集：本文に出る専門語をその場で日本語に開く。比喩を使う。 -->
+    <section id="terms">
+      <div class="sh"><span class="sn">02</span><h2>先に用語を覚える</h2></div>
+      <p class="lead-in">以降で出てくる言葉を、ここで一度かみ砕いておきます。ここが分かれば残りは読めます。</p>
+      <div class="gloss">
+        <!-- FILL: 本文に出る専門語ぶんだけ .term を並べる。比喩を1つ添えると効く。 -->
+        <div class="term"><span class="w">{{用語1}}</span><p>{{平易な説明＋比喩}}</p></div>
+        <div class="term"><span class="w">{{用語2}}</span><p>{{平易な説明}}</p></div>
+      </div>
+      <!-- 任意: 問題の全体像を1文で掴ませる callout -->
+      <div class="callout"><span class="ic">💡</span><div><h4>{{核心を1行で}}</h4><p>{{一番大事な関係を平易に}}</p></div></div>
+    </section>
+
+    <!-- 03 ファイル毎：表に圧縮せず、1ファイル=1カード。「なぜ触ったか」＋「見るコツ」。本命を上に。 -->
+    <section id="files">
+      <div class="sh"><span class="sn">03</span><h2>変更したファイル（1つずつ、なぜ触ったか）</h2></div>
+      <p class="lead-in">この PR は{{N}}ファイルに触れています。<strong>本命は{{どれか}}</strong>。上から順に「なぜ触ったか」と「見るときのコツ」を書きます。</p>
+      <!-- FILL: 変更ファイルぶんだけ .file を並べる。pill=new/mod、rk=hi/md/lo。 -->
+      <div class="file">
+        <div class="fh"><span class="fn">{{path/to/file}}</span><span class="pill mod">改修</span><span class="pill diff">{{+X −Y 行}}</span><span class="rk hi">リスク：{{高/中/低}}（{{理由ラベル}}）</span></div>
+        <div class="fb">
+          <p><strong>なぜ触ったか。</strong> {{このファイルの役割 → 今回なぜ何を足したか}}</p>
+          <div class="check"><b>見るときのコツ：</b> {{このファイルで具体的に何を確認するか}}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 中心ロジック：経路図（変える所＋変えない所）＋ before/after の物語。 -->
+    <section id="logic">
+      <div class="sh"><span class="sn">04</span><h2>中心のロジック（before / after で理解する）</h2></div>
+      <p class="lead-in">一番大事な「なぜ問題が起き、どう直したか」を、経路図と before/after で追います。</p>
+      <div class="diagram" role="img" aria-label="{{図の説明}}">
+        <div class="lanes">
+          <!-- FILL: 1レーン=1実行文脈。chip.new=新規/差込点、chip.bad=問題点。arr で矢印。 -->
+          <div class="lane"><h4>{{経路名}} <span class="tagm">{{文脈}}</span></h4>
+            <div class="flow"><span class="chip">{{起点}}</span><span class="arr">→</span><span class="chip new">{{差込点}}</span><span class="arr">→</span><span class="chip">{{終点}}</span></div>
+          </div>
+        </div>
+        <div class="diag-note"><strong>差込点は{{どこ}}。</strong> {{変えない所（hot path 等）を明記＝「ここは見なくてよい」も負荷低減}}</div>
+      </div>
+      <div class="ba">
+        <div class="box before"><h4>Before（これまで・問題）</h4>
+          <ol><!-- FILL --><li>{{どう壊れていたか、順を追って}}</li></ol></div>
+        <div class="box after"><h4>After（このPR・修正後）</h4>
+          <ol><!-- FILL --><li>{{どう直したか、順を追って}}</li></ol></div>
+      </div>
+      <p>{{要するに一言でまとめる}}</p>
+    </section>
+
+    <!-- 05 関数毎：変わった関数ごとに「なぜ」＋「この場合はこうなる」場合分け。⚠ 実差分から書く。 -->
+    <section id="funcs">
+      <div class="sh"><span class="sn">05</span><h2>関数ごとの変更（詳しく）</h2></div>
+      <p class="lead-in">実際に変わった関数を1つずつ「なぜこう変えたか」と「この場合はこうなる／この場合はこうできる」で解説します。</p>
+      <!-- FILL: git diff <base> <head> -- <file> を読み、変わった関数ぶんだけ .file を並べる。推測で埋めない。 -->
+      <div class="file">
+        <div class="fh"><span class="fn">{{関数シグネチャ}}</span><span class="pill new">新規/改修</span><span class="rk md">{{位置づけ}}</span></div>
+        <div class="fb">
+          <p class="why"><strong>なぜこう変えたか：</strong> {{従来どうで、なぜ変えたか}}</p>
+          <div class="cases">
+            <div class="ch"><span>この場合</span><span>こうなる</span></div>
+            <!-- FILL: 条件ぶんだけ .row。cond good/bad/warn で色分け。 -->
+            <div class="row"><div class="cond good">{{正常ケース}}</div><div class="out">{{どうなる}}</div></div>
+            <div class="row"><div class="cond bad">{{異常ケース}}</div><div class="out">{{どうなる（ログ文言があれば code で引用）}}</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 テスト読み下し：「テスト済み」と書かず、各テストが何を確かめたかを1行日本語に。L3=未カバー明示。 -->
+    <section id="tests">
+      <div class="sh"><span class="sn">06</span><h2>テストで何が確かめられたか（読み下し付き）</h2></div>
+      <p class="lead-in">「テスト済み」と一言で書くのではなく、<strong>どの振る舞いを・どのテストで・何を確認したか</strong>を1行ずつ日本語に読み下します。難易度で <span class="cls l1">L1</span>（純ロジック）/ <span class="cls l2">L2</span>（並行）/ <span class="cls l3">L3</span>（実機のみ）に分けています。</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>確かめたい振る舞い</th><th>階級</th><th>テスト名</th><th>結果</th></tr></thead>
+        <tbody>
+          <!-- FILL: 各行に readout（読み下し）を添える。L3 は res.pend で「未カバー/保留」を明示。 -->
+          <tr><td>{{振る舞い}}<br><span class="readout">＝ {{何が言えるか}}</span></td><td><span class="cls l1">L1</span></td><td class="mono" style="font-family:var(--mono);font-size:.78rem">{{TestName}}</td><td><span class="res pass">CI green</span></td></tr>
+          <tr><td>{{実機でしか確認できない事項}}<br><span class="readout">＝ 自動テストでは再現できない</span></td><td><span class="cls l3">L3</span></td><td class="mono" style="font-family:var(--mono);font-size:.78rem">（自動化できない）</td><td><span class="res pend">{{実機 soak 保留}}</span></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout"><span class="ic">⚠</span><div><h4>「CIが緑」と「実機で正しい」は別物です</h4><p>{{build-green ≠ behavior-verified を平易に。残る最終確認点を正直に書く}}</p></div></div>
+    </section>
+
+    <!-- 07 検証済み/要判断＋問い：事実とレビュアーの判断を分ける。問いは「決めてほしい」形で。 -->
+    <section id="judge">
+      <div class="sh"><span class="sn">07</span><h2>見てほしい・判断してほしい点</h2></div>
+      <p class="lead-in">機械的に確認できたこと（＝事実）と、<strong>あなたの判断が要ること</strong>を分けます。</p>
+      <div class="split">
+        <div class="col ok"><h4>✓ 確認済み（事実）</h4>
+          <ul><!-- FILL: ビルド/テスト等の確定事項 --><li>{{確定した検証}}</li></ul></div>
+        <div class="col jg"><h4>要判断（あなたに決めてほしい）</h4>
+          <ul><!-- FILL: 設計の好み・線引き・未取得の実機結果。「たぶん大丈夫」を混ぜない --><li>{{要判断}}</li></ul></div>
+      </div>
+      <p class="lead-in" style="margin-top:22px">最後に、レビューで<strong>特に答えを聞きたい問い</strong>です（「はい/いいえ」より「この設計で良いか」を決めてほしいもの）。</p>
+      <ol class="q">
+        <!-- FILL: 決定を求める問いに限る。雑学・既答は書かない。1問=1 li。 -->
+        <li>{{設計判断・トレードオフ・境界についての問い}}</li>
+      </ol>
+    </section>
+
+    <footer>
+      <p>PR: {{repo}} {{#NNNN}}（<code>{{branch}}</code>）／ 対象コミット群 <code>{{sha…}}</code>。CI: {{状況}}。</p>
+      <p>設計・根拠の正本：Ikemi-lab <code>experiments/{{FL###}}</code>。<strong>この資料は差分の代わりではなく、差分を読むための地図です。</strong>最終確認は PR の実差分でお願いします。</p>
+      <p style="margin-top:10px;color:var(--ink-faint)">初学者リッチ版（読者＝当該分野に不慣れなレビュア向け）。専門家向けの簡潔版は SME テンプレ（template.html）で。</p>
+    </footer>
+  </div>
+</div>

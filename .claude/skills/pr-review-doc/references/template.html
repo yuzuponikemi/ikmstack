@@ -1,0 +1,173 @@
+<!--
+  pr-review-doc TEMPLATE (mechanism). Copy this file, fill the {{...}} placeholders and the
+  sections marked <!-- FILL --> with the PR's specifics, then publish via the Artifact tool.
+  Keep the inline CSS (exp-deck brand tokens) and the 4-section structure. Do NOT add external
+  resources (CSP blocks them). This template is the skeleton for the 4 required parts:
+    01 流れ/アーキ図  02 判定/モデル(任意)  03 変更ファイル→観点表  04 検証済み/要判断  05 見てほしい点
+  Remove sections that don't apply, but keep 01/03/04/05.
+-->
+<style>
+  :root{
+    --bg:#FAF9FB; --panel:#FFFFFF; --ink:#211B28; --muted:#6B6473;
+    --line:#E7E2EC; --line2:#EFEBF3; --tint:#F3EEF7;
+    --purple:#531872; --purple-h:#6C2A87; --green:#3F8B5C;
+    --c-break:#C0392B; --c-break-bg:#FBEDEB;
+    --c-confirm:#B26A00; --c-confirm-bg:#FBF1E1;
+    --c-allow:#3F8B5C; --c-allow-bg:#EBF4EE;
+    --ok:#3F8B5C; --ok-bg:#EBF4EE; --warn:#B26A00; --warn-bg:#FBF1E1;
+    --mono:ui-monospace,"Cascadia Code","SFMono-Regular",Consolas,monospace;
+    --sans:system-ui,"Segoe UI",-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  }
+  *{box-sizing:border-box} body{margin:0}
+  .wrap{background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.6;
+    -webkit-font-smoothing:antialiased; padding:clamp(20px,5vw,56px) clamp(16px,5vw,40px)}
+  .page{max-width:1060px; margin:0 auto}
+  .eyebrow{font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--purple-h); font-weight:700; margin:0 0 10px}
+  h1{font-size:clamp(1.5rem,3.4vw,2.3rem); line-height:1.14; margin:0; letter-spacing:-.015em; text-wrap:balance; font-weight:800}
+  .lede{font-size:clamp(1rem,1.5vw,1.12rem); color:#4A4351; max-width:66ch; margin:14px 0 0}
+  .metabar{display:flex; flex-wrap:wrap; gap:9px 16px; align-items:center; margin-top:20px; font-size:.82rem; color:var(--muted)}
+  .metabar code{font-family:var(--mono); color:var(--ink); background:var(--tint); padding:1px 7px; border-radius:5px}
+  a{color:var(--purple-h)}
+  .pill{display:inline-flex; align-items:center; gap:7px; font-weight:700; font-size:.78rem; padding:5px 12px; border-radius:999px}
+  .pill.safe{color:var(--ok); background:var(--ok-bg); border:1px solid #CBE6D4}
+  .pill.warn{color:var(--warn); background:var(--warn-bg); border:1px solid #F0DDBB}
+  .pill .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+  hr.rule{height:1px;background:var(--line);border:0;margin:32px 0}
+  section{margin-top:38px}
+  h2{font-size:1.24rem; letter-spacing:-.01em; margin:0 0 4px; font-weight:750; display:flex; gap:11px; align-items:baseline}
+  h2 .n{font-family:var(--mono); font-size:.85rem; color:var(--purple-h); font-weight:700}
+  .sec-note{color:var(--muted); font-size:.9rem; margin:0 0 18px; max-width:72ch}
+  .tldr{background:var(--tint); border:1px solid #E4D7EE; border-radius:14px; padding:18px 20px}
+  .tldr h3{margin:0 0 10px; font-size:1rem; color:var(--purple)}
+  .tldr ul{margin:0; padding-left:20px} .tldr li{margin:5px 0; font-size:.92rem} .tldr b{color:var(--purple)}
+  .chip{display:inline-flex; align-items:center; font-family:var(--mono); font-size:.72rem; font-weight:700; padding:2px 8px; border-radius:6px; white-space:nowrap; border:1px solid transparent}
+  .chip.break{color:var(--c-break); background:var(--c-break-bg); border-color:#F2CFC9}
+  .chip.confirm{color:var(--c-confirm); background:var(--c-confirm-bg); border-color:#F0DDBB}
+  .chip.allow{color:var(--c-allow); background:var(--c-allow-bg); border-color:#CBE6D4}
+  /* flow diagram primitives */
+  .flow{display:grid; gap:14px; margin-top:8px}
+  .lane{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px}
+  .lane-h{display:flex; align-items:center; gap:9px; font-weight:700; font-size:.9rem; margin-bottom:12px}
+  .lane-h .who{font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
+  .chain{display:flex; flex-wrap:wrap; align-items:stretch; gap:0}
+  .node{background:#FBFAFC; border:1px solid var(--line); border-radius:10px; padding:9px 12px; display:flex; flex-direction:column; justify-content:center}
+  .node .t{font-weight:700; font-size:.85rem} .node .s{font-family:var(--mono); font-size:.72rem; color:var(--muted); margin-top:2px}
+  .node.gate{border-width:2px}
+  .node.g1{border-color:var(--c-break); background:var(--c-break-bg)}
+  .node.g2{border-color:#2F6F9E; background:#EAF1F8}
+  .node.g3{border-color:var(--green); background:var(--ok-bg)}
+  .node.gate .tag{font-family:var(--mono); font-size:.66rem; font-weight:700; margin-bottom:3px}
+  .g1 .tag{color:var(--c-break)} .g2 .tag{color:#2F6F9E} .g3 .tag{color:var(--green)}
+  .arw{display:flex; align-items:center; color:var(--muted); font-weight:800; padding:0 8px}
+  .tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--panel); margin-top:6px}
+  table{border-collapse:collapse; width:100%; min-width:720px; font-size:.86rem}
+  thead th{background:var(--tint); color:var(--purple); text-align:left; font-weight:700; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; padding:10px 13px; border-bottom:1px solid var(--line)}
+  tbody td{padding:10px 13px; border-bottom:1px solid var(--line2); vertical-align:top}
+  tbody tr:last-child td{border-bottom:0}
+  .file{font-family:var(--mono); font-size:.79rem; color:var(--ink); font-weight:600}
+  .small{font-size:.82rem; color:#4A4351}
+  .rk{font-family:var(--mono); font-size:.7rem; font-weight:700; padding:1px 7px; border-radius:5px; white-space:nowrap}
+  .rk.hi{color:var(--c-break); background:var(--c-break-bg)} .rk.md{color:var(--c-confirm); background:var(--c-confirm-bg)} .rk.lo{color:var(--muted); background:var(--tint)}
+  .split{display:grid; gap:14px} @media(min-width:760px){.split{grid-template-columns:1fr 1fr}}
+  .col{border-radius:14px; padding:16px 18px; border:1px solid} .col.v{background:var(--ok-bg); border-color:#CBE6D4} .col.j{background:var(--warn-bg); border-color:#F0DDBB}
+  .col h3{margin:0 0 8px; font-size:.98rem} .col.v h3{color:var(--ok)} .col.j h3{color:var(--warn)}
+  .col ul{margin:0; padding-left:19px} .col li{margin:5px 0; font-size:.86rem} .col code{font-family:var(--mono); font-size:.82em}
+  .q{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--purple); border-radius:10px; padding:13px 16px; margin-top:11px}
+  .q b{color:var(--purple)} .q p{margin:4px 0 0; font-size:.86rem; color:#4A4351}
+  footer{margin-top:44px; padding-top:16px; border-top:1px solid var(--line); font-size:.78rem; color:var(--muted)} footer code{font-family:var(--mono)}
+</style>
+
+<div class="wrap"><div class="page">
+
+  <header>
+    <p class="eyebrow">{{FL-###}} ・ {{repo}} PR {{#NNNN}} ・ レビュー補助</p>
+    <h1>{{変更の一言タイトル}} — レビューガイド</h1>
+    <p class="lede">差分を1行ずつ追わなくても「<b>何が・なぜ・どこに入り・何を確認すべきか</b>」が分かるように整理した、{{レビュアー}}向けの資料。実装の詳細差分は PR で、設計の根拠は {{FL###}} レポート群で。</p>
+    <div class="metabar">
+      <!-- 挙動変化の有無を最初に明示。無害なら safe、要注意なら warn ピル -->
+      <span class="pill safe"><span class="dot"></span>{{既定挙動: 例 "既定 OFF ＝ 製品挙動は不変"}}</span>
+      <span><a href="{{PR URL}}">PR {{#NNNN}}</a>{{(draft)}}</span>
+      <span>base <code>{{base}}</code> ・ branch <code>{{branch}}</code></span>
+    </div>
+  </header>
+
+  <div class="tldr" style="margin-top:26px">
+    <h3>30秒サマリ(レビュアー向け)</h3>
+    <ul>
+      <li><b>何を</b>：{{一文で目的}}</li>
+      <li><b>効き方 / 挙動変化</b>：{{既定でどうか、危険面だけか}}</li>
+      <li><b>どこに</b>：{{入る点の数と場所。新規 vs 既存差込}}</li>
+      <li><b>依存</b>：{{新規依存の有無}}</li>
+      <li><b>検証</b>：{{確定した検証}} / <b>{{未検証の主なもの}}</b></li>
+    </ul>
+  </div>
+
+  <hr class="rule">
+
+  <section aria-labelledby="flow">
+    <h2 id="flow"><span class="n">01</span>どこに入るか(流れ / アーキ)</h2>
+    <p class="sec-note">{{変更が経路のどこに入るか。複数入口があればレーンで分ける。太枠+色=新規点。}}</p>
+    <div class="flow">
+      <!-- FILL: 1レーン=1入口。node で経路、node.gate.g1/g2/g3 で新規/変更点を強調。arw で矢印。 -->
+      <div class="lane">
+        <div class="lane-h"><span class="who">{{入口 例: エージェント/ネットワーク}}</span></div>
+        <div class="chain">
+          <div class="node"><div class="t">{{起点}}</div><div class="s">{{補足}}</div></div>
+          <div class="arw">&rarr;</div>
+          <div class="node gate g2"><div class="tag">{{新規/変更点ラベル}}</div><div class="t">{{ファイル/メソッド}}</div><div class="s">{{何をする}}</div></div>
+          <div class="arw">&rarr;</div>
+          <div class="node"><div class="t">{{終点}}</div><div class="s">{{補足}}</div></div>
+        </div>
+      </div>
+      <!-- 追加レーン(人間/GUI 経路、設定ファイル経路 等)を必要な数だけ -->
+    </div>
+  </section>
+
+  <!-- 任意: 判定モデル・状態遷移など、この変更に固有の "読み解きの鍵" があれば 02 に表/図で。無ければ削除。 -->
+
+  <section aria-labelledby="files">
+    <h2 id="files"><span class="n">03</span>変更ファイル &rarr; 役割 &rarr; 見る観点</h2>
+    <p class="sec-note">レビューの地図。新規(新)/改修(改)を分け、各ファイルで具体的に何を確認するか。リスク高を上に。</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>ファイル</th><th>役割</th><th>レビュー観点</th><th>リスク</th></tr></thead>
+        <tbody>
+          <!-- FILL: リスク高(アセンブリ境界/fail-open|closed/状態機械/並行/破壊的)を上に -->
+          <tr><td class="file">{{path}} <span class="small">(新|改)</span></td><td class="small">{{役割}}</td><td class="small">{{何を確認するか}}</td><td><span class="rk hi">高</span></td></tr>
+          <tr><td class="file">{{path}} <span class="small">(新|改)</span></td><td class="small">{{役割}}</td><td class="small">{{何を確認するか}}</td><td><span class="rk md">中</span></td></tr>
+          <tr><td class="file">{{path}} <span class="small">(新|改)</span></td><td class="small">{{役割}}</td><td class="small">{{何を確認するか}}</td><td><span class="rk lo">低</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="conf">
+    <h2 id="conf"><span class="n">04</span>確かめたこと / あなたの判断が要ること</h2>
+    <div class="split">
+      <div class="col v">
+        <h3>&#10003; 検証済み</h3>
+        <ul><!-- FILL: ビルド/テスト/パリティ等の確定事項 -->
+          <li>{{確定した検証}}</li>
+        </ul>
+      </div>
+      <div class="col j">
+        <h3>&#9651; 要判断・未検証</h3>
+        <ul><!-- FILL: 未検証・設計判断が要る点(誇張しない) -->
+          <li>{{未検証・要判断}}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="ask">
+    <h2 id="ask"><span class="n">05</span>特に見てほしい点</h2>
+    <!-- FILL: レビュアーに投げる技術的な問い(設計判断・トレードオフ・境界)。1問=1 .q -->
+    <div class="q"><b>{{論点}}</b><p>{{背景と問い}}</p></div>
+  </section>
+
+  <footer>
+    設計根拠 = {{Ikemi-lab experiments/FL###/ の R###}}。実装 = <a href="{{PR URL}}">{{repo}} PR {{#NNNN}}</a>。
+    この資料は差分の代替ではなくレビューの地図。最終確認は PR の実差分で。
+  </footer>
+
+</div></div>
