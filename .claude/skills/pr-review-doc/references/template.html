@@ -18,7 +18,10 @@
     --mono:ui-monospace,"Cascadia Code","SFMono-Regular",Consolas,monospace;
     --sans:system-ui,"Segoe UI",-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
   }
-  *{box-sizing:border-box} body{margin:0}
+  /* body に明示的な地色を置く。Artifact のビューアは自分のテーマで背景を塗るので、
+     body が透明だと host 側の地色を借りてしまう(ダーク host で本文が読めなくなる)。
+     この資料は明るい単一テーマに寄せた意匠なので、両テーマ分岐はせず明示塗りで通す。 */
+  *{box-sizing:border-box} body{margin:0; background:var(--bg); color:var(--ink)}
   .wrap{background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.6;
     -webkit-font-smoothing:antialiased; padding:clamp(20px,5vw,56px) clamp(16px,5vw,40px)}
   .page{max-width:1060px; margin:0 auto}
