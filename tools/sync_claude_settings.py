@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 def main() -> int:
-    root_dir = Path(__file__).resolve().parent.parent
+    root_dir = Path.cwd()  # install モデルでは tools/ が harness への symlink。記録層の設定を読み書きする
     config_file = root_dir / ".lab-config.json"
     template_file = root_dir / ".claude" / "settings.json.template"
     target_file = root_dir / ".claude" / "settings.json"
@@ -34,8 +34,8 @@ def main() -> int:
     drive_path = ""
     if drive_root:
         # Resolve the base folder of google_drive_root (strip 'experiments/' if present)
-        # e.g., "G:\\Shared drives\\YourCompany\\ExperimentData\\tr-lab\\experiments\\"
-        # -> "G:\\Shared drives\\YourCompany\\ExperimentData\\tr-lab\\"
+        # e.g., "~/Library/CloudStorage/GoogleDrive-<account>/共有ドライブ/<drive>/<notebook>/experiments/"
+        # -> "~/Library/CloudStorage/GoogleDrive-<account>/共有ドライブ/<drive>/<notebook>/"
         p = Path(drive_root)
         if p.name == "experiments":
             drive_path = str(p.parent)
@@ -50,7 +50,7 @@ def main() -> int:
     defaults = {
         "permissions": {
             "additionalDirectories": [
-                "..\\Shared_KB"
+                "../shared-kb"
             ]
         }
     }

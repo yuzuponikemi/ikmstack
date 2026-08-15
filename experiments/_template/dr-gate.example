@@ -1,0 +1,17 @@
+# .dr-gate marker template — copy to an experiment root as `.dr-gate` to opt in.
+# The presence of `.dr-gate` in experiments/<experiment_id>/ turns on the
+# lightweight dr-audit gate (validate + numeric_compare + prose_check) at commit
+# time for that experiment only. Remove the file to opt out. All keys are optional.
+
+# ledger: path to the claims ledger, relative to the experiment dir.
+#         Default when omitted:
+ledger: reports/claims.jsonl
+
+# prose:  optional report md; when set, ledger_to_prose_check runs too
+#         (verifies (claim:cNNN) markers, catches numeric drift prose<->ledger).
+# prose:  reports/<experiment_id>-R###_YYYYMMDD_topic.md
+
+# reltol: relative tolerance for numeric_compare recompute matching.
+#         Default when omitted: 0.02 (2% — absorbs sub-1% rounding differences
+#         while still catching real mix-ups).
+# reltol: 0.02

@@ -41,13 +41,14 @@ AI コーディングエージェント向けのリポジトリ規約。
 1. **git はテキスト + 生成スクリプトだけ**。図やデータ(CSV・画像・動画・バイナリ)は
    git に入れず、**生成スクリプトでローカル再現できる**状態にする。
    - **生データ・大容量・完成形の図付きレポート** → Google Drive(正本)、`MANIFEST.md` からリンク。
-   - **図(プロット)** → git に置かない。各実験の **`regenerate.ps1`** を 1 回流せば、
+   - **図(プロット)** → git に置かない。各実験の **`regenerate.sh`** を 1 回流せば、
      生データから決定論的に再生成され、レポートを図付きでローカルプレビューできる
      (出力先は `.gitignore` 済 = `_generated/` などの出力ディレクトリ)。
    - 目安: 1 ファイル 1 MB 超・再現不能・手編集物は Drive へ。
    - **再現性の鍵は「生データ(Drive)+ スクリプト(git)+ commit SHA(MANIFEST)」**。
      図そのものを git で運ぶのではなく、図を作る手順を git で運ぶ。
-   - `regenerate.ps1` と図リンクが満たすべき3条件(R1〜R3、`tools/check_report_figures.py` で検査)は
+   - `regenerate.sh` と図リンクが満たすべき3条件(R1〜R3、`tools/check_report_figures.py` で検査)は
+   <!-- policy:figures-not-in-git@97b4297f -->
      **[docs/conventions/figures-regen.md](docs/conventions/figures-regen.md)** に従う。
 
 2. **実験は 1 ディレクトリに閉じる**。`experiments/_template/` をコピーして始める。
@@ -60,9 +61,11 @@ AI コーディングエージェント向けのリポジトリ規約。
    - **詰め込みで不親切にしない**(語を補い節を分ける)。レポートの長さに上限は設けない —
      **整然さが最優先**で、量が増えたら**話題ごとに 1 個別レポートに分ける**(`reports/` に
      1 トピック 1 ファイルで足す)。**個別レポート(`reports/E###-R###`)は
+     <!-- policy:report-naming-numbering@eb565f44 -->
      1 本で自走的に読める**よう前提・用語・手法を再共有してよい(読みやすさ > 重複回避)。
      逆に `REPORT.md` は現状サマリ 1 本に保つ。詳細 → reporting.md / exp-report。
    - 運用の詳細(1機能=1権威の文書分け・事実/仮説の分離・鮮度維持)は
+   <!-- policy:living-vs-primary@134848f4 -->
      **[docs/conventions/reporting.md](docs/conventions/reporting.md)** に分離。
 
 ## 実験 ID と 命名規約
@@ -80,22 +83,83 @@ AI コーディングエージェント向けのリポジトリ規約。
   - `PLAN.md` 冒頭: `**実験ID**: E###_<topic>`
   - `MANIFEST.md` 冒頭: `実験ID: E###_<topic>`
   - `REPORT.md` 冒頭の **YAML フロントマター**: `experiment_id: E###_<topic>` ほか
+  <!-- policy:frontmatter-schema@6e2e1a63 -->
     (書式は exp-report スキル参照)
 - **横断レジストリ** `experiments/INDEX.md` の一覧表は、各 `REPORT.md` のフロントマターから
-  `python tools/report_meta.py` が生成する(手編集しない。マーカ間のみ書き換わる)。
+  `python3 tools/report_meta.py` が生成する(手編集しない。マーカ間のみ書き換わる)。
   状態・要約を変えたいときは REPORT.md のフロントマターを直してスクリプトを回す。
 - **ファイル名規約**: 実験直下の単数リビング文書(`PLAN.md` / `MANIFEST.md` / `REPORT.md` /
   任意の `DECISIONS.md`)は **ID を付けず正規名のまま**にする。一方 `reports/` 配下の
   **1実験に多数ある一次記録は `E###-R###` で一意名**にする。
 
-## ディレクトリ構成・詳細ルール
+## 詳細規約(段階的開示・`docs/conventions/`)
 
-ディレクトリ構成、Notebook規約、Google Drive規約、ログの書式などの詳細な規定は、以下を参照してください。
-- [詳細規約 (Jupyter/Drive/構成等)](docs/conventions/repository-rules.md)
+頻繁には要らない機械的詳細はここに分離。**該当作業のときに開く**:
+
+| 文書 | いつ読む |
+|---|---|
+| [docs/conventions/repository-rules.md](docs/conventions/repository-rules.md) | ディレクトリ構成・Notebook 規約・Google Drive 規約・ログの書式を確認するとき |
+| [docs/conventions/figures-regen.md](docs/conventions/figures-regen.md) | 図・`regenerate.sh`・図リンクを書く/直すとき(R1〜R3、三大原則#1の詳細) |
+| [docs/conventions/reporting.md](docs/conventions/reporting.md) | レポート/plan を書くとき(1機能=1権威・命名/R番号・事実/仮説の分離・撤回の記録・検証ゲート・鮮度維持) |
+| [docs/conventions/record-routing.md](docs/conventions/record-routing.md) | 記録がどの層に着地するか迷ったとき(ノート根 / sidecar の振り分け正本) |
+| [docs/conventions/policy-map.md](docs/conventions/policy-map.md) | 規約そのものを直すとき(1ルール=1正本の対応表。改訂手順は harness-edit スキル) |
+| [docs/harness-map.md](docs/harness-map.md) | ハーネスの全体像を思い出したいとき・部品(スキル/ゲート/ツール)を足すとき(棚卸しは `python3 tools/harness_map.py` が生成・pre-commit が鮮度を検査) |
 
 ## レポートの構成(要点。詳細 → [docs/conventions/reporting.md](docs/conventions/reporting.md))
 
 **1機能=1権威**。同じ役割の文書を2つ作らない。
 - **リビング文書(R番号なし・正規名。常に最新化)**: `REPORT.md` (現状サマリ・最初に読む唯一の権威) / `PLAN.md` (計画) / `DECISIONS.md` (決定履歴)。
 - **一次記録 `reports/E###-R###_*.md` (R番号あり・追記型)**: 各セッション/検証ごとの詳細な根拠・数値・図リンク。
+
+## 実験のワークフロー
+
+1. `experiments/_template/` を `experiments/E###_<topic>/` にコピーする(`/exp-new`)
+2. `PLAN.md` に 実験ID / 目的・仮説・成功基準・関与リポジトリを書く
+3. 着手時に `MANIFEST.md` へ 実験ID と関与リポジトリの commit SHA を記録する
+   (`git -C ../<repo> rev-parse --short HEAD`)。再現性はこれで担保する
+   (サブモジュールは使わない)
+4. データは Drive の対応フォルダに置き、`MANIFEST.md` にパス・サイズ・取得日を記録する
+5. `REPORT.md` にフロントマターを書き、`python3 tools/report_meta.py` で `experiments/INDEX.md` を生成する
+6. **各セッション/検証の結末は一次記録 `reports/E###-R###_<YYYYMMDD>_<topic>.md`(フロントマター付き)に書き、`python3 tools/report_meta.py` で `reports/INDEX.md` を再生成する**
+   (整合確認のみなら `python3 tools/report_meta.py --check`。pre-commit も同じ検査を回す)
+7. 区切りで **`REPORT.md`(現状サマリ)を最新の結論に更新**する(覆った結論を残さない。`/exp-checkpoint`)。
+   `MANIFEST.md` / `PLAN.md`(長期なら `DECISIONS.md` も)が現実とずれていないか確認する。
+   確定した恒久知識は KB へ昇格する(`/kb-promote`。任意)
+
+## 知見の昇格(tips → KB)
+
+- **`tips/`** は現場知見の前段。挙動・不具合の発生機序(`mechanism-*.md`)と、
+  再利用できる調査・解析のやり方(`method-*.md`)を、雑でよいので早く書く。
+- **KB**(共有ナレッジベース)は蒸留された恒久知識。実験の結論が固まったら
+  `/kb-promote` で昇格させ、昇格先を元レポートから逆リンクする。
+- 昇格の基準は「**他の実験・他の人が前提として使えるまで確定したか**」。
+  確定していない知見は tips とレポートに留め、KB に上げない。
+
+## スクリプト規約(実行コード)
+
+**実行環境は macOS を前提にする。** シェルスクリプトは `#!/bin/sh`(POSIX)で書き、
+Python は `python3` で呼ぶ(macOS は `python` を提供しない)。PowerShell には依存しない
+— 実験の再生成ランナーは `regenerate.sh`、ハーネスの道具は `tools/*.py` に揃える。
+
+**スクリプトの中身は英語で書く**(コメント・出力メッセージとも)。日本語は
+レポート / ログ / ドキュメント側に書き、実行コードには入れない。理由は 2 つ:
+
+- 実行コードは環境をまたいで動く。ロケール・コンソールの文字コードに依存しない方が事故が少ない。
+- 図のラベルやレポート本文と違い、**実行コードの読み手は開発者だけ**なので、
+  日本語である利得が小さい。
+
+例外は、図のラベル・レポートに埋める文字列など**成果物として人が読む文字列**。
+これは日本語でよい(むしろ日本語が正しい)。
+
+> この規約は「機械で強制しない」。以前は日本語 Windows の PowerShell 5.1 が
+> BOM なし非ASCII を読めずクラッシュするのを pre-commit で弾いていたが、
+> **実行環境を macOS に一本化したので撤去した**(2026-08-15)。
+> 規律としては残すが、守らせるのはレビューであってゲートではない。
+
+## 複数リポジトリにまたがる作業
+
+- 横断検証のセッションは ② 記録層(ノート)で起動するのが基本。③ プロダクト repo から
+  起動した場合も、記録は `tools/sidecar.py` がノート側へ振り分ける(③ は無変更のまま)。
+- 隣接リポジトリの地図は親フォルダの `CLAUDE.md`(ワークスペース地図)を参照する。
+- 横断作業で隣のリポジトリが必要になったら `/add-dir ../<repo>` を提案してよい。
 

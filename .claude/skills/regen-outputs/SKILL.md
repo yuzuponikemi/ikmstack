@@ -1,11 +1,11 @@
 ---
 name: regen-outputs
-description: Regenerate an experiment's figures and auto-reports locally so reports preview with images — sync raw data from Drive, run the experiment's regenerate.ps1, open the generated .md. Figures are not committed to git (AGENTS.md 三大原則#1); this is how anyone (esp. on a fresh clone) reads reports with figures. Use when "図付きで読みたい", "レポートをプレビュー", "図を再生成", "regenerate を回して"
+description: Regenerate an experiment's figures and auto-reports locally so reports preview with images — sync raw data from Drive, run the experiment's regenerate.sh, open the generated .md. Figures are not committed to git (AGENTS.md 三大原則#1); this is how anyone (esp. on a fresh clone) reads reports with figures. Use when "図付きで読みたい", "レポートをプレビュー", "図を再生成", "regenerate を回して"
 ---
 
 # regen-outputs — 図・自動レポートのローカル再生成
 
-Git 管理外の図や自動生成レポートを、生データと `regenerate.ps1` を用いて決定論的にローカルで再生成し、画像付きでレポートをプレビューできるようにします。
+Git 管理外の図や自動生成レポートを、生データと `regenerate.sh` を用いて決定論的にローカルで再生成し、画像付きでレポートをプレビューできるようにします。
 
 > [!IMPORTANT]
 > **作業開始前の義務**:
@@ -28,8 +28,8 @@ cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
 1. **Google Drive データの同期確認**:
    - 入力データ（Drive 側）が最新であることを確認します。
 
-2. **PowerShell での再生成実行**:
+2. **再生成の実行**:
    ```powershell
-   pwsh experiments/E###_<topic>/regenerate.ps1
+   sh experiments/E###_<topic>/regenerate.sh
    ```
-   ※ PC環境によりドライブレターが異なる場合は、必要に応じて `-DriveRoot` を渡します。
+   ※ Drive のマウント先が既定と違う場合は、環境変数 `LAB_DRIVE` で上書きします。

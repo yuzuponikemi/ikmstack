@@ -13,10 +13,18 @@
 experiments/**/data/
 experiments/**/logs_dev_pc/**/*.csv
 
-# ── 再生成される図・自動レポート（regenerate.ps1 でローカル再現。git 不可）──
+# ── 再生成される図・自動レポート（regenerate.sh でローカル再現。git 不可）──
 experiments/**/_generated/
 experiments/**/figures/
 experiments/**/reports/plots_*/
+
+# ── 派生 HTML ビュー（生成物。正本は .md — tools/index_html.py / report_readview.py）──
+experiments/INDEX.html
+experiments/**/_generated/*.readview.html
+
+# ── report-checksum の検算（正本は .py。ノート・HTML は使い捨て）──────────
+experiments/**/verification/*.ipynb
+experiments/**/verification/*.html
 
 # ── 報告デッキ等のバイナリ生成物（deckgen.py で再現／正本は Drive）──────
 experiments/**/outputs/*.pptx

@@ -13,7 +13,7 @@
                            citation_error_rate(欠落/不正の割合)も算出(R003 A1)
 
 使い方:
-    python tools/dr/dr_gate.py <path>/claims.jsonl [--aql 0.065]
+    python3 tools/dr/dr_gate.py <path>/claims.jsonl [--aql 0.065]
 
 終了コード: 0 = 受入可(PASS) / 1 = 差し戻し(FAIL) / 2 = ファイル無し or スキーマエラー
 """
@@ -23,7 +23,7 @@ import argparse
 import sys
 from pathlib import Path
 
-# 同ディレクトリの validate_ledger を再利用(python tools/dr/dr_gate.py で sys.path[0]=tools/dr)
+# 同ディレクトリの validate_ledger を再利用(python3 tools/dr/dr_gate.py で sys.path[0]=tools/dr)
 from validate_ledger import load_and_validate
 
 

@@ -5,7 +5,7 @@
 stdlib のみ。決定論チェック(数値の真偽は LLM でなくコードで行う)。
 
 使い方:
-    python tools/dr/validate_ledger.py <path>/claims.jsonl
+    python3 tools/dr/validate_ledger.py <path>/claims.jsonl
 
 終了コード: 0 = エラーなし(警告はあってもよい) / 1 = スキーマエラーあり / 2 = ファイル無し
 dr_gate.py からは load_and_validate() を import して使う。

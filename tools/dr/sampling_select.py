@@ -15,7 +15,7 @@
 > ここで決めるのは「検査対象の選定」までで、過剰な精度を主張しない。
 
 使い方:
-    python tools/dr/sampling_select.py <path>/claims.jsonl [--level II] [--aql 0.065]
+    python3 tools/dr/sampling_select.py <path>/claims.jsonl [--level II] [--aql 0.065]
 
 終了コード: 0(選定を出力)/ 2(ファイル無し等)
 """

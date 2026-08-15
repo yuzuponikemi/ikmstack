@@ -45,5 +45,5 @@ cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
    ```
 
 3. **目視確認と配布**:
-   PowerShell で `PowerPoint.Application` COM を利用して PNG/PDF エクスポートを行い、レイアウト崩れを目視で確認します。
+   LibreOffice のヘッドレス変換で PDF/PNG を書き出し、レイアウト崩れを目視で確認します(下記)。
    完成した `.pptx` および `.pdf` は Google Drive の実験フォルダへコピーし、メンバーに渡します。

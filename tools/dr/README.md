@@ -23,7 +23,7 @@
 {
   "hooks": {
     "Stop": [{ "hooks": [{ "type": "command",
-      "command": "python tools/dr/dr_gate.py <対象台帳>" }] }]
+      "command": "python3 tools/dr/dr_gate.py <対象台帳>" }] }]
   }
 }
 ```
@@ -51,10 +51,10 @@
 
 ```sh
 # 1. 台帳のスキーマを検証
-python tools/dr/validate_ledger.py <path>/claims.jsonl
+python3 tools/dr/validate_ledger.py <path>/claims.jsonl
 
 # 2. (検証前)受入ゲート → 判断駆動が未検証なので FAIL するのが正しい
-python tools/dr/dr_gate.py <path>/claims.jsonl
+python3 tools/dr/dr_gate.py <path>/claims.jsonl
 
 # 3. 各 decision_driving 主張を dr-verifier(プロンプト)で独立検証し、
 #    verification ブロックを埋める。プロンプトは
@@ -62,7 +62,7 @@ python tools/dr/dr_gate.py <path>/claims.jsonl
 #    検証者には source_url と value だけ渡す(執筆者の根拠は渡さない=独立性)。
 
 # 4. 再度ゲート → 全 decision_driving が verified なら PASS
-python tools/dr/dr_gate.py <path>/claims.jsonl
+python3 tools/dr/dr_gate.py <path>/claims.jsonl
 ```
 
 

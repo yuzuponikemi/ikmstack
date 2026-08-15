@@ -12,7 +12,7 @@ deck.py のスキーマは下部のドキュメント文字列と SKILL.md を�
 
 deck.py(content)が定義すべきモジュール属性:
   OUT_NAME : str           出力の基底名(拡張子は無視。生成時に _YYYYMMDD-HHMM が付与される)
-  TAG      : str           フッターに出す実験ID(例 "FL-958")
+  TAG      : str           フッターに出す実験ID(例 "E058")
   TITLE    : str           表紙タイトル(改行可)
   SUBTITLE : str           表紙サブタイトル(問い)
   META     : str           表紙メタ行(範囲・日付)

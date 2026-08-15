@@ -4,11 +4,13 @@
   "mode": "hybrid",
   "experiment_id_pattern": "^E\\d+_[a-z0-9-]+$",
   "experiment_id_prefix": "E",
-  "google_drive_root": "G:\\Shared drives\\<your-drive>\\{{NOTEBOOK}}\\experiments\\",
+  "google_drive_root": "~/Library/CloudStorage/GoogleDrive-<account>/共有ドライブ/<drive>/{{NOTEBOOK}}/experiments/",
   "allowed_figure_roots": [
     "_generated",
     "figures"
   ],
+  "jira_enabled": false,
+  "retraction_rule_epoch": "0000-00-00",
   "harness_repo_path": "../ikmstack",
   "sidecar": {
     "enabled": true,

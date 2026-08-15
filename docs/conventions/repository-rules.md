@@ -21,7 +21,7 @@ experiments/
     PLAN.md                           # ★リビング★ 枠組み・仮説・成功基準 + 次の計画
     REPORT.md                         # ★リビング・唯一の現状サマリ★ 確定事実・現在の結論・未解決
     DECISIONS.md                      # (任意・長期のみ)方針転換の履歴。追記型・R番号なし
-    regenerate.ps1                    # 図・自動レポートをローカル再生成(図は git に置かない)
+    regenerate.sh                    # 図・自動レポートをローカル再生成(図は git に置かない)
     scripts/                          # 解析スクリプト
     reports/                          # 日付つき一次記録だけ(セッション/検証ごと。R番号あり・追記型)
       INDEX.md                        # レポート索引(状態バッジ + 1行要約)
@@ -34,6 +34,7 @@ tools/                                # リポジトリ共通ユーティリテ�
   report_meta.py                      # report フロントマター → INDEX.md 生成・検証
   check_report_figures.py             # 図リンクが gitignored 出力先を指すか検査
 ```
+      <!-- policy:report-naming-numbering@eb565f44 -->
 
 ---
 
@@ -42,8 +43,8 @@ tools/                                # リポジトリ共通ユーティリテ�
 Jupyter Notebook も **git にテキストとしてコミット**します。ただし、差分の肥大化や実行結果の混入を防ぐため、**セル出力 (計算結果・図・実行カウント) は必ずクリアして保存**します。
 
 ### 出力のクリア手順
-- **手動クリア**: `python tools/strip_nb_outputs.py <nb.ipynb ...>`
-- **確認のみ**: `python tools/strip_nb_outputs.py --check <nb.ipynb ...>`
+- **手動クリア**: `python3 tools/strip_nb_outputs.py <nb.ipynb ...>`
+- **確認のみ**: `python3 tools/strip_nb_outputs.py --check <nb.ipynb ...>`
 - **自動クリア**: `.gitattributes` 内の `*.ipynb filter=nbstrip` 設定により、`git add` 時に自動でセル出力がクリアされます。
 
 ---
@@ -59,7 +60,8 @@ Jupyter Notebook も **git にテキストとしてコミット**します。た
 ## 4. ログの書式
 
 日次ログは `logs/<YYYY>/<YYYY-MM-DD>_<topic>.md` に記述します。1日に複数のトピックがある場合は、それぞれ別ファイルとして切り分けます。
-ログは以下の見出し構成を最低限維持してください。
+最低限の見出しは **目的 / やったこと / わかったこと / 次にやること** の4つです。
+関連する実験ディレクトリ・関連リポジトリ・KB ページがあれば必ずリンクします。
 
 ```markdown
 # YYYY-MM-DD <トピック名>

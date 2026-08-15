@@ -43,14 +43,17 @@ cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
    - 作成したパスを MANIFEST.md に記録。
 5. **`REPORT.md` のフロントマターを記入し `experiments/INDEX.md` を生成** —
    `REPORT.md` 冒頭に `experiment_id`(=ディレクトリ名)/ `status`(初期は `planning`)/ `period_start` / `summary` を書き、`python3 tools/report_meta.py` を実行(INDEX 行を手書きしない)。
+   <!-- policy:report-meta-regen@a43c35f7 -->
 6. **次にやることは `PLAN.md`(次の計画)に書く**。
 
 ## リマインド(立ち上げ時に必要なら案内)
 
 - データ(CSV・画像・>1MB)は git に入れず Drive へ。ローカル一時作業は `data/`(.gitignore 済)
-- **図は git に入れない**。`regenerate.ps1`(テンプレに同梱)を実験の入力/出力に合わせて書き、
+- **図は git に入れない**。`regenerate.sh`(テンプレに同梱)を実験の入力/出力に合わせて書き、
   図はローカル再生成でプレビューする(三大原則#1)。**入力は Drive 正本を直読み**(R1。ローカル固有
-  パス禁止、差はドライブレターのみ)、**出力は `_generated/` に統一**(R2。.gitignore 済)。
+  パス禁止、差は Drive のマウント先のみ)、**出力は `_generated/` に統一**(R2。.gitignore 済)。
   図リンクは出力先を正しい相対深さで指す(R3。`tools/check_report_figures.py` が pre-commit で検査)
+  <!-- policy:figures-not-in-git@97b4297f -->
 - Notebook はセル出力をクリアして保存(`python3 tools/strip_nb_outputs.py`)
+<!-- policy:nb-strip-outputs@3ca1441e -->
 - レポート作成は **exp-report**、終了時の ナレッジ昇格は **kb-promote** スキルを使う。

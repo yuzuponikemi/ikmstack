@@ -13,6 +13,7 @@
   - フロントマターの記述と「結論を冒頭に書く」原則を守れば、`reports/INDEX.md` は不要です。
 - **複数レポートが発生する実験**:
   - 各セッションや検証ごとに、`reports/` 配下に「日付つき一次記録」（例: `E###-R###_...`）を作成します。
+  <!-- policy:report-naming-numbering@eb565f44 -->
   - ディレクトリ直下には `REPORT.md`（現状サマリ＝最初に読む唯一の権威）、`PLAN.md`（現在の計画）、および長期キャンペーンに限り `DECISIONS.md`（方針転換履歴）を配置します。
 
 ---
@@ -82,10 +83,11 @@ INDEX ページは手書きせず、フロントマターをもとにスクリ�
 
 ```sh
 # INDEX 表の再生成 (experiments/INDEX.md および各 reports/INDEX.md)
-python tools/report_meta.py
+python3 tools/report_meta.py
 
 # 整合性の検証のみを実行 (差分やエラーがあれば exit code 1)
-python tools/report_meta.py --check
+python3 tools/report_meta.py --check
 ```
+<!-- policy:report-meta-regen@a43c35f7 -->
 
 ※ `<id>/reports/INDEX.md` と `experiments/INDEX.md` には、生成マーカー (`<!-- gen:...-index:start -->` および `:end -->`) が記述されている必要があります。
