@@ -41,13 +41,13 @@ AI コーディングエージェント向けのリポジトリ規約。
 1. **git はテキスト + 生成スクリプトだけ**。図やデータ(CSV・画像・動画・バイナリ)は
    git に入れず、**生成スクリプトでローカル再現できる**状態にする。
    - **生データ・大容量・完成形の図付きレポート** → Google Drive(正本)、`MANIFEST.md` からリンク。
-   - **図(プロット)** → git に置かない。各実験の **`regenerate.ps1`** を 1 回流せば、
+   - **図(プロット)** → git に置かない。各実験の **`regenerate.sh`** を 1 回流せば、
      生データから決定論的に再生成され、レポートを図付きでローカルプレビューできる
      (出力先は `.gitignore` 済 = `_generated/` などの出力ディレクトリ)。
    - 目安: 1 ファイル 1 MB 超・再現不能・手編集物は Drive へ。
    - **再現性の鍵は「生データ(Drive)+ スクリプト(git)+ commit SHA(MANIFEST)」**。
      図そのものを git で運ぶのではなく、図を作る手順を git で運ぶ。
-   - `regenerate.ps1` と図リンクが満たすべき3条件(R1〜R3、`tools/check_report_figures.py` で検査)は
+   - `regenerate.sh` と図リンクが満たすべき3条件(R1〜R3、`tools/check_report_figures.py` で検査)は
    <!-- policy:figures-not-in-git@97b4297f -->
      **[docs/conventions/figures-regen.md](docs/conventions/figures-regen.md)** に従う。
 
@@ -99,7 +99,7 @@ AI コーディングエージェント向けのリポジトリ規約。
 | 文書 | いつ読む |
 |---|---|
 | [docs/conventions/repository-rules.md](docs/conventions/repository-rules.md) | ディレクトリ構成・Notebook 規約・Google Drive 規約・ログの書式を確認するとき |
-| [docs/conventions/figures-regen.md](docs/conventions/figures-regen.md) | 図・`regenerate.ps1`・図リンクを書く/直すとき(R1〜R3、三大原則#1の詳細) |
+| [docs/conventions/figures-regen.md](docs/conventions/figures-regen.md) | 図・`regenerate.sh`・図リンクを書く/直すとき(R1〜R3、三大原則#1の詳細) |
 | [docs/conventions/reporting.md](docs/conventions/reporting.md) | レポート/plan を書くとき(1機能=1権威・命名/R番号・事実/仮説の分離・撤回の記録・検証ゲート・鮮度維持) |
 | [docs/conventions/record-routing.md](docs/conventions/record-routing.md) | 記録がどの層に着地するか迷ったとき(ノート根 / sidecar の振り分け正本) |
 | [docs/conventions/policy-map.md](docs/conventions/policy-map.md) | 規約そのものを直すとき(1ルール=1正本の対応表。改訂手順は harness-edit スキル) |
@@ -135,19 +135,26 @@ AI コーディングエージェント向けのリポジトリ規約。
 - 昇格の基準は「**他の実験・他の人が前提として使えるまで確定したか**」。
   確定していない知見は tips とレポートに留め、KB に上げない。
 
-## スクリプト規約(.ps1 / .py ほか実行コード)
+## スクリプト規約(実行コード)
 
-**スクリプトの中身は全部英語で書く**(コメント・出力メッセージとも)。
-日本語は レポート / ログ / ドキュメント側に書き、実行コードには入れない。
-理由: 実機・計測PCの CP932 コンソールで文字化け・PowerShell 5.1 の ParseException の
-温床になるため。どうしても日本語が必要な対話メッセージ等のみ **UTF-8 BOM 付き**(次善策)。
+**実行環境は macOS を前提にする。** シェルスクリプトは `#!/bin/sh`(POSIX)で書き、
+Python は `python3` で呼ぶ(macOS は `python` を提供しない)。PowerShell には依存しない
+— 実験の再生成ランナーは `regenerate.sh`、ハーネスの道具は `tools/*.py` に揃える。
 
-**機械強制の範囲**: 最悪ケース(実機/計測PCで走るスクリプトの起動不能)を確実に止めるため、
-`tools/check_script_encoding.py` が `experiments/<id>/scripts/**/*.ps1` を検査し、
-**非ASCII かつ BOM なし**(=CP932/PS5.1 で ParseException する形)を pre-commit で弾く
-(ASCII が第一選択、UTF-8 BOM は許容)。開発PC専用コード(解析/作図 `.py`・`regenerate.ps1`・
-`tools/` 等。Python3/PS7 は UTF-8 を正しく読み、図ラベルの日本語は意図的)は機械強制の対象外だが、
-上の「英語で書く」原則自体は全実行コードに適用する。
+**スクリプトの中身は英語で書く**(コメント・出力メッセージとも)。日本語は
+レポート / ログ / ドキュメント側に書き、実行コードには入れない。理由は 2 つ:
+
+- 実行コードは環境をまたいで動く。ロケール・コンソールの文字コードに依存しない方が事故が少ない。
+- 図のラベルやレポート本文と違い、**実行コードの読み手は開発者だけ**なので、
+  日本語である利得が小さい。
+
+例外は、図のラベル・レポートに埋める文字列など**成果物として人が読む文字列**。
+これは日本語でよい(むしろ日本語が正しい)。
+
+> この規約は「機械で強制しない」。以前は日本語 Windows の PowerShell 5.1 が
+> BOM なし非ASCII を読めずクラッシュするのを pre-commit で弾いていたが、
+> **実行環境を macOS に一本化したので撤去した**(2026-08-15)。
+> 規律としては残すが、守らせるのはレビューであってゲートではない。
 
 ## 複数リポジトリにまたがる作業
 

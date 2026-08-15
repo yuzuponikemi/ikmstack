@@ -22,7 +22,7 @@ Any field can be omitted; empty fields drop out (no dangling separators).
 
 Design constraints
 ------------------
-* English only (AGENTS.md script rule: measurement/instrument PCs run CP932
+* English only (AGENTS.md script rule: executable code is written in English
   consoles; Japanese in executable code corrupts / raises ParseException).
 * matplotlib is imported lazily inside stamp()/savefig_stamped() so this module
   can be imported (and --selftest run) on a box without matplotlib.
@@ -58,7 +58,7 @@ from datetime import date
 from pathlib import Path
 
 # Force UTF-8 so any stray non-ASCII (e.g. a data_era a caller passes) does not
-# crash on a cp1252/cp932 console. Best effort; harmless where unsupported.
+# crash on a non-UTF-8 console. Best effort; harmless where unsupported.
 for _stream in (sys.stdout, sys.stderr):
     try:
         _stream.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]

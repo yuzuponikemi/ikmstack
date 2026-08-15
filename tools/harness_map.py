@@ -10,7 +10,7 @@
   - .claude/skills/*/SKILL.md              frontmatter: name / description
   - docs/conventions/policy-registry.json  規約ルールと実行時強制の有無
   - .githooks/pre-commit                   コミット関門の並び(out=$(python …) を抽出)
-  - tools/*.py / tools/<pkg>/              道具と1行説明(docstring / 先頭コメント)
+  - tools/*.py / tools/*.sh / tools/<pkg>/ 道具と1行説明(docstring / 先頭コメント)
 
 使い方:
   python tools/harness_map.py          # 再生成(マーカ間のみ書き換え)
@@ -90,7 +90,7 @@ def sec_summary() -> list[str]:
     hook = (ROOT / ".githooks" / "pre-commit").read_text(encoding="utf-8")
     n_gates = len(re.findall(r"out=\$\((?:\"\$PY\"|python3?) ", hook))
     n_tools = len(
-        [p for p in (ROOT / "tools").iterdir() if p.suffix in (".py", ".ps1")]
+        [p for p in (ROOT / "tools").iterdir() if p.suffix in (".py", ".sh")]
     )
     n_agents = len(list((ROOT / ".claude" / "agents").glob("*.md")))
     return [
@@ -186,7 +186,7 @@ def _doc_line(p: Path) -> str:
 def sec_tools() -> list[str]:
     rows = []
     for p in sorted((ROOT / "tools").iterdir()):
-        if p.is_file() and p.suffix in (".py", ".ps1"):
+        if p.is_file() and p.suffix in (".py", ".sh"):
             rows.append(f"| `tools/{p.name}` | {esc(first_sentence(_doc_line(p)))} |")
         elif p.is_dir() and (p / "README.md").exists():
             head = (p / "README.md").read_text(encoding="utf-8").splitlines()[0]

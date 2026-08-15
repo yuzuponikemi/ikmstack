@@ -46,18 +46,6 @@ if [ "$status" -ne 0 ]; then
   exit 1
 fi
 
-# 実機/計測系 PowerShell のエンコーディング関門。experiments/<id>/scripts/*.ps1 が
-# 非ASCII かつ BOM 無しだと、日本語 Windows(CP932/PS5.1)で ParseException になる。
-out=$("$PY" tools/check_script_encoding.py 2>&1)
-status=$?
-if [ "$status" -ne 0 ]; then
-  echo "$out"
-  echo
-  echo "✗ 実機/計測系の .ps1 が非ASCIIかつ BOM なしです(CP932/PS5.1 で ParseException)。"
-  echo "  → ASCII 化(推奨)、または UTF-8 BOM 付きで保存してください(AGENTS.md スクリプト規約)。"
-  exit 1
-fi
-
 # 実験ごと opt-in の dr-audit 軽量ゲート。safe-by-construction: staged な実験が
 # .dr-gate マーカを持つときだけ走る(validate + numeric_compare + prose_check)。
 out=$("$PY" tools/dr/dr_gate_precommit.py 2>&1)
@@ -86,6 +74,7 @@ fi
 # ここから下はハーネス自身(① ikmstack)の検査。記録層(② ノート)には規約の正本が
 # 無いので、ソースが cwd にあるときだけ走らせる。
 if [ -f docs/conventions/policy-registry.json ]; then
+  # 規約の正本と写しのドリフト検査(1ルール=1正本+ピン留め)。
   out=$("$PY" tools/policy_gate.py 2>&1)
   status=$?
   if [ "$status" -ne 0 ]; then
@@ -99,6 +88,7 @@ if [ -f docs/conventions/policy-registry.json ]; then
 fi
 
 if [ -f docs/harness-map.md ]; then
+  # ハーネス地図の棚卸し(生成部)がソースとずれていないかの鮮度検査。
   out=$("$PY" tools/harness_map.py --check 2>&1)
   status=$?
   if [ "$status" -ne 0 ]; then

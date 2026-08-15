@@ -262,20 +262,6 @@
           "file": ".claude/skills/report-checksum/SKILL.md"
         }
       ]
-    },
-    {
-      "id": "field-script-ascii-bom",
-      "title": "実機/計測 PowerShell(.ps1)は英語優先・非ASCIIなら UTF-8 BOM 必須(CP932/PS5.1 対策)",
-      "canonical": {
-        "file": "AGENTS.md",
-        "anchor": "スクリプト規約(.ps1 / .py ほか実行コード)"
-      },
-      "key_lines": [
-        "tools/check_script_encoding.py"
-      ],
-      "copies": [],
-      "allow": [],
-      "enforced_by": "tools/check_script_encoding.py (pre-commit; scope experiments/<id>/scripts/**/*.ps1)"
     }
   ]
 }

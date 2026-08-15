@@ -13,7 +13,7 @@
 experiments/**/data/
 experiments/**/logs_dev_pc/**/*.csv
 
-# ── 再生成される図・自動レポート（regenerate.ps1 でローカル再現。git 不可）──
+# ── 再生成される図・自動レポート（regenerate.sh でローカル再現。git 不可）──
 experiments/**/_generated/
 experiments/**/figures/
 experiments/**/reports/plots_*/

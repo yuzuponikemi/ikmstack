@@ -7,7 +7,7 @@
 ## 1. 原則 (図は git にコミットしない)
 
 三大原則#1 に基づき、図（グラフやプロットなど）は Git 管理下に置きません。Git に保存するのは「テキストと生成スクリプト」のみです。
-図付きでレポートをプレビューしたいときは、各実験の **`regenerate.ps1`** を実行して決定論的に図を再生成します。
+図付きでレポートをプレビューしたいときは、各実験の **`regenerate.sh`** を実行して決定論的に図を再生成します。
 
 ---
 
@@ -17,11 +17,11 @@
    - 再生成したい実験ディレクトリ（例: `experiments/E001_my-topic/`）を確認します。
 2. **Drive データの用意 (R1規約)**:
    - 入力データの正本は Google Drive 上に存在する必要があります。
-   - `regenerate.ps1` が Drive フォルダを直読みするため、共有ドライブが見える状態にしておきます。
-   - **PC のドライブレターが異なる場合**: `-DriveRoot 'X:\Shared drives\...\my-lab-repo'` のように引数で DriveRoot を渡します。
+   - `regenerate.sh` が Drive フォルダを直読みするため、共有ドライブが見える状態にしておきます。
+   - **Drive のマウント先が既定と違う場合**: `LAB_DRIVE='/path/to/共有ドライブ/my-lab-repo' sh …/regenerate.sh` のように環境変数で上書きします。
 3. **スクリプトの実行**:
    ```powershell
-   pwsh experiments/E###_<topic>/regenerate.ps1
+   sh experiments/E###_<topic>/regenerate.sh
    ```
 4. **レポートのプレビュー**:
    - `REPORT.md` や `reports/*.md` をプレビューします。
@@ -38,6 +38,6 @@
 
 ---
 
-## 4. `regenerate.ps1` がない実験の立ち上げ
+## 4. `regenerate.sh` がない実験の立ち上げ
 
-新規の実験や `regenerate.ps1` を持たない古い実験では、`experiments/_template/regenerate.ps1` を雛形（テンプレート）としてコピーし、入力データと出力パスに合わせてカスタマイズします。
+新規の実験や `regenerate.sh` を持たない古い実験では、`experiments/_template/regenerate.sh` を雛形（テンプレート）としてコピーし、入力データと出力パスに合わせてカスタマイズします。

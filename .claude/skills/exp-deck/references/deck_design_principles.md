@@ -67,21 +67,24 @@ PowerPoint形式（`.pptx`）は、**「①GitHub無しでの閲覧」「②全�
    uv run --with python-pptx .claude/skills/exp-deck/deckgen.py experiments/<ID>/deck.py
    ```
    出力先は `experiments/<ID>/outputs/<OUT_NAME基底>_<YYYYMMDD-HHMM>.pptx`。再生成しても過去の成果物を上書きしません。
-4. **目視確認とPDF書き出し**: PowerPoint COM を使用してスライドをPNGにエクスポートし、文字溢れやレイアウト崩れを確認します。
+4. **目視確認とPDF書き出し**: LibreOffice のヘッドレス変換で PDF と PNG を書き出し、文字溢れやレイアウト崩れを確認します。
 5. **Drive配布**: `.pptx` と `.pdf` をGoogle Drive上の実験フォルダにコピーし、関係者がGoogleスライド等で編集可能な状態にします。
 
-### 目視確認用 PowerShell スクリプト
-```powershell
-$src = "experiments\<ID>\outputs"; $pptx = "$src\<OUT_NAME>"
-$pp = New-Object -ComObject PowerPoint.Application
-try {
-  $deck = $pp.Presentations.Open((Resolve-Path $pptx), $true, $false, $false)
-  $deck.SaveAs((Join-Path (Resolve-Path $src) "<basename>.pdf"), 32)   # 32 = ppSaveAsPDF
-  $dir = Join-Path (Resolve-Path $src) "preview"; New-Item -ItemType Directory -Force $dir | Out-Null
-  $i=1; foreach ($s in $deck.Slides) { $s.Export("$dir\slide$('{0:D2}' -f $i).png","PNG",1280,720); $i++ }
-  $deck.Close()
-} finally { $pp.Quit() }
+### 目視確認用スクリプト(macOS)
+
+前提: `brew install --cask libreoffice` と `brew install poppler`(`pdftoppm` 用)。
+
+```sh
+src="experiments/<ID>/outputs"; pptx="$src/<OUT_NAME>"
+
+# 1) pptx -> pdf（LibreOffice のヘッドレス変換）
+soffice --headless --convert-to pdf --outdir "$src" "$pptx"
+
+# 2) pdf -> 1スライド1枚の PNG（目視用。preview/ は git 管理外）
+mkdir -p "$src/preview"
+pdftoppm -png -r 96 "$src/<basename>.pdf" "$src/preview/slide"
 ```
+
 `preview/` 内のPNGで目視確認後、プレビューディレクトリはコミットせずに削除します。
 
 ---

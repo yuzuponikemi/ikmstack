@@ -21,7 +21,7 @@
 
 | 項目 | 内容 |
 |------|------|
-| 言語 | Markdown, Python, PowerShell, CSS, HTML, JSON |
+| 言語 | Markdown, Python, sh, CSS, HTML, JSON |
 | フレームワーク | なし（`package.json` / `pyproject.toml` を持たない shell + Python 構成） |
 | 規模 | 58 ファイル / 107 ノード / 147 エッジ / 7 層 |
 | 依存の密度 | `imports` エッジは 6 本のみ = **疎結合な「規約・仕組み集」** |
@@ -69,7 +69,7 @@ AI 生成レポートの数値・主張を出典と突き合わせて**独立検
 
 - **symlink install モデル**：skill 本体を各 repo にコピーせず `~/.claude` 配下へシンボリックリンクを張る。ikmstack を1回更新すれば全マシンの skill が同時に最新化される。ハーネスをプロダクトに vendored（同居）させると「どっち編集」「merge 衝突」が構造的に起きるため、install モデルで **ハーネスは1ソース**に保つ。
 - **規約を人手でなく機械で強制する**：`.githooks/pre-commit` が図リンク逸脱（`check_report_figures.py`）と INDEX ドリフトを commit 前に止め、`strip_nb_outputs.py` がノートブック出力の混入を防ぐ。
-- **図は git に入れない（三大原則 #1）**：`regenerate.ps1` が Drive 正本の生データから再生成する。`/regen-outputs` が図付きプレビューを駆動。
+- **図は git に入れない（三大原則 #1）**：`regenerate.sh` が Drive 正本の生データから再生成する。`/regen-outputs` が図付きプレビューを駆動。
 - **安全な式評価（AST ホワイトリスト）**：`numeric_compare.py` は `eval()` を使わず、`ast` で許可された演算ノードだけを通して数式を安全に再計算する。
 - **デザイントークンの単一ソース**：`tokens.py` が色・フォント・余白を1箇所で定義し `brand.css` を派生生成。pptx と HTML プレビューのブランドを一致させる。
 
@@ -87,7 +87,7 @@ AI 生成レポートの数値・主張を出典と突き合わせて**独立検
 | 6 | dr-audit ① 台帳検証の基盤 | `claims_schema.md`, `validate_ledger.py`, `numeric_compare.py`, `dr_gate.py` |
 | 7 | dr-audit ② 照合と出典再取得 | `sampling_select.py`, `ledger_to_prose_check.py`, `dr-verifier.md`, `dr-audit/SKILL.md` |
 | 8 | exp-deck スライド生成器 | `exp-deck/SKILL.md`, `deckgen.py`, `tokens.py`, `brand.css` |
-| 9 | テンプレート層と図の再生成 | `PLAN/REPORT/MANIFEST.md`, `regenerate.ps1`, `INDEX.md` |
+| 9 | テンプレート層と図の再生成 | `PLAN/REPORT/MANIFEST.md`, `regenerate.sh`, `INDEX.md` |
 | 10 | 記録層 scaffold と KB 昇格 | `notebook-template/*`, `kb-promote/SKILL.md` |
 
 **流れ**：README → AGENTS（規約） → setup（install） → skills（動詞） → tools（実体） → dr-audit（検証） → exp-deck（出力） → テンプレート → 記録層／KB 昇格 で実験→報告→知識化のループが一周します。
@@ -143,7 +143,7 @@ AI 生成レポートの数値・主張を出典と突き合わせて**独立検
 <summary><b>⑤ テンプレート層</b></summary>
 
 - `experiments/_template/{PLAN,REPORT,MANIFEST}.md` — 実験1件の骨格（事前登録・house-style 雛形・関与 repo の SHA）
-- `experiments/_template/regenerate.ps1` — 図・自動レポートの一括再生成スクリプト
+- `experiments/_template/regenerate.sh` — 図・自動レポートの一括再生成スクリプト
 - `experiments/_template/reports/INDEX.md`, `experiments/INDEX.md` — レポート/実験索引ひな形
 - `notebook-template/{README,AGENTS,CLAUDE}.md`, `gitignore`, `lab-config.json.template` — 記録層 scaffold
 </details>

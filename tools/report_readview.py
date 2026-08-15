@@ -189,7 +189,7 @@ class ReadViewRenderer(mistune.HTMLRenderer):
             body = f'<img alt="{alt_txt}" src="data:{_MIME[ext]};base64,{data}"/>'
         else:
             body = ('<div class="missing">図が見つかりません — '
-                    '<code>regenerate.ps1</code> で再生成後に再実行すると埋め込まれます</div>')
+                    '<code>regenerate.sh</code> で再生成後に再実行すると埋め込まれます</div>')
         cap = f'<span class="t">{alt_txt}</span>' if alt_txt else ""
         return (f'<div class="fig"><div class="fig-cap"><span class="badge">図</span>{cap}</div>'
                 f'{body}<div class="src">src: {_esc(url)}</div></div>')

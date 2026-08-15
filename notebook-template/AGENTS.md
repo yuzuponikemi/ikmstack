@@ -22,7 +22,7 @@ AI コーディングエージェント向けの補足規約。**この repo は
 ## この repo で守ること（記録層としての最小規約）
 
 - **git はテキスト＋生成スクリプトだけ**。図・生データ・大容量は git に入れず、
-  `regenerate.ps1` でローカル再現／正本は Google Drive（`MANIFEST.md` からリンク）。
+  `regenerate.sh` でローカル再現／正本は Google Drive（`MANIFEST.md` からリンク）。
 - **実験は1ディレクトリに閉じる**（`experiments/_template/` をコピーして始める＝`/exp-new`）。
 - **確定事実と、意見・仮説・暫定値を混ぜない**（見出し・語頭ラベルで切り分ける）。
 - **ハーネス（skill/tool/規約）をここで編集しない**。改善は ikmstack へ。

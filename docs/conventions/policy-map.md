@@ -24,6 +24,5 @@
 | `retraction-record` | 撤回は機械可読に記録する(旧版 superseded_by 必須 / 新版 corrects・retraction_type・discovered_by)(実行時強制: tools/report_meta.py (link resolvability + vocabulary; pre-commit)) | docs/conventions/reporting.md「改訂・撤回の記録」 | — | `@b39a00ca` |
 | `new-term-referent-first` | 新語(造語)は初出定義+役割1つで導入する(語より先に指示対象; 検査は readability-review、定着語は terms.yaml へ昇格) | docs/conventions/reporting.md「新語(造語)の導入規律」 | .claude/skills/readability-review/SKILL.md | `@8b08bf1b` |
 | `report-input-pinning` | データ由来のレポートは入力(データ/仕様)をピン留めする(再現性・検算の前提) | docs/conventions/reporting.md「データ由来の数値は入力をピン留めする」 | .claude/skills/report-checksum/SKILL.md | `@b32fc5e6` |
-| `field-script-ascii-bom` | 実機/計測 PowerShell(.ps1)は英語優先・非ASCIIなら UTF-8 BOM 必須(CP932/PS5.1 対策)(実行時強制: tools/check_script_encoding.py (pre-commit; scope experiments/<id>/scripts/**/*.ps1)) | AGENTS.md「スクリプト規約(.ps1 / .py ほか実行コード)」 | — | `@1b655c1b` |
 
 <!-- gen:policy-map:end -->

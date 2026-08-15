@@ -47,7 +47,7 @@ NOT flagged: bare integers (counts like "8 tubes" are usually contextual), dates
 Anchors (any one in the same paragraph makes the number traceable)
 ------------------------------------------------------------------
 markdown link/image `](`, primary-record id `<PREFIX>\\d+-R\\d+`, a figure output
-dir (from .lab-config.json allowed_figure_roots) or image file, a script/code path (.py .ps1
+dir (from .lab-config.json allowed_figure_roots) or image file, a script/code path (.py .sh
 or a backticked path), a source label (出典/根拠/source/ref/cf/via/URL), a
 data-era mention (data_era/data:/era/期間), a footnote/citation marker ([^ or [@).
 

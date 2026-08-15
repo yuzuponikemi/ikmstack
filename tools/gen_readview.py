@@ -4,8 +4,7 @@
 各実験の regenerate スクリプトの末尾から 1 行で呼ぶ。ブロックを複製せず、
 変更点をここ 1 か所に集約する:
 
-    PowerShell:  python "$PSScriptRoot/../../tools/gen_readview.py" "$PSScriptRoot"
-    sh:          python3 "$(dirname "$0")/../../tools/gen_readview.py" "$(dirname "$0")"
+    python3 "$(dirname "$0")/../../tools/gen_readview.py" "$(dirname "$0")"
 
 **図の再生成後に呼ぶこと**(生成済み PNG を base64 で埋め込むため)。
 MD が正本・HTML は派生ビュー(git には入れない)。

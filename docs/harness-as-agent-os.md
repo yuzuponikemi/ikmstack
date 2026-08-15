@@ -26,7 +26,7 @@ consume する。境界の理由は AGENTS.md「3層運用」を見る。
 
 1. **二重帳簿** — machine-truth の正本 + 人間可読の派生物 + 両者を同期させる決定論ゲート。
    例: レポートのフロントマター → `report_meta.py` → INDEX.md /
-   claims.jsonl → 散文(dr-audit)/ 生データ+`regenerate.ps1` → 図 /
+   claims.jsonl → 散文(dr-audit)/ 生データ+`regenerate.sh` → 図 /
    policy-registry.json → policy-map.md / ソース群 → `harness_map.py` → harness-map.md。
    **生成物は手で編集しない。回せば直る**ものだけが生成部に入れる。
 2. **LLM を信頼しない設計(distrust-by-construction)** — LLM の出力・作用は、

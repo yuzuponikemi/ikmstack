@@ -34,8 +34,8 @@ def main() -> int:
     drive_path = ""
     if drive_root:
         # Resolve the base folder of google_drive_root (strip 'experiments/' if present)
-        # e.g., "G:\\Shared drives\\YourCompany\\ExperimentData\\<notebook>\\experiments\\"
-        # -> "G:\\Shared drives\\YourCompany\\ExperimentData\\<notebook>\\"
+        # e.g., "~/Library/CloudStorage/GoogleDrive-<account>/共有ドライブ/<drive>/<notebook>/experiments/"
+        # -> "~/Library/CloudStorage/GoogleDrive-<account>/共有ドライブ/<drive>/<notebook>/"
         p = Path(drive_root)
         if p.name == "experiments":
             drive_path = str(p.parent)

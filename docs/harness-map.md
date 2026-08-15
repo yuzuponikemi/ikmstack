@@ -19,7 +19,7 @@ distrust-by-construction / エントロピー最小)。改訂手順は harness-e
 
 <!-- gen:harness-map:summary:start -->
 
-スキル **14** / エージェント **1** / 規約ルール **15**(うち実行時強制 8) / pre-commit 関門 **7** / tools **19**
+スキル **14** / エージェント **1** / 規約ルール **14**(うち実行時強制 7) / pre-commit 関門 **6** / tools **18**
 
 <!-- gen:harness-map:summary:end -->
 
@@ -101,11 +101,10 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 |---|---|---|
 | 1 | `python tools/report_meta.py --check` | report フロントマター ↔ INDEX.md のドリフトをコミット前に検出する。 |
 | 2 | `python tools/check_report_figures.py --check` | 図リンクが再生成出力先(_generated/ 等の gitignored)を指すか検査(三大原則#1 R3)。 |
-| 3 | `python tools/check_script_encoding.py` | 実機/計測系 PowerShell のエンコーディング関門。 |
-| 4 | `python tools/dr/dr_gate_precommit.py` | 実験ごと opt-in の dr-audit 軽量ゲート。 |
-| 5 | `python tools/check_untraceable_numbers.py` | 実験ごと opt-in の「追跡できない数値」リンタ。 |
-| 6 | `python tools/policy_gate.py` |  |
-| 7 | `python tools/harness_map.py --check` |  |
+| 3 | `python tools/dr/dr_gate_precommit.py` | 実験ごと opt-in の dr-audit 軽量ゲート。 |
+| 4 | `python tools/check_untraceable_numbers.py` | 実験ごと opt-in の「追跡できない数値」リンタ。 |
+| 5 | `python tools/policy_gate.py` | 規約の正本と写しのドリフト検査(1ルール=1正本+ピン留め)。 |
+| 6 | `python tools/harness_map.py --check` | ハーネス地図の棚卸し(生成部)がソースとずれていないかの鮮度検査。 |
 
 <!-- gen:harness-map:gates:end -->
 
@@ -132,7 +131,6 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | `retraction-record` | 撤回は機械可読に記録する(旧版 superseded_by 必須 / 新版 corrects・retraction_type・discovered_by) | docs/conventions/reporting.md | `tools/report_meta.py (link resolvability + vocabulary; pre-commit)` |
 | `new-term-referent-first` | 新語(造語)は初出定義+役割1つで導入する(語より先に指示対象; 検査は readability-review、定着語は terms.yaml へ昇格) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |
 | `report-input-pinning` | データ由来のレポートは入力(データ/仕様)をピン留めする(再現性・検算の前提) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |
-| `field-script-ascii-bom` | 実機/計測 PowerShell(.ps1)は英語優先・非ASCIIなら UTF-8 BOM 必須(CP932/PS5.1 対策) | AGENTS.md | `tools/check_script_encoding.py (pre-commit; scope experiments/<id>/scripts/**/*.ps1)` |
 
 <!-- gen:harness-map:rules:end -->
 
@@ -166,7 +164,6 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | 道具 | 1行説明(docstring/先頭コメント) |
 |---|---|
 | `tools/check_report_figures.py` | check_report_figures.py — レポートの図リンクが「再生成出力先」を指すか検証(依存なし) |
-| `tools/check_script_encoding.py` | check_script_encoding.py - guard field/measurement PowerShell against the |
 | `tools/check_untraceable_numbers.py` | check_untraceable_numbers.py -- flag empirical numbers that carry no provenance anchor. |
 | `tools/dr/`(6 scripts) | tools/dr — Deep Research 検証ツール (Phase 1 MVP) |
 | `tools/gen_readview.py` | gen_readview.py — 読みビュー(HTML)生成の共通ステップ。 |

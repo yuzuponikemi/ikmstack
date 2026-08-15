@@ -5,7 +5,8 @@
   "jira_enabled": false,
   "jira_base_url": "https://your-company.atlassian.net/browse/",
   "jira_project_key": "PROJ",
-  "google_drive_root": "G:\\Shared drives\\YourCompany\\ExperimentData\\<notebook>\\experiments\\",
+  "_google_drive_root_note": "macOS の Drive for desktop の既定マウント先。旧構成なら /Volumes/GoogleDrive/... のこともある",
+  "google_drive_root": "~/Library/CloudStorage/GoogleDrive-<account>/共有ドライブ/<drive>/<notebook>/experiments/",
   "allowed_figure_roots": [
     "_generated",
     "figures"
