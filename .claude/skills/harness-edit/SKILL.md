@@ -33,11 +33,11 @@ description: Safely create or revise the harness's own source — skills (.claud
      合わせて更新する(更新しないと C1 で止まる)。
 3. **ピンを伝播する**(key_lines を変えた場合のみ):
    ```
-   python tools/policy_gate.py --digest <rule-id>   # 新 digest を取得
+   python3 tools/policy_gate.py --digest <rule-id>   # 新 digest を取得
    ```
    ゲートが列挙する各写しについて、**インライン要約が正本の変更後も正しいかを見てから**
    ピンの digest を書き換える(機械的に digest だけ直さない — レビューがピン更新の対価)。
-4. **マップを再生成する**: `python tools/policy_gate.py --write-map`
+4. **マップを再生成する**: `python3 tools/policy_gate.py --write-map`
 5. **新スキルを作る場合**は雛形に従う:
    - `.claude/skills/<name>/SKILL.md`。frontmatter は `name:`(ケバブ)と `description:`
      (英語、トリガー語句の例を含める。既存スキル参照)。本文は日本語可・~150行目安。
@@ -46,8 +46,8 @@ description: Safely create or revise the harness's own source — skills (.claud
      ②1〜2行の最小インライン要約 ③`正本: <file>「<anchor>」` + ピン。
      長い理由説明・表・例は正本側へ。
    - 再説明した規約があれば、レジストリの該当ルール `copies` に登録する。
-6. **検証**: `python tools/policy_gate.py --all` が PASS すること。
-   `python tools/policy_gate.py --selftest` はゲート自体を触ったときのみ。
+6. **検証**: `python3 tools/policy_gate.py --all` が PASS すること。
+   `python3 tools/policy_gate.py --selftest` はゲート自体を触ったときのみ。
 7. **波及先の目視**(ゲートが見ないもの): 変更した規約を**言い換えで**再説明している
    文が無いか、`policy-map.md` の写し一覧のファイルだけ開いて確認する
    (ゲートは key_lines の複製しか検出しない — 意味的ドリフトは人間/LLM の担当)。

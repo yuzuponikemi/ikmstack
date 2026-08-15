@@ -23,12 +23,15 @@
    - 今回の作業で変更や測定を行った実験ディレクトリを特定します。
 2. **一次記録の確認**:
    - 新しい検証結果があれば、`reports/E###-R###_...` としてレポート化されているか確認します（採番とフロントマターは `exp-report` スキルに従う）。
+   <!-- policy:report-naming-numbering@eb565f44 -->
    - 画像などのバイナリファイルが Git に誤って追加されていないか（三大原則#1）確認します。
 3. **大文字系リビング文書の更新**:
    - 上記の規約に基づき、`REPORT.md` / `PLAN.md` / `DECISIONS.md` / `MANIFEST.md` を一巡して更新または確認します。
 4. **インデックスの再生成**:
-   - `python tools/report_meta.py` を実行して `INDEX.md` を更新し、`python tools/report_meta.py --check` でエラーがないことを確認します。
+   - `python3 tools/report_meta.py` を実行して `INDEX.md` を更新し、`python3 tools/report_meta.py --check` でエラーがないことを確認します。
+   <!-- policy:report-meta-regen@a43c35f7 -->
 5. **日次ログの作成**:
    - `logs/<YYYY>/<YYYY-MM-DD>_<topic>.md` に、当日の作業概要を `lab-log` 規約（目的/やったこと/わかったこと/次にやること）に従って記録します。
+   <!-- policy:lab-log-format@a0eca25e -->
 6. **最終報告**:
    - 更新したリビング文書、または「変更なし」を確認した旨を整理し、表形式でユーザーに提示します。

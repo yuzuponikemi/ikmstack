@@ -13,7 +13,7 @@
   W2 未使用主張 : 台帳の decision_driving が散文から一度も参照されない
 
 使い方:
-    python tools/dr/ledger_to_prose_check.py <prose.md> <claims.jsonl>
+    python3 tools/dr/ledger_to_prose_check.py <prose.md> <claims.jsonl>
 
 終了コード: 0 = ERROR なし / 1 = ERROR あり / 2 = ファイル無し等
 dr_gate の R3(台帳内引用整合)に対し、本スクリプトは散文側を見る。

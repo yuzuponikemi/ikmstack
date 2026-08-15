@@ -36,12 +36,12 @@ a no-op (rc 0). Default mode additionally skips unless a STAGED file is on the
 surface (or is the registry/map), so ordinary experiment commits pay nothing.
 
 Usage:
-    python tools/policy_gate.py               # staged-scoped check (pre-commit)
-    python tools/policy_gate.py --all         # full check regardless of staging
-    python tools/policy_gate.py --write-map   # regenerate policy-map.md
-    python tools/policy_gate.py --digest <id> # print a rule's current digest8
-    python tools/policy_gate.py --selftest    # verify C1..C5 detect synthetic drift
-    python tools/policy_gate.py --verbose     # per-rule detail even on PASS
+    python3 tools/policy_gate.py               # staged-scoped check (pre-commit)
+    python3 tools/policy_gate.py --all         # full check regardless of staging
+    python3 tools/policy_gate.py --write-map   # regenerate policy-map.md
+    python3 tools/policy_gate.py --digest <id> # print a rule's current digest8
+    python3 tools/policy_gate.py --selftest    # verify C1..C5 detect synthetic drift
+    python3 tools/policy_gate.py --verbose     # per-rule detail even on PASS
 
 Exit codes: 0 = PASS (or nothing to gate) / 1 = FAIL / 2 = usage/config error.
 """
@@ -76,7 +76,7 @@ MAP_PREAMBLE = """# ポリシーマップ(1ルール=1正本)
 ハーネスの規約がどこを正本とし、どのファイルが写し(ピン付き)かの対応表。
 
 > **この表は手で編集しない。** 正本は [policy-registry.json](policy-registry.json)、
-> 表は `python tools/policy_gate.py --write-map` が生成する(マーカ間のみ書き換わる)。
+> 表は `python3 tools/policy_gate.py --write-map` が生成する(マーカ間のみ書き換わる)。
 > 同期は pre-commit の policy_gate が検証する。
 
 """
@@ -275,7 +275,7 @@ def write_map(root: Path, reg: dict) -> Path:
         new = pre + section + post
     else:
         new = MAP_PREAMBLE + section + "\n"
-    # Path.write_text() gained `newline` in 3.10; setup-runbook §0 promises 3.9+.
+    # Path.write_text() gained `newline` in 3.10; 3.9 でも動くよう open() を使う。
     with map_path.open("w", encoding="utf-8", newline="\n") as fh:
         fh.write(new)
     return map_path
@@ -327,7 +327,7 @@ def _selftest() -> int:
                 "id": "test-rule",
                 "title": "test",
                 "canonical": {"file": "canon.md"},
-                "key_lines": ["python tools/foo.py --bar"],
+                "key_lines": ["python3 tools/foo.py --bar"],
                 "copies": [{"file": "copy.md"}],
             }],
         }
@@ -337,11 +337,11 @@ def _selftest() -> int:
                   rogue: str = "unrelated text") -> None:
             (root / "canon.md").write_text(
                 canon if canon is not None
-                else "Rule: run\n  python tools/foo.py\n  --bar\nend.",  # wrapped on purpose
+                else "Rule: run\n  python3 tools/foo.py\n  --bar\nend.",  # wrapped on purpose
                 encoding="utf-8")
             (root / "copy.md").write_text(
                 copy if copy is not None
-                else f"run `python tools/foo.py --bar`\n<!-- policy:test-rule@{digest} -->\n",
+                else f"run `python3 tools/foo.py --bar`\n<!-- policy:test-rule@{digest} -->\n",
                 encoding="utf-8")
             (root / "rogue.md").write_text(rogue, encoding="utf-8")
             write_map(root, reg)
@@ -352,13 +352,13 @@ def _selftest() -> int:
         reset(canon="the command was removed entirely")
         expect("C1 canonical lost key line", run_checks(root, reg), "C1")
 
-        reset(copy="run `python tools/foo.py --bar` (pin forgotten)")
+        reset(copy="run `python3 tools/foo.py --bar` (pin forgotten)")
         expect("C2 copy without pin", run_checks(root, reg), "C2")
 
-        reset(rogue="someone pasted python tools/foo.py --bar here")
+        reset(rogue="someone pasted python3 tools/foo.py --bar here")
         expect("C3 unregistered restatement", run_checks(root, reg), "C3")
 
-        reset(copy=f"run `python tools/foo.py --bar`\n<!-- policy:test-rule@00000000 -->\n")
+        reset(copy=f"run `python3 tools/foo.py --bar`\n<!-- policy:test-rule@00000000 -->\n")
         expect("C4 stale pin", run_checks(root, reg), "C4")
 
         reset()
@@ -371,7 +371,7 @@ def _selftest() -> int:
         # allow-list: rogue text is exempted
         reg_allow = json.loads(json.dumps(reg))
         reg_allow["rules"][0]["allow"] = ["rogue.md"]
-        reset(rogue="allowed mention: python tools/foo.py --bar")
+        reset(rogue="allowed mention: python3 tools/foo.py --bar")
         write_map(root, reg_allow)
         expect("allow-list exemption", run_checks(root, reg_allow))
 
@@ -439,11 +439,11 @@ def main() -> int:
     print("fix guide:")
     print("  C1: restore the key line in the canonical, or update key_lines in the registry")
     print("  C2: add the pin  <!-- policy:<id>@<digest> -->  to the copy"
-          " (digest: python tools/policy_gate.py --digest <id>)")
+          " (digest: python3 tools/policy_gate.py --digest <id>)")
     print("  C3: register the file as a copy (with pin), move the text to the canonical,"
           " or add it to the rule's 'allow' list")
     print("  C4: review the copy against the canonical, then update the pin digest")
-    print("  C5: python tools/policy_gate.py --write-map")
+    print("  C5: python3 tools/policy_gate.py --write-map")
     return 1
 
 

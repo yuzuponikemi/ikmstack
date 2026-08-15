@@ -34,7 +34,7 @@ tools/                                # リポジトリ共通ユーティリテ�
   report_meta.py                      # report フロントマター → INDEX.md 生成・検証
   check_report_figures.py             # 図リンクが gitignored 出力先を指すか検査
 ```
-<!-- policy:report-naming-numbering@eb565f44 -->
+      <!-- policy:report-naming-numbering@eb565f44 -->
 
 ---
 
@@ -43,8 +43,8 @@ tools/                                # リポジトリ共通ユーティリテ�
 Jupyter Notebook も **git にテキストとしてコミット**します。ただし、差分の肥大化や実行結果の混入を防ぐため、**セル出力 (計算結果・図・実行カウント) は必ずクリアして保存**します。
 
 ### 出力のクリア手順
-- **手動クリア**: `python tools/strip_nb_outputs.py <nb.ipynb ...>`
-- **確認のみ**: `python tools/strip_nb_outputs.py --check <nb.ipynb ...>`
+- **手動クリア**: `python3 tools/strip_nb_outputs.py <nb.ipynb ...>`
+- **確認のみ**: `python3 tools/strip_nb_outputs.py --check <nb.ipynb ...>`
 - **自動クリア**: `.gitattributes` 内の `*.ipynb filter=nbstrip` 設定により、`git add` 時に自動でセル出力がクリアされます。
 
 ---

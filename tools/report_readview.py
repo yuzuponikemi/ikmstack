@@ -14,7 +14,7 @@ MD を単一の正本に保ったまま、読みやすい派生 HTML を生成�
   - `## 結論`(および要点/概要)以外の H2 セクションを <details> に畳んで段階開示
 
 使い方:
-  python tools/report_readview.py <report.md> [-o out.html] [--stdout] [--no-fold]
+  python3 tools/report_readview.py <report.md> [-o out.html] [--stdout] [--no-fold]
   既定の出力先: その実験の _generated/<stem>.readview.html
 
 依存: mistune(>=3)。図生成で既にローカルは依存パッケージを使うため許容(AGENTS 三大原則は
@@ -37,6 +37,7 @@ import mistune
 
 # report_meta.py のフロントマターパーサを再利用(重複実装を避ける)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from report_meta import load_config  # noqa: E402
 from report_meta import parse_frontmatter  # noqa: E402
 
 from readview.theme import css  # noqa: E402
@@ -78,12 +79,15 @@ def _chipify(escaped: str) -> str:
 
 
 _WIKILINK_RE = re.compile(r"\[\[([^\]|]+?)\]\]")
-_RID_RE = re.compile(r"^FL\d+-R\d+$")            # レポート参照
-_EXP_RE = re.compile(r"^FL\d+(_[\w-]+)?$")       # 実験参照(FL### または FL###_slug)
+# 実験 ID の接頭辞はノート固有(.lab-config.json)。FL 固定にするとウィキリンクが
+# 別プレフィックスのノートで永久に解決しない(例外も出ないので気づけない)。
+_PREFIX = re.escape(str(load_config(Path.cwd()).get("experiment_id_prefix", "E")))
+_RID_RE = re.compile(rf"^{_PREFIX}\d+-R\d+$")     # レポート参照
+_EXP_RE = re.compile(rf"^{_PREFIX}\d+(_[\w-]+)?$")  # 実験参照(E### または E###_slug)
 
 
 def _resolve_ref(token: str, exp_root: Path | None, out_dir: Path):
-    """[[FL###]] / [[FL###-R###]] を、隣の読みビュー or 実験一覧への相対 href に解決。"""
+    """[[E###]] / [[E###-R###]] を、隣の読みビュー or 実験一覧への相対 href に解決。"""
     if exp_root is None:
         return None
     exps = exp_root.parent  # experiments/
@@ -666,7 +670,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
         description="レポート MD の HTML 読みビュー生成。MD ファイル単体、または実験"
         "ディレクトリ(REPORT.md + reports/FL*-R*_*.md を一括)を受ける。")
-    ap.add_argument("md", type=Path, help="対象の FL###-R###_*.md、または実験ディレクトリ")
+    ap.add_argument("md", type=Path, help="対象の <実験ID>-R###_*.md、または実験ディレクトリ")
     ap.add_argument("-o", "--out", type=Path, help="出力 HTML パス(単体時のみ)")
     ap.add_argument("--stdout", action="store_true", help="標準出力へ(単体時のみ)")
     ap.add_argument("--no-fold", action="store_true", help="セクションを畳まない")

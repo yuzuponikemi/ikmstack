@@ -86,7 +86,7 @@ AI コーディングエージェント向けのリポジトリ規約。
   <!-- policy:frontmatter-schema@6e2e1a63 -->
     (書式は exp-report スキル参照)
 - **横断レジストリ** `experiments/INDEX.md` の一覧表は、各 `REPORT.md` のフロントマターから
-  `python tools/report_meta.py` が生成する(手編集しない。マーカ間のみ書き換わる)。
+  `python3 tools/report_meta.py` が生成する(手編集しない。マーカ間のみ書き換わる)。
   状態・要約を変えたいときは REPORT.md のフロントマターを直してスクリプトを回す。
 - **ファイル名規約**: 実験直下の単数リビング文書(`PLAN.md` / `MANIFEST.md` / `REPORT.md` /
   任意の `DECISIONS.md`)は **ID を付けず正規名のまま**にする。一方 `reports/` 配下の
@@ -103,7 +103,7 @@ AI コーディングエージェント向けのリポジトリ規約。
 | [docs/conventions/reporting.md](docs/conventions/reporting.md) | レポート/plan を書くとき(1機能=1権威・命名/R番号・事実/仮説の分離・撤回の記録・検証ゲート・鮮度維持) |
 | [docs/conventions/record-routing.md](docs/conventions/record-routing.md) | 記録がどの層に着地するか迷ったとき(ノート根 / sidecar の振り分け正本) |
 | [docs/conventions/policy-map.md](docs/conventions/policy-map.md) | 規約そのものを直すとき(1ルール=1正本の対応表。改訂手順は harness-edit スキル) |
-| [docs/harness-map.md](docs/harness-map.md) | ハーネスの全体像を思い出したいとき・部品(スキル/ゲート/ツール)を足すとき(棚卸しは `python tools/harness_map.py` が生成・pre-commit が鮮度を検査) |
+| [docs/harness-map.md](docs/harness-map.md) | ハーネスの全体像を思い出したいとき・部品(スキル/ゲート/ツール)を足すとき(棚卸しは `python3 tools/harness_map.py` が生成・pre-commit が鮮度を検査) |
 
 ## レポートの構成(要点。詳細 → [docs/conventions/reporting.md](docs/conventions/reporting.md))
 
@@ -119,9 +119,9 @@ AI コーディングエージェント向けのリポジトリ規約。
    (`git -C ../<repo> rev-parse --short HEAD`)。再現性はこれで担保する
    (サブモジュールは使わない)
 4. データは Drive の対応フォルダに置き、`MANIFEST.md` にパス・サイズ・取得日を記録する
-5. `REPORT.md` にフロントマターを書き、`python tools/report_meta.py` で `experiments/INDEX.md` を生成する
-6. **各セッション/検証の結末は一次記録 `reports/E###-R###_<YYYYMMDD>_<topic>.md`(フロントマター付き)に書き、`python tools/report_meta.py` で `reports/INDEX.md` を再生成する**
-   (整合確認のみなら `python tools/report_meta.py --check`。pre-commit も同じ検査を回す)
+5. `REPORT.md` にフロントマターを書き、`python3 tools/report_meta.py` で `experiments/INDEX.md` を生成する
+6. **各セッション/検証の結末は一次記録 `reports/E###-R###_<YYYYMMDD>_<topic>.md`(フロントマター付き)に書き、`python3 tools/report_meta.py` で `reports/INDEX.md` を再生成する**
+   (整合確認のみなら `python3 tools/report_meta.py --check`。pre-commit も同じ検査を回す)
 7. 区切りで **`REPORT.md`(現状サマリ)を最新の結論に更新**する(覆った結論を残さない。`/exp-checkpoint`)。
    `MANIFEST.md` / `PLAN.md`(長期なら `DECISIONS.md` も)が現実とずれていないか確認する。
    確定した恒久知識は KB へ昇格する(`/kb-promote`。任意)

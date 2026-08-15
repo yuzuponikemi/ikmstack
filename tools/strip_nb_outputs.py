@@ -8,12 +8,12 @@ noisy diffs. This tool clears them so .ipynb files stay diff-friendly.
 Dependency-free (stdlib json only) so it works on any PC without extra installs.
 
 Usage:
-    python tools/strip_nb_outputs.py nb1.ipynb nb2.ipynb   # strip files in place
-    python tools/strip_nb_outputs.py --check nb1.ipynb      # exit 1 if not stripped
-    python tools/strip_nb_outputs.py < in.ipynb > out.ipynb # stdin->stdout (git clean filter)
+    python3 tools/strip_nb_outputs.py nb1.ipynb nb2.ipynb   # strip files in place
+    python3 tools/strip_nb_outputs.py --check nb1.ipynb      # exit 1 if not stripped
+    python3 tools/strip_nb_outputs.py < in.ipynb > out.ipynb # stdin->stdout (git clean filter)
 
 As a git clean filter (.gitattributes: `*.ipynb filter=nbstrip`):
-    git config filter.nbstrip.clean "python tools/strip_nb_outputs.py"
+    git config filter.nbstrip.clean "python3 tools/strip_nb_outputs.py"
     git config filter.nbstrip.smudge cat
 """
 import json

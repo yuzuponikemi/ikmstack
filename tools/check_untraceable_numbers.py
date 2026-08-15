@@ -58,11 +58,11 @@ matches how reports cite a figure/script once, then show its tabular data below.
 
 Usage
 -----
-    python tools/check_untraceable_numbers.py            # staged marked experiments (pre-commit)
-    python tools/check_untraceable_numbers.py --all      # every marked experiment
-    python tools/check_untraceable_numbers.py --experiment experiments/<experiment_id>
-    python tools/check_untraceable_numbers.py --file path/to/REPORT.md   # ad hoc one file
-    python tools/check_untraceable_numbers.py --selftest # built-in fixtures (no repo needed)
+    python3 tools/check_untraceable_numbers.py            # staged marked experiments (pre-commit)
+    python3 tools/check_untraceable_numbers.py --all      # every marked experiment
+    python3 tools/check_untraceable_numbers.py --experiment experiments/<experiment_id>
+    python3 tools/check_untraceable_numbers.py --file path/to/REPORT.md   # ad hoc one file
+    python3 tools/check_untraceable_numbers.py --selftest # built-in fixtures (no repo needed)
 
 Exit codes: 0 = PASS (or nothing to check) / 1 = violations found / 2 = usage/config error.
 """
@@ -116,10 +116,14 @@ SUPPRESS_RE = re.compile(r"<!--\s*numbers-ok(?::[^>]*)?\s*-->")
 # (.lab-config.json), so the anchor alternation is built at import time.
 _CFG = report_meta.load_config(REPO_ROOT)
 _PREFIX = re.escape(str(_CFG.get("experiment_id_prefix", "E")))
-_FIG_ROOTS = "|".join(
+# 空の選択肢を作らないこと。"a||b" のような交替は空文字にマッチし、ANCHOR_RE が
+# 任意の位置で成立してリンタ全体が静かな no-op になる([OK] を名乗って何も見ない)。
+_FIG_ROOT_PARTS = [
     re.escape(r.rstrip("/")) + "/"
-    for r in _CFG.get("allowed_figure_roots", ["_generated", "figures"])
-)
+    for r in (_CFG.get("allowed_figure_roots") or ["_generated", "figures"])
+    if str(r).strip()
+]
+_FIG_ROOTS_ALT = "|".join(_FIG_ROOT_PARTS) if _FIG_ROOT_PARTS else r"(?!)"  # (?!) = 決して一致しない
 
 ANCHOR_RE = re.compile(
     r"\]\("                              # markdown link/image target
@@ -128,7 +132,7 @@ ANCHOR_RE = re.compile(
     # would otherwise swallow the exponent in "1.2e-3".
     rf"|(?<![A-Za-z0-9])(?-i:{_PREFIX})\d+-R\d+"   # primary-record id (this notebook)
     rf"|(?<![A-Za-z0-9])(?-i:{_PREFIX})-\d+"       # hyphenated cross-record/ticket reference
-    rf"|{_FIG_ROOTS}"                     # figure output roots (.lab-config.json)
+    rf"|{_FIG_ROOTS_ALT}"                 # figure output roots (.lab-config.json)
     r"|\.(?:png|jpg|jpeg|gif|svg|webp)\b"
     # a source/data file path (any common language or data extension) is a pointer
     r"|\.(?:py|ps1|cs|cpp|hpp|[ch]|ino|ts|tsx|js|java|go|rs|sql|md|"

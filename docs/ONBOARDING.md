@@ -6,7 +6,8 @@
 >
 > ⚠️ **ファイル数・スキル一覧はこの生成時点のもの**で、その後にツール・スキルを追加しています
 > （ハーネス自己保守 `policy_gate` / `harness_map`、日次ログ草稿 `log_draft`、撤回集計
-> `retractions`、横断シンセシス `synthesis_*`、読みビュー `index_html` / `report_readview`、
+> `retractions`、出典アンカー検査 `check_untraceable_numbers`、図の出所焼き込み `provenance_stamp`、
+> 横断シンセシス `synthesis_*`、読みビュー `index_html` / `report_readview`、
 > スキル `harness-edit` / `report-checksum` / `readability-review` / `runbook-review` /
 > `procedure-new` / `pr-review-doc`）。
 > **常に最新の棚卸しは [harness-map.md](harness-map.md)**（`python3 tools/harness_map.py` が生成し

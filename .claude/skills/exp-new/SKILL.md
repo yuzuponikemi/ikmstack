@@ -43,6 +43,7 @@ cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
    - 作成したパスを MANIFEST.md に記録。
 5. **`REPORT.md` のフロントマターを記入し `experiments/INDEX.md` を生成** —
    `REPORT.md` 冒頭に `experiment_id`(=ディレクトリ名)/ `status`(初期は `planning`)/ `period_start` / `summary` を書き、`python3 tools/report_meta.py` を実行(INDEX 行を手書きしない)。
+   <!-- policy:report-meta-regen@a43c35f7 -->
 6. **次にやることは `PLAN.md`(次の計画)に書く**。
 
 ## リマインド(立ち上げ時に必要なら案内)

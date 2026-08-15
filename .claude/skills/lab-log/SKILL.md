@@ -1,10 +1,10 @@
 ---
 name: lab-log
 description: Write or update a daily lab log with the standard headings (目的/やったこと/わかったこと/次にやること), linking related experiments, repos, and KB pages. Routes automatically to the right place — the notebook's logs/ when run inside it, or the notebook's sidecar/<slug>/ when run from a product repo (keeping that repo clean). Use at session wrap-up, or when the user says "今日のログを書いて", "セッションをまとめて", "ログに残して".
+<!-- policy:lab-log-format@a0eca25e -->
 ---
 
 # lab-log — 日次ログ作成
-<!-- policy:lab-log-format@a0eca25e -->
 
 セッションの作業を `<logs>/<YYYY>/<YYYY-MM-DD>_<topic>.md` に記録する。
 追記中心・雑多でよい(推敲しない)。1 日に複数トピックあれば複数ファイル。

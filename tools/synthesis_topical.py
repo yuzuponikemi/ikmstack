@@ -26,7 +26,7 @@ _TERM_RE = re.compile(r"[A-Za-z][A-Za-z0-9_]{2,}|[ァ-ヶ][ァ-ヶー]{1,}")
 # ノイズ語(構造語・URL 断片・体裁語)。df フィルタで拾えない固定ノイズだけ列挙。
 _STOP = {
     "reports", "report", "experiment", "data", "note", "index", "jira", "http",
-    "https", "com", "www", "atlassian", "browse", "github", "the",
+    "https", "com", "www", "browse", "github", "the",
     "and", "for", "with", "this", "that", "are", "was", "から", "また", "など",
     "rerpot", "docs", "conventions", "readme", "manifest", "plan", "decisions",
     "レポート", "データ", "ファイル", "これ", "それ", "とき", "ため", "こと",

@@ -125,7 +125,7 @@ Jupyter Notebook (`.ipynb`) はセル出力を含んだ状態で保存すると�
 - **仕組み** : `.gitattributes` に `*.ipynb filter=nbstrip` を記述。
 - **実体定義 (クローンごとに初回セットアップが必要)** :
   ```powershell
-  git config filter.nbstrip.clean "python tools/strip_nb_outputs.py"
+  git config filter.nbstrip.clean "python3 tools/strip_nb_outputs.py"
   git config filter.nbstrip.smudge cat
   ```
 

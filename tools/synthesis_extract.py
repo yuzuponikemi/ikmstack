@@ -19,10 +19,10 @@ git に遅れる構造のため、ここでは brain を介さず **git 作業�
 
 使い方
 ------
-  python tools/synthesis_extract.py                 # JSON を stdout へ
-  python tools/synthesis_extract.py --markdown      # 3 ビューを Markdown で
-  python tools/synthesis_extract.py --out <dir>     # JSON + Markdown をファイル出力
-  python tools/synthesis_extract.py <experiments>   # 既定: リポジトリの experiments/
+  python3 tools/synthesis_extract.py                 # JSON を stdout へ
+  python3 tools/synthesis_extract.py --markdown      # 3 ビューを Markdown で
+  python3 tools/synthesis_extract.py --out <dir>     # JSON + Markdown をファイル出力
+  python3 tools/synthesis_extract.py <experiments>   # 既定: リポジトリの experiments/
 
 frontmatter の解析は report_meta.parse_frontmatter を再利用(パーサの二重持ち回避)。
 """

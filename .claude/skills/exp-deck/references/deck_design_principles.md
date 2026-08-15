@@ -112,7 +112,7 @@ pdftoppm -png -r 96 "$src/<basename>.pdf" "$src/preview/slide"
    ```sh
    uv run --with python-pptx .claude/skills/exp-deck/deckgen.py experiments/[実験ID]_[トピック]/deck.py
    ```
-4. PowerPoint COM を利用して PNG/PDF エクスポートを行い、スライドの文字溢れやレイアウト崩れがないか目視検証し、崩れがあれば `deck.py` を微調整して再ビルドしてください。
+4. LibreOffice のヘッドレス変換で PDF/PNG を書き出し(`soffice --headless --convert-to pdf` → `pdftoppm -png`)、スライドの文字溢れやレイアウト崩れがないか目視検証し、崩れがあれば `deck.py` を微調整して再ビルドしてください。
 5. 生成された `.pptx` および `.pdf` を Google Drive 上の対象実験フォルダにコピーしてください。
 
 完了後、以下の形式のみで親エージェントに最終報告を行ってください。元ドキュメントのテキストや `deck.py` の全コード等の長大な情報は返さないでください：

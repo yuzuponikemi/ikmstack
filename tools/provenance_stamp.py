@@ -46,8 +46,8 @@ or stamp then save yourself:
 
 CLI
 ---
-    python tools/provenance_stamp.py --selftest      # verify text assembly (no matplotlib)
-    python tools/provenance_stamp.py --text [--data-era ...] [--script ...]   # print footer only
+    python3 tools/provenance_stamp.py --selftest      # verify text assembly (no matplotlib)
+    python3 tools/provenance_stamp.py --text [--data-era ...] [--script ...]   # print footer only
 """
 from __future__ import annotations
 

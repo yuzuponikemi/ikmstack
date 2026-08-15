@@ -5,7 +5,7 @@ stalled: a blocking modal dialog is invisible to shell tools but obvious in a
 screenshot. Capture, then Read the PNG (this agent is a VLM and can read it).
 
 Usage:
-  python tools/screenshot.py [out.png]     # default: temp dir
+  python3 tools/screenshot.py [out.png]     # default: temp dir
 
 Captures every monitor. macOS uses the built-in `screencapture` (no extra
 permissions beyond the one-time Screen Recording grant for the terminal app);

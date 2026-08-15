@@ -1,69 +1,95 @@
 #!/bin/sh
-# <実験名> — 図・自動レポートの一括再生成
+# <experiment> -- regenerate figures and auto-generated reports.
 #
-# 方針(AGENTS.md 三大原則#1): git には「テキスト + 生成スクリプト」だけを置き、図はコミットしない。
-# 図付きレポートを読みたい人は、Drive を同期してこのスクリプトを1回流せばローカルで再現できる。
+# Policy (AGENTS.md principle #1): git carries text + generator scripts only, never
+# figures. Anyone who wants to read a report with its figures syncs the Drive and
+# runs this once to reproduce them locally.
 #
-#   入力 : Drive 正本の生データ(R1: PC 固有ローカルパスを入力にしない。差は Drive のマウント先だけ)
-#   出力 : _generated/(plots_*/ と自動生成 .md。.gitignore 済 = ローカル専用)(R2: 出力先は1つに揃える)
-#   使い方: sh experiments/E###_<topic>/regenerate.sh
-#           別マウント: LAB_DRIVE='/path/to/共有ドライブ/<notebook>' sh .../regenerate.sh
-#           生成後、reports/ 内の .md を開けば図付きでプレビューできる(図は ../_generated/)。
-#           共有用の完成版(図付き)は exp-deck / Drive へ。
+#   input  : raw data on the Drive (R1: never take a machine-local path as the
+#            source of truth; the only per-machine difference is the mount point)
+#   output : _generated/ (plots_*/ and generated .md, gitignored = local only)
+#            (R2: keep every output under a single root)
+#   usage  : sh experiments/E###_<topic>/regenerate.sh
+#            other mount: LAB_DRIVE='/path/to/shared drive/<notebook>' sh .../regenerate.sh
+#            afterwards, open a .md under reports/ to preview it with figures
+#            (they live in ../_generated/). Share the finished deck via exp-deck.
+#
+# Exit codes: 0 = every script succeeded or skipped / 1 = at least one failed.
 set -u
 
-# --- Drive のルート ----------------------------------------------------------
-# macOS の Google Drive (Drive for desktop) は既定でここにマウントされる:
-#   ~/Library/CloudStorage/GoogleDrive-<アカウント>/共有ドライブ/<ドライブ名>/...
-# 旧クライアントや別構成なら /Volumes/GoogleDrive/... のこともある。
-# 実際のパスは .lab-config.json の google_drive_root に書き、ここは env で上書きする。
-DRIVE_ROOT="${LAB_DRIVE:-$HOME/Library/CloudStorage/GoogleDrive-<account>/共有ドライブ/<drive>/<notebook>}"
+# --- Drive root --------------------------------------------------------------
+# On macOS, Google Drive for desktop mounts at
+#   ~/Library/CloudStorage/GoogleDrive-<account>/<shared drive>/...
+# Older clients use /Volumes/GoogleDrive/... instead. Put the real path in
+# .lab-config.json (google_drive_root) and override here with $LAB_DRIVE.
+DRIVE_ROOT="${LAB_DRIVE:-$HOME/Library/CloudStorage/GoogleDrive-<account>/SharedDrives/<drive>/<notebook>}"
 
-cd "$(dirname "$0")" || exit 1
-export MPLBACKEND=Agg   # 図はファイル保存のみ(ウィンドウを開かない)
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+cd "$script_dir" || exit 1
+export MPLBACKEND=Agg   # write figures to files only; never open a window
 
-# --- 入力 = Drive 正本(R1)----------------------------------------------------
-# この実験の生データが Drive のどこにあるかに合わせて書き換える(MANIFEST.md「データの所在」)。
-# 例: 実験フォルダ直下 raw を読む場合 ↓。共有データセットなら shared-datasets/... を指す。
+# --- input = the Drive (R1) --------------------------------------------------
+# Point this at wherever this experiment's raw data lives (MANIFEST.md records it).
 DATA_ROOT="$DRIVE_ROOT/experiments/<id>/raw"
 if [ ! -d "$DATA_ROOT" ]; then
-  echo "生データ $DATA_ROOT が無い。Drive を同期、別マウントなら LAB_DRIVE を指定(MANIFEST.md)。" >&2
+  echo "raw data not found: $DATA_ROOT" >&2
+  echo "Sync the Drive, or set LAB_DRIVE to your mount point (see MANIFEST.md)." >&2
   exit 1
 fi
-# スクリプトに渡す(各 scripts/*.py は環境変数 or 引数でこの入力を受ける。ローカルパス直書き禁止)。
+# Hand it to the scripts. Each scripts/*.py reads this env var; none of them may
+# hardcode a local path.
 export EXP_DATA_ROOT="$DATA_ROOT"
-echo "入力: $DATA_ROOT"
+echo "input: $DATA_ROOT"
 
-# --- 図/レポートを生成するスクリプトを順に実行(出力先は _generated/ に揃える)(R2)---------
-ok=0; skipped=0; failed=0
-ok_list=''; skipped_list=''; failed_list=''
+# --- run every generator, all output under _generated/ (R2) ------------------
+n_ok=0
+n_skipped=0
+n_failed=0
+ok_list=''
+skipped_list=''
+failed_list=''
+n_seen=0
 
-for s in scripts/*.py; do
-  [ -e "$s" ] || continue          # マッチ無しのときの glob 素通りを弾く
-  name="$(basename "$s")"
-  echo "▶ $name"
-  python3 -X utf8 "$s"
-  status=$?
-  # exit 2 = SKIP: 入力が未取得(事前登録・測定進行中)。本物の失敗と区別する(AGENTS.md R1)。
-  # 事前登録解析は、データ欠如時に exit 1(fail) ではなく exit 2(skip) を返すこと。
-  if [ "$status" -eq 0 ]; then
-    ok=$((ok + 1)); ok_list="$ok_list $name"
-  elif [ "$status" -eq 2 ]; then
-    skipped=$((skipped + 1)); skipped_list="$skipped_list $name"
+for script in scripts/*.py; do
+  [ -e "$script" ] || continue          # unmatched glob passes the pattern through
+  n_seen=$((n_seen + 1))
+  name=$(basename "$script")
+  echo "> $name"
+  python3 -X utf8 "$script"
+  # Note: `status` is read-only in zsh, so this variable must not be named that.
+  rc=$?
+  # exit 2 = SKIP: the input is not collected yet (pre-registration, measurement
+  # still running). Keep it distinct from a real failure (AGENTS.md R1).
+  if [ "$rc" -eq 0 ]; then
+    n_ok=$((n_ok + 1)); ok_list="$ok_list $name"
+  elif [ "$rc" -eq 2 ]; then
+    n_skipped=$((n_skipped + 1)); skipped_list="$skipped_list $name"
   else
-    failed=$((failed + 1)); failed_list="$failed_list $name"
+    n_failed=$((n_failed + 1)); failed_list="$failed_list $name"
   fi
 done
 
-echo
-echo "=== 完了: 成功 $ok / スキップ $skipped / 失敗 $failed ==="
-[ "$skipped" -gt 0 ] && echo "スキップ(データ未取得・事前登録):$skipped_list"
-[ "$failed" -gt 0 ] && echo "失敗(要調査):$failed_list"
+if [ "$n_seen" -eq 0 ]; then
+  echo "warning: no scripts/*.py found under $script_dir -- nothing to regenerate." >&2
+fi
 
-# --- 読みビュー(HTML)を追随生成 — 図の再生成後に呼ぶこと ---------------------
-# mistune 未導入ならスキップ扱い(図・レポート本体には影響しない)。
+echo
+echo "=== done: ok $n_ok / skipped $n_skipped / failed $n_failed ==="
+if [ "$n_skipped" -gt 0 ]; then
+  echo "skipped (input not collected yet):$skipped_list"
+fi
+if [ "$n_failed" -gt 0 ]; then
+  echo "failed (needs investigation):$failed_list" >&2
+fi
+
+# --- follow up with the HTML read view -- must run after the figures exist ---
+# Skipped (exit 0) when mistune is absent; it must not fail the regeneration.
 if [ -f ../../tools/gen_readview.py ]; then
   python3 ../../tools/gen_readview.py .
 fi
 
-echo "プレビュー: reports/ の .md を開く(図は ../_generated/plots_*/ に再生成済)"
+echo "preview: open a .md under reports/ (figures are in ../_generated/plots_*/)"
+
+# Surface a real failure to the caller (/regen-outputs, CI). Skips are not failures.
+[ "$n_failed" -eq 0 ] || exit 1
+exit 0

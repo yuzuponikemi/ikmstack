@@ -10,8 +10,8 @@ mismatch のとき「(a) 出典の値が誤り /
 されていて初めて意味を持つ。
 
 使い方:
-    python tools/dr/numeric_compare.py <path>/claims.jsonl
-    python tools/dr/numeric_compare.py <path>/claims.jsonl --only c007
+    python3 tools/dr/numeric_compare.py <path>/claims.jsonl
+    python3 tools/dr/numeric_compare.py <path>/claims.jsonl --only c007
 
 終了コード: 0 = 全 derived が一致 / 1 = mismatch あり / 2 = ファイル無し等
 stdlib のみ。式評価は ast ベースのホワイトリスト(eval は使わない)。

@@ -35,7 +35,7 @@
 - 対象レポートの数値や固有名詞の断定を 1行1主張として `claims.jsonl` に書き起こします。
 - 台帳のスキーマ検証を実行します：
   ```sh
-  python tools/dr/validate_ledger.py <台帳パス>/claims.jsonl
+  python3 tools/dr/validate_ledger.py <台帳パス>/claims.jsonl
   ```
   ※エラーが出た場合はスキーマに従って修復します。
 
@@ -45,11 +45,11 @@
 - 返された検証結果 JSON (`verification`, `citation_axes`, `entity_check`) を台帳に書き戻します。
 - 補足的主張 (`risk=supporting`) は、サンプリング選定スクリプトを実行して選ばれた行のみを検証します：
   ```sh
-  python tools/dr/sampling_select.py <台帳パス>/claims.jsonl
+  python3 tools/dr/sampling_select.py <台帳パス>/claims.jsonl
   ```
 
 ### ステップ3: 派生値の決定論的再計算 (Recompute)
-- `python tools/dr/numeric_compare.py <台帳パス>/claims.jsonl`
+- `python3 tools/dr/numeric_compare.py <台帳パス>/claims.jsonl`
 - **mismatch 時の調査手順**: 
   1. 出典の導出基準（分母や入力となる指標の定義）を確認します。
   2. 台帳の `derivation.vars` や `formula` の定義誤り（台帳のバグ）か、一次ソースの値自体の誤りかを切り分けます。
@@ -57,16 +57,17 @@
 
 ### ステップ4: 散文（Markdown）と台帳の相互追跡
 - Markdown レポート内の数値に `(claim:cNNN)` のマーカーを付与し、台帳と紐づけます。
+<!-- policy:dr-gate-opt-in@fd4434e1 -->
 - 散文との整合性チェックを実行します：
   ```sh
-  python tools/dr/ledger_to_prose_check.py <散文ファイル> <台帳パス>/claims.jsonl
+  python3 tools/dr/ledger_to_prose_check.py <散文ファイル> <台帳パス>/claims.jsonl
   ```
 - 散文中の記述と台帳の値の乖離（E3: 数値ドリフト）はすべて修正します。
 
 ### ステップ5: 受入ゲートの実行
 - 最後に必ず受入ゲートスクリプトを実行します：
   ```sh
-  python tools/dr/dr_gate.py <台帳パス>/claims.jsonl
+  python3 tools/dr/dr_gate.py <台帳パス>/claims.jsonl
   ```
 - **PASS**: すべての `decision_driving` が検証済み、かつ不良率が許容基準（AQL）以下、かつ引用整合性が取れている場合に判定されます。
 - **FAIL**: ゲートを通過しなかった場合、指摘された箇所をステップ2〜4に戻って修正・再検証し、PASS するまで繰り返します。
@@ -92,11 +93,11 @@
 2. 対象主張台帳: [claims.jsonl のファイルパス]
 
 タスク内容：
-1. `python tools/dr/validate_ledger.py` を実行してスキーマを確認し、エラーがあれば台帳を修復してください。
+1. `python3 tools/dr/validate_ledger.py` を実行してスキーマを確認し、エラーがあれば台帳を修復してください。
 2. 台帳の `decision_driving` 主張に対し、独立検証エージェント `dr-verifier` を呼び出して検証を実行してください。補足主張は `sampling_select.py` の選択結果に基づき検証してください。
-3. `python tools/dr/numeric_compare.py` で派生値の再計算・照合を実行し、ミスマッチがあれば原因を調べて台帳を修正してください。
-4. `python tools/dr/ledger_to_prose_check.py` で散文レポートと台帳の整合性を確認し、不一致（数値ドリフト）があれば修正してください。
-5. 最後に `python tools/dr/dr_gate.py` を実行し、PASS するまで自律的に修正と再検証をループしてください。
+3. `python3 tools/dr/numeric_compare.py` で派生値の再計算・照合を実行し、ミスマッチがあれば原因を調べて台帳を修正してください。
+4. `python3 tools/dr/ledger_to_prose_check.py` で散文レポートと台帳の整合性を確認し、不一致（数値ドリフト）があれば修正してください。
+5. 最後に `python3 tools/dr/dr_gate.py` を実行し、PASS するまで自律的に修正と再検証をループしてください。
 
 完了後、以下の形式のみで親エージェントに最終報告を行ってください。途中のデバッグログや JSONL データ等の長大なテキストは返さないでください：
 ---

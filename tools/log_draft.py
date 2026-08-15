@@ -19,10 +19,10 @@ AGENTS.md 規定の 4 見出しに流し込むだけを行う。
 
 使い方
 ------
-  python tools/log_draft.py                        # 今日ぶんを標準出力へ
-  python tools/log_draft.py --date 2026-08-04      # 指定日
-  python tools/log_draft.py --since 2026-08-03 --until 2026-08-06   # 期間まとめ
-  python tools/log_draft.py --date 2026-08-04 --topic e091-pressure --write
+  python3 tools/log_draft.py                        # 今日ぶんを標準出力へ
+  python3 tools/log_draft.py --date 2026-08-04      # 指定日
+  python3 tools/log_draft.py --since 2026-08-03 --until 2026-08-06   # 期間まとめ
+  python3 tools/log_draft.py --date 2026-08-04 --topic e091-pressure --write
 
 `--write` の出力先は `logs/<YYYY>/<日付>_<topic>.md`。`--topic` 省略時は
 その日いちばん動いた実験のスラッグを使う(無ければ `session`)。
@@ -155,7 +155,7 @@ def render(commits: list[Commit], repo: Path, title_date: str) -> tuple[list[str
 
     L = [f"# {title_date} ⟦FILL: トピック名⟧", ""]
     L += [
-        "> **これは草稿**(`python tools/log_draft.py` が commit から組んだもの)。",
+        "> **これは草稿**(`python3 tools/log_draft.py` が commit から組んだもの)。",
         "> 生成物ではないので**回して上書きしない** — このまま置かず、手で育てる。",
         f"> 素材: {len(commits)} コミット / 実験 {sum(1 for k, _ in ranked if k)} 件。",
         "",

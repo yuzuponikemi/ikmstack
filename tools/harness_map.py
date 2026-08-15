@@ -13,8 +13,8 @@
   - tools/*.py / tools/*.sh / tools/<pkg>/ 道具と1行説明(docstring / 先頭コメント)
 
 使い方:
-  python tools/harness_map.py          # 再生成(マーカ間のみ書き換え)
-  python tools/harness_map.py --check  # 検証のみ(ずれていれば exit 1)
+  python3 tools/harness_map.py          # 再生成(マーカ間のみ書き換え)
+  python3 tools/harness_map.py --check  # 検証のみ(ずれていれば exit 1)
 """
 from __future__ import annotations
 
@@ -86,12 +86,15 @@ def sec_summary() -> list[str]:
         (ROOT / "docs" / "conventions" / "policy-registry.json").read_text(encoding="utf-8")
     )
     n_rules = len(reg["rules"])
-    n_enforced = sum(1 for r in reg["rules"] if r.get("enforced_by"))
+    # enforced_by は「—(機械強制はしない…)」のような真値の説明文を持つことがある。
+    # 実際に機械が強制するものだけ数える。
+    n_enforced = sum(1 for r in reg["rules"]
+                     if (r.get("enforced_by") or "").strip()
+                     and not (r.get("enforced_by") or "").lstrip().startswith("—"))
     hook = (ROOT / ".githooks" / "pre-commit").read_text(encoding="utf-8")
     n_gates = len(re.findall(r"out=\$\((?:\"\$PY\"|python3?) ", hook))
-    n_tools = len(
-        [p for p in (ROOT / "tools").iterdir() if p.suffix in (".py", ".sh")]
-    )
+    n_tools = len([p for p in (ROOT / "tools").iterdir() if p.suffix in (".py", ".sh")]) \
+        + len([d for d in (ROOT / "tools").iterdir() if d.is_dir() and not d.name.startswith("_")])
     n_agents = len(list((ROOT / ".claude" / "agents").glob("*.md")))
     return [
         f"スキル **{n_skills}** / エージェント **{n_agents}** / "
@@ -105,12 +108,13 @@ def sec_gates() -> list[str]:
     rows = []
     step = 0
     for idx, line in enumerate(lines):
-        # フックは `"$PY"`(python3 優先解決)でインタプリタを呼ぶ。表示は python に揃える。
+        # フックは `"$PY"`(python3 優先解決)でインタプリタを呼ぶ。表示は python3 に揃える
+        # (macOS には `python` が無いので、そのままコピペして動く形にする)。
         m = re.search(r"out=\$\((?:\"\$PY\"|python3?) ([^)]+?)\s+2>&1\)", line)
         if not m:
             continue
         step += 1
-        cmd = "python " + m.group(1).strip()
+        cmd = "python3 " + m.group(1).strip()
         # 直前の連続コメントブロックの先頭行を「何を守るか」として拾う
         j = idx - 1
         while j >= 0 and lines[j].strip() == "":
@@ -229,10 +233,10 @@ def main() -> None:
     if check:
         print(
             "harness map: STALE — 棚卸し(生成部)がソースとずれています。\n"
-            "  → python tools/harness_map.py で再生成し、git add してください。"
+            "  → python3 tools/harness_map.py で再生成し、git add してください。"
         )
         sys.exit(1)
-    # Path.write_text() gained `newline` in 3.10; setup-runbook §0 promises 3.9+.
+    # Path.write_text() gained `newline` in 3.10; 3.9 でも動くよう open() を使う。
     with MAP_PATH.open("w", encoding="utf-8", newline="\n") as fh:
         fh.write(new)
     print(f"wrote {MAP_PATH.relative_to(ROOT)}")

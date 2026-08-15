@@ -35,6 +35,7 @@
 - **図リンクの整合性 (R3)**: 
   - 図リンクが出力先とずれていると画像が表示されません。
   - `tools/check_report_figures.py` がこれを事前検査し、誤りがあれば Git コミットが防止（pre-commit）されます。
+  <!-- policy:figures-not-in-git@97b4297f -->
 
 ---
 

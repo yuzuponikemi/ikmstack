@@ -14,7 +14,7 @@ description: Build a per-report verification ("検算") notebook that independen
 - **1レポート1検算(per-report)**。実験単位ではない。主張の単位はレポートで、
   1実験は複数レポート(R001/R002…)を産み各々別のデータ取り扱いをする。対象は必ず1本の
   `E###-R###`。レポート1本の実験なら per-report は per-experiment に自然一致する。
-<!-- policy:report-naming-numbering@eb565f44 -->
+  <!-- policy:report-naming-numbering@eb565f44 -->
 - **カバレッジ = 数値表 + 図の計算過程を全部**。§結論の数値だけでなく、レポートが載せる
   **各図がエンコードする統計**(箱ひげの四分位・装置別/月次/群別の中央値やバンド・ソート順)を
   図ごとに独立再計算し、**図PNGと並べて**確認する。読者が最も気にするのは図の計算過程。
@@ -97,8 +97,8 @@ description: Build a per-report verification ("検算") notebook that independen
      --verify <exp>/verification/verify_<id>.html \
      --out    <exp>/verification/review_<E###-R###>_side-by-side.html
    ```
-   readview HTML が無ければ `python tools/report_readview.py <exp>/reports/<report>.md` で先に作る。
-7. **開いて確認**: `! start <exp>/verification/review_<E###-R###>_side-by-side.html`(ブラウザ)。
+   readview HTML が無ければ `python3 tools/report_readview.py <exp>/reports/<report>.md` で先に作る。
+7. **開いて確認**: `! open <exp>/verification/review_<E###-R###>_side-by-side.html`(ブラウザ)。
 
 ## いつ使わない
 

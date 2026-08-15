@@ -16,7 +16,7 @@ summary: 一行要約(experiments/INDEX.md の1行要約に流用される)
 > (1〜2 セッションで終わる小さな検証なら reports/ を作らずこのファイル単体でよい。)
 >
 > 冒頭の YAML フロントマターが**メタデータの正本**。`experiments/INDEX.md` の行は
-> `python tools/report_meta.py` がここから生成する(本文に Jira/状態/期間を再掲しない)。
+> `python3 tools/report_meta.py` がここから生成する(本文に Jira/状態/期間を再掲しない)。
 
 - **結論(1 行)**:
 

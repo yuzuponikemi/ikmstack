@@ -7,8 +7,8 @@
 
 使い方
 ------
-  python tools/index_html.py             # experiments/INDEX.html を生成
-  python tools/report_meta.py            # INDEX.md 再生成時にも自動で再生成される
+  python3 tools/index_html.py             # experiments/INDEX.html を生成
+  python3 tools/report_meta.py            # INDEX.md 再生成時にも自動で再生成される
 
 依存なし(stdlib のみ)。外部 CSS/JS を参照しない単一 HTML を書き出す。
 """
@@ -202,7 +202,7 @@ _TEMPLATE = """<!DOCTYPE html>
 </head>
 <body>
 <h1>実験レジストリ INDEX</h1>
-<div class="meta">生成: <span id="generated"></span> ・ 正本は各実験の REPORT.md フロントマター(再生成: <code>python tools/index_html.py</code>)</div>
+<div class="meta">生成: <span id="generated"></span> ・ 正本は各実験の REPORT.md フロントマター(再生成: <code>python3 tools/index_html.py</code>)</div>
 
 <div class="controls">
   <input id="search" type="search" placeholder="検索 (ID / 要約)…">

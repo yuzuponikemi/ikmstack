@@ -6,8 +6,8 @@
 
 - **棚卸し(生成部)** — 「何があるか」。機械可読ソース(SKILL.md frontmatter /
   policy-registry.json / .githooks/pre-commit / tools)から
-  `python tools/harness_map.py` が決定論で再生成する(マーカ間のみ)。**手で編集しない**。
-  鮮度は pre-commit の `python tools/harness_map.py --check` が守る。
+  `python3 tools/harness_map.py` が決定論で再生成する(マーカ間のみ)。**手で編集しない**。
+  鮮度は pre-commit の `python3 tools/harness_map.py --check` が守る。
 - **全体像(手書き部)** — 「なぜ・どう繋がるか」。層図と narrative。機械化できない設計判断なので
   人手/LLM で維持する。**陳腐化を遅らせるため、手書き部には個々の部品名・件数を書かない**
   (部品の名前は生成部だけが持つ。部品を足しても手書き部は原則ノータッチ)。
@@ -19,7 +19,7 @@ distrust-by-construction / エントロピー最小)。改訂手順は harness-e
 
 <!-- gen:harness-map:summary:start -->
 
-スキル **14** / エージェント **1** / 規約ルール **14**(うち実行時強制 7) / pre-commit 関門 **6** / tools **18**
+スキル **14** / エージェント **1** / 規約ルール **14**(うち実行時強制 6) / pre-commit 関門 **6** / tools **20**
 
 <!-- gen:harness-map:summary:end -->
 
@@ -99,12 +99,12 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 
 | # | 検査コマンド | 何を守るか(フックのコメント1行目) |
 |---|---|---|
-| 1 | `python tools/report_meta.py --check` | report フロントマター ↔ INDEX.md のドリフトをコミット前に検出する。 |
-| 2 | `python tools/check_report_figures.py --check` | 図リンクが再生成出力先(_generated/ 等の gitignored)を指すか検査(三大原則#1 R3)。 |
-| 3 | `python tools/dr/dr_gate_precommit.py` | 実験ごと opt-in の dr-audit 軽量ゲート。 |
-| 4 | `python tools/check_untraceable_numbers.py` | 実験ごと opt-in の「追跡できない数値」リンタ。 |
-| 5 | `python tools/policy_gate.py` | 規約の正本と写しのドリフト検査(1ルール=1正本+ピン留め)。 |
-| 6 | `python tools/harness_map.py --check` | ハーネス地図の棚卸し(生成部)がソースとずれていないかの鮮度検査。 |
+| 1 | `python3 tools/report_meta.py --check` | report フロントマター ↔ INDEX.md のドリフトをコミット前に検出する。 |
+| 2 | `python3 tools/check_report_figures.py --check` | 図リンクが再生成出力先(_generated/ 等の gitignored)を指すか検査(三大原則#1 R3)。 |
+| 3 | `python3 tools/dr/dr_gate_precommit.py` | 実験ごと opt-in の dr-audit 軽量ゲート。 |
+| 4 | `python3 tools/check_untraceable_numbers.py` | 実験ごと opt-in の「追跡できない数値」リンタ。 |
+| 5 | `python3 tools/policy_gate.py` | 規約の正本と写しのドリフト検査(1ルール=1正本+ピン留め)。 |
+| 6 | `python3 tools/harness_map.py --check` | ハーネス地図の棚卸し(生成部)がソースとずれていないかの鮮度検査。 |
 
 <!-- gen:harness-map:gates:end -->
 
@@ -119,7 +119,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 |---|---|---|---|
 | `report-meta-regen` | INDEX は手書きせず report_meta.py で再生成する | AGENTS.md | `tools/report_meta.py --check (pre-commit)` |
 | `figures-not-in-git` | 図は git に入れない(三大原則#1、R1〜R3) | docs/conventions/figures-regen.md | `tools/check_report_figures.py (pre-commit)` |
-| `report-naming-numbering` | レポート命名 FL###-R### と R 番号の規律(リビング文書に R を振らない) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |
+| `report-naming-numbering` | レポート命名 <実験ID>-R### と R 番号の規律(リビング文書に R を振らない) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |
 | `frontmatter-schema` | REPORT.md / 一次記録の YAML フロントマター書式 | .claude/skills/exp-report/references/exp_report_guide.md | `tools/report_meta.py (schema errors fail --check)` |
 | `living-vs-primary` | リビング文書 vs 一次記録(1機能=1権威) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |
 | `central-todo-scope` | 中央 tasks/TODO.md はマネジメント観点+リポ運営専用(実験の詳細は PLAN/REPORT が正本) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |

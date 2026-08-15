@@ -15,8 +15,8 @@
 
 使い方
 ------
-  python tools/retractions.py           # docs/retractions.md を再生成
-  python tools/retractions.py --check   # 差分があれば exit 1(生成し忘れ検出)
+  python3 tools/retractions.py           # docs/retractions.md を再生成
+  python3 tools/retractions.py --check   # 差分があれば exit 1(生成し忘れ検出)
 
 pre-commit の関門にはしない(生成し忘れの実害が小さいため。週次 watch で拾う)。
 """
@@ -182,7 +182,7 @@ def render(entries: list[Entry]) -> list[str]:
 
 SCAFFOLD = """# 撤回(retraction)の横断集計
 
-> **この表は生成物**。`python tools/retractions.py` が各実験の
+> **この表は生成物**。`python3 tools/retractions.py` が各実験の
 > `reports/*.md` のフロントマター(`corrects` / `retraction_type` / `discovered_by`)と
 > `docs/retractions-bootstrap.jsonl` から組む。**手で編集しない**。
 > 書式・統制語彙の正本は `docs/conventions/reporting.md`「改訂・撤回の記録」。
@@ -233,7 +233,7 @@ def main(argv: list[str]) -> int:
 
     if args.check:
         if changed:
-            print(f"--check: {out} が古い(python tools/retractions.py で再生成)")
+            print(f"--check: {out} が古い(python3 tools/retractions.py で再生成)")
             return 1
         print(f"--check: {out} は最新({len(entries)} 件)")
         return 0

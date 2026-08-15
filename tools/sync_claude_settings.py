@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 def main() -> int:
-    root_dir = Path(__file__).resolve().parent.parent
+    root_dir = Path.cwd()  # install モデルでは tools/ が harness への symlink。記録層の設定を読み書きする
     config_file = root_dir / ".lab-config.json"
     template_file = root_dir / ".claude" / "settings.json.template"
     target_file = root_dir / ".claude" / "settings.json"
@@ -50,7 +50,7 @@ def main() -> int:
     defaults = {
         "permissions": {
             "additionalDirectories": [
-                "..\\Shared_KB"
+                "../shared-kb"
             ]
         }
     }

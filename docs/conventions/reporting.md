@@ -31,10 +31,10 @@
   訂正・撤回が出たら新しい日付レポートを足し、`REPORT.md` を最新化し、INDEX で旧レポートの状態を更新する。
 - **索引 `reports/INDEX.md`**: 全レポートを状態バッジ(🟢 有効 / 🟡 部分置換 / ⚪ 旧記録)
   と 1 行要約で一覧。表は各レポートのフロントマター(`status` / `summary`)から
-  `python tools/report_meta.py` が生成する(マーカ間のみ。手で表を書かない。
+  `python3 tools/report_meta.py` が生成する(マーカ間のみ。手で表を書かない。
+  <!-- policy:report-meta-regen@a43c35f7 -->
   正本: AGENTS.md「実験のワークフロー」step 5-6)。
   配下の全レポートにフロントマターが揃って初めて生成され、未付与が残る間はスキップ・通知される。
-  <!-- policy:report-meta-regen@8a33397d -->
 - **退避 `reports/archive/`**: 後続版に置換された旧版・自動生成 raw ダンプを移す
   (削除しない。一次参照でないだけ)。
 
@@ -214,16 +214,21 @@ superseded_by: E077-R004         # status が superseded なら必須
 
 ### 何を機械が守るか
 
-`python tools/report_meta.py --check`(pre-commit)が守るのは**リンクと語彙だけ**:
+`python3 tools/report_meta.py --check`(pre-commit)が守るのは**リンクと語彙だけ**:
 `status: superseded` に `superseded_by` があるか、`corrects` / `superseded_by` が
 同一実験内の実在 report_id に解決するか、`retraction_type` / `discovered_by` が語彙内か。
 
 **遡及は要求しない**(claim マーカと同じ扱い)。施行より前の一次記録に逆向きリンクが
 無くても、**触ったついでに足せばよい**(一斉backfillはしない)。
-語彙・リンク解決・自己参照の検査は新設キーを書いたときだけ発火するので全件に効く。
-自己検査は `python tools/report_meta.py --selftest`(落ちるべきときに落ちるかを確認)。
+施行日は**ノートごとに `.lab-config.json` の `retraction_rule_epoch`(YYYY-MM-DD)**で決める。
+`setup --init-notebook` は生成日を書き込む。**既存の記録があるノートを後から配線するときは、
+必ず配線日を書くこと** — 書かないと過去の `superseded` 全件に逆向きリンクを要求して
+コミットが止まる。
+語彙・リンク解決・自己参照の検査は新設キーを書いたときだけ発火するので、施行日に関係なく全件に効く
+(逆に言えば、`superseded_by` の必須検査だけが施行日の影響を受ける)。
+自己検査は `python3 tools/report_meta.py --selftest`(落ちるべきときに落ちるかを確認)。
 **分類が妥当かどうかは機械は見ない**(散文の意味判定はしない = ハーネス地図の境界線)。
-横断集計は `python tools/retractions.py` が `docs/retractions.md` を生成する。
+横断集計は `python3 tools/retractions.py` が `docs/retractions.md` を生成する。
 
 主要指標は件数ではなく **発見経路の内訳**(`user-sme` に偏る = 独立検証層が育っていない)。
 件数が増えること自体は悪ではない。**撤回を書きにくくすることが最大の失敗**である。
@@ -280,7 +285,7 @@ superseded_by: E077-R004         # status が superseded なら必須
 2. **まとめとして固定する瞬間** — `REPORT.md`(現状サマリ)の更新や総括レポート
    (exp-checkpoint / exp-report)。自分用でも、**結論として固定する数値は出典に戻す**。
 
-これを **共有前ゲート**と呼ぶ。台帳のある実験は `python tools/dr/dr_gate.py <台帳>` を
+これを **共有前ゲート**と呼ぶ。台帳のある実験は `python3 tools/dr/dr_gate.py <台帳>` を
 通せばよく、台帳が無ければ「その成果物に載る数値を列挙し、出典 or 再計算で 1 件ずつ潰す」
 だけでよい(台帳作成は必須ではない — 台帳は繰り返し検証する実験のための道具)。
 **潰せなかった数値は、成果物から落とすか「暫定」と明記する。**

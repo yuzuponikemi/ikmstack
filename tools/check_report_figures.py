@@ -27,7 +27,7 @@ from pathlib import PurePosixPath
 from pathlib import Path
 
 # デフォルトで許容される出力ルート
-ALLOWED_ROOTS = {"figures", "_generated", "loadeval_cli"}
+ALLOWED_ROOTS = {"figures", "_generated"}
 
 # 既知の未対応実験の警告リスト
 BACKLOG = set()

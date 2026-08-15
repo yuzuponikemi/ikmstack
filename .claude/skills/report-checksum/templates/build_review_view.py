@@ -14,7 +14,7 @@ Usage:
     [--title "E059-R001 レビュー"] [--left-label "..."] [--right-label "..."]
 
 Open the result in a browser (VSCode has no synced two-HTML view):
-  ! start <out>
+  ! open <out>
 """
 from __future__ import annotations
 
@@ -123,7 +123,7 @@ def main() -> int:
     print("wrote review-view:", args.out)
     print("  left  (report):", report_rel)
     print("  right (verify):", verify_rel)
-    print(f"open in a browser:\n  ! start {args.out}")
+    print(f"open in a browser:\n  ! open {args.out}")
     return 0
 
 

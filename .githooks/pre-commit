@@ -22,7 +22,7 @@ if [ "$status" -ne 0 ]; then
   echo "$out"
   echo
   echo "✗ report のフロントマターと INDEX.md が一致していません(または不備があります)。"
-  echo "  → python tools/report_meta.py で INDEX を再生成し、変更を git add してから再コミットしてください。"
+  echo "  → python3 tools/report_meta.py で INDEX を再生成し、変更を git add してから再コミットしてください。"
   exit 1
 fi
 
@@ -54,7 +54,7 @@ if [ "$status" -ne 0 ]; then
   echo "$out"
   echo
   echo "✗ dr-audit 軽量ゲートが失敗しました(.dr-gate マーカのある実験)。"
-  echo "  → 台帳を直すか、python tools/dr/dr_gate_precommit.py --all --verbose で確認してください。"
+  echo "  → 台帳を直すか、python3 tools/dr/dr_gate_precommit.py --all --verbose で確認してください。"
   exit 1
 fi
 
@@ -81,7 +81,7 @@ if [ -f docs/conventions/policy-registry.json ]; then
     echo "$out"
     echo
     echo "✗ ハーネス規約の正本と写しがずれています(policy gate)。"
-    echo "  → python tools/policy_gate.py --all --verbose で確認。正本/レジストリを直したら"
+    echo "  → python3 tools/policy_gate.py --all --verbose で確認。正本/レジストリを直したら"
     echo "    写しのピンを更新(digest は --digest <id>)、マップは --write-map で再生成。"
     exit 1
   fi
@@ -95,7 +95,7 @@ if [ -f docs/harness-map.md ]; then
     echo "$out"
     echo
     echo "✗ ハーネス地図の棚卸し(生成部)がソースとずれています。"
-    echo "  → python tools/harness_map.py で再生成し、git add docs/harness-map.md してください。"
+    echo "  → python3 tools/harness_map.py で再生成し、git add docs/harness-map.md してください。"
     exit 1
   fi
 fi

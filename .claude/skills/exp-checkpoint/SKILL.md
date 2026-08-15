@@ -34,6 +34,22 @@ cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
 
 2. **INDEX の再生成**:
    - フロントマターの変更後、`python3 tools/report_meta.py` および `python3 tools/report_meta.py --check` を実行して整合性を確認します。
+   <!-- policy:report-meta-regen@a43c35f7 -->
 
 3. **日次ログの作成と報告**:
    - 日次ログ（`logs/` 下）を `lab-log` 規約で更新し、最後に更新・確認結果をユーザーに報告します。
+
+## 撤回(retraction)を書く
+
+結論・数値を後から取り消したら、**新しい一次記録の frontmatter に撤回の記録を残す**。
+これは pre-commit が検査する数少ない意味ルールで、**リンクが解決しないと commit が止まる**。
+
+```yaml
+corrects: E###-R00X          # 覆した一次記録(同一実験内。複数可)
+retraction_type: stale-source  # 統制語彙(reporting.md の表)
+discovered_by: self            # self | user-sme | independent-audit
+```
+<!-- policy:retraction-record@b39a00ca -->
+
+覆された側(旧版)には `status: superseded` と **`superseded_by:`** を必ず添える。
+正本: docs/conventions/reporting.md「改訂・撤回の記録」

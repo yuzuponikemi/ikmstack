@@ -17,7 +17,7 @@ The full audit (dr-verifier web re-fetch + dr_gate acceptance gate requiring
 decision_driving all-verified) stays in the /dr-audit skill; it needs the web /
 an agent and is not deterministic enough for a commit hook.
 
-Marker format (`experiments/FL###_*/.dr-gate`), all keys optional:
+Marker format (`experiments/<experiment_id>/.dr-gate`), all keys optional:
     # comment lines start with '#'
     ledger: reports/claims.jsonl     # relative to the experiment dir; this is the default
     prose:  reports/E001-R001_...md  # relative; enables ledger_to_prose_check
@@ -26,10 +26,10 @@ Marker format (`experiments/FL###_*/.dr-gate`), all keys optional:
 An empty marker means "use reports/claims.jsonl, no prose check, reltol 2%".
 
 Usage:
-    python tools/dr/dr_gate_precommit.py                # gate marked experiments among STAGED files
-    python tools/dr/dr_gate_precommit.py --all          # gate every marked experiment
-    python tools/dr/dr_gate_precommit.py --experiment experiments/E001_...  # gate one dir (testing)
-    python tools/dr/dr_gate_precommit.py --ledger <path> [--prose <path>]     # gate an explicit ledger (testing)
+    python3 tools/dr/dr_gate_precommit.py                # gate marked experiments among STAGED files
+    python3 tools/dr/dr_gate_precommit.py --all          # gate every marked experiment
+    python3 tools/dr/dr_gate_precommit.py --experiment experiments/E001_...  # gate one dir (testing)
+    python3 tools/dr/dr_gate_precommit.py --ledger <path> [--prose <path>]     # gate an explicit ledger (testing)
 
 Exit codes: 0 = PASS (or nothing to gate) / 1 = FAIL / 2 = usage/config error.
 """
@@ -57,7 +57,9 @@ TOOLS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = Path.cwd()
 MARKER_NAME = ".dr-gate"
 DEFAULT_LEDGER = "reports/claims.jsonl"
-EXP_RE = re.compile(r"(experiments/FL[^/]+)/")
+# 実験 ID の接頭辞はノート固有(.lab-config.json)。ここは接頭辞に依存させない
+# — FL 固定にすると別プレフィックスのノートでゲートが静かに空振りする。
+EXP_RE = re.compile(r"(experiments/[^/_][^/]*)/")
 
 
 def _child_env() -> dict[str, str]:
@@ -117,7 +119,9 @@ def _all_marked_experiments() -> list[Path]:
     exp_root = REPO_ROOT / "experiments"
     if not exp_root.is_dir():
         return []
-    return sorted(p.parent for p in exp_root.glob("FL*/" + MARKER_NAME))
+    # 接頭辞非依存。_template など先頭 _ の雛形だけ除く。
+    return sorted(p.parent for p in exp_root.glob("*/" + MARKER_NAME)
+                  if not p.parent.name.startswith("_"))
 
 
 class GateResult:
@@ -228,7 +232,7 @@ def main() -> int:
 
     print("\n=== gate:", "[FAIL] blocked" if failed else "[PASS] all opted-in ledgers clean", "===")
     if failed:
-        print("Run `python tools/dr/dr_gate_precommit.py --all --verbose` locally, fix, then re-commit.")
+        print("Run `python3 tools/dr/dr_gate_precommit.py --all --verbose` locally, fix, then re-commit.")
         print("(To bypass once: git commit --no-verify.)")
     return 1 if failed else 0
 

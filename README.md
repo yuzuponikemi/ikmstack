@@ -150,7 +150,7 @@ docs/conventions/                 reporting / figures-regen / repository-rules /
                                   record-routing（どこで起動しても正しく着地する規約）/
                                   policy-map + policy-registry.json（1ルール=1正本）
 docs/harness-map.md               ハーネスの全体像と棚卸し（生成部は harness_map.py）
-.githooks/pre-commit              INDEX↔フロントマター・図リンク・スクリプト encoding・
+.githooks/pre-commit              INDEX↔フロントマター・図リンク・
                                   opt-in ゲート（.dr-gate / .numbers-gate）・ハーネス規約
 experiments/_template/            実験の雛形（/exp-new がコピー）
 experiments/INDEX.md              実験レジストリの空雛形（report_meta が生成）

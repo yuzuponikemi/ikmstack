@@ -21,7 +21,7 @@ def _load_brand() -> dict:
     root = Path(__file__).resolve().parents[2]  # repo root: tools/readview/ -> repo
     tokens_py = root / ".claude" / "skills" / "exp-deck" / "brand" / "tokens.py"
     try:
-        spec = importlib.util.spec_from_file_location("_tc_brand_tokens", tokens_py)
+        spec = importlib.util.spec_from_file_location("_deck_brand_tokens", tokens_py)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)  # type: ignore[union-attr]
         return dict(

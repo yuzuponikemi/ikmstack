@@ -33,10 +33,10 @@ INDEX の表は次のマーカ間だけを書き換える(凡例・散文は手�
 
 使い方
 ------
-  python tools/report_meta.py            # 全 INDEX を生成(書き換え)
-  python tools/report_meta.py --check    # 検証のみ(差分/不備があれば exit 1)
-  python tools/report_meta.py --selftest # 撤回ゲートの自己検査(落ちるべきときに落ちるか)
-  python tools/report_meta.py <experiments dir>  # 既定: リポジトリの experiments/
+  python3 tools/report_meta.py            # 全 INDEX を生成(書き換え)
+  python3 tools/report_meta.py --check    # 検証のみ(差分/不備があれば exit 1)
+  python3 tools/report_meta.py --selftest # 撤回ゲートの自己検査(落ちるべきときに落ちるか)
+  python3 tools/report_meta.py <experiments dir>  # 既定: リポジトリの experiments/
 
 不備の隔離
 ----------
@@ -91,8 +91,14 @@ RETRACTION_TYPES = {
 DISCOVERED_BY = {"self", "user-sme", "independent-audit"}
 
 # 施行日。これより前に作られた一次記録に `superseded_by` を遡って要求しない
-# (claim マーカと同じ扱い = 遡及は要求しない)。ノートごとに
-# .lab-config.json の `retraction_rule_epoch` で上書きできる。
+# (claim マーカと同じ扱い = 遡及は要求しない。正本: reporting.md「改訂・撤回の記録」)。
+#
+# **ノートごとに .lab-config.json の `retraction_rule_epoch` に「配線した日」を書く。**
+# 既定はノート作成日が不明なときのフォールバックで、`setup --init-notebook` は
+# 生成時の日付を書き込むので新規ノートではこの既定に落ちない。既存の記録があるノートを
+# 後から配線する場合は、必ず配線日を書くこと(書かないと過去の superseded 全件に
+# 逆向きリンクを要求してコミットが止まる)。
+#
 # 他の検査(語彙・リンク解決・自己参照)は新設キーを書いたときだけ発火するので
 # 施行日に関係なく全件に効く。
 RETRACTION_RULE_EPOCH = "0000-00-00"
@@ -393,7 +399,16 @@ def check_retractions(
     機械は見ない(散文の意味判定はしない)。正本: docs/conventions/reporting.md。
     """
     epoch = str(config.get("retraction_rule_epoch", RETRACTION_RULE_EPOCH))
+    # known は「実在する report_id」の集合。metas(=検査を通ったレポート)から作ると、
+    # スキーマ不備で隔離された兄弟を指すリンクが「解決しない」と誤報される
+    # (隔離クラスの不備が停止クラスのエラーに化ける)。ID がパースできれば実在とみなす。
     known = {meta["report_id"] for _, meta in metas}
+    for f in reports_dir.glob("*.md"):
+        if f.name == "INDEX.md":
+            continue
+        m = parse_frontmatter(f)
+        if m and m.get("report_id"):
+            known.add(str(m["report_id"]))
     errors: list[str] = []
 
     def err(name: str, msg: str) -> None:
@@ -493,12 +508,41 @@ _SELFTEST_CASES = [
 ]
 
 
+def _selftest_shipped_default() -> list[str]:
+    """**出荷する既定値**での挙動を検証する。
+
+    _SELFTEST_CASES は epoch を注入して回すため、出荷既定 RETRACTION_RULE_EPOCH の
+    挙動を一度も通らない。「誰も出荷していない設定に対する PASS」を防ぐための追加検査。
+    """
+    import tempfile
+
+    out: list[str] = []
+    with tempfile.TemporaryDirectory() as tmp:
+        rep = Path(tmp) / "experiments" / "E999_default" / "reports"
+        rep.mkdir(parents=True)
+        (rep / "E999-R001_20190101_old.md").write_text(
+            "---\nreport_id: E999-R001\ntype: 結果\nstatus: superseded\n"
+            "created: 2019-01-01\nsummary: 古い記録(逆向きリンク無し)\n---\n",
+            encoding="utf-8")
+        # 既定(0000-00-00)は「免除しない」= 古い記録にも逆向きリンクを要求する
+        _, _, _, errs = build_reports_table(rep, {"jira_enabled": False})
+        if not any("superseded_by が無い" in e for e in errs):
+            out.append("出荷既定 epoch: 古い superseded を免除してしまった(遡及要求が効いていない)")
+        # 配線日を書けば免除される(この逃げ道が本当に配線されているか)
+        _, _, _, errs2 = build_reports_table(
+            rep, {"jira_enabled": False, "retraction_rule_epoch": "2026-08-15"})
+        if any("superseded_by が無い" in e for e in errs2):
+            out.append("retraction_rule_epoch を設定しても免除されない(逃げ道が壊れている)")
+    return out
+
+
 def _selftest() -> int:
     """撤回ゲートが「落ちるべきときに落ちる」ことを確認する(policy_gate --selftest に倣う)。"""
     import tempfile
 
     config = {"jira_enabled": False, "retraction_rule_epoch": _SELFTEST_EPOCH}
     failures = []
+    failures += _selftest_shipped_default()
     for name, extra, expect in _SELFTEST_CASES:
         with tempfile.TemporaryDirectory() as tmp:
             rep = Path(tmp) / "experiments" / "E999_selftest" / "reports"
@@ -535,7 +579,7 @@ def _selftest() -> int:
     if failures:
         print(f"\n--selftest: {len(failures)} / {len(_SELFTEST_CASES)} 件 失敗", file=sys.stderr)
         return 1
-    print(f"--selftest: 撤回ゲート {len(_SELFTEST_CASES)} 件すべて期待どおり")
+    print(f"--selftest: 撤回ゲート {len(_SELFTEST_CASES)} 件 + 出荷既定 epoch の検査すべて期待どおり")
     return 0
 
 
@@ -625,6 +669,9 @@ def main(argv: list[str]) -> int:
         for e in retraction_errors:
             print(f"    {e}", file=sys.stderr)
         print("    → 正本: docs/conventions/reporting.md「改訂・撤回の記録」", file=sys.stderr)
+        print("    → 既存の記録があるノートを配線した直後なら、.lab-config.json の", file=sys.stderr)
+        print("       retraction_rule_epoch に配線日(YYYY-MM-DD)を書けば過去分は免除されます。",
+              file=sys.stderr)
         return 1
 
     if args.check:
