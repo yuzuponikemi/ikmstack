@@ -5,6 +5,10 @@
 # 記録層向けの検査は cwd 基準で experiments/ を見る。ハーネス自身の検査
 # (policy gate / harness map) は、そのソースが cwd にあるときだけ走る。
 #
+# **成功時も1行サマリを出す。** 「検査して OK」と「検査対象が0件」は意味が全く違うのに、
+# 黙って通ると区別がつかない。対象数はこのフックが自分で数える(ツールの出力を
+# 解析しない = 文言変更で壊れない)。凡例: ✓=検査した / —=対象なし / skip=ソースなし
+#
 # 有効化(クローンごと): git config core.hooksPath .githooks
 # 一時的に無視したい場合のみ: git commit --no-verify
 
@@ -14,6 +18,33 @@ if [ -z "$PY" ]; then
   echo "⚠ pre-commit: python3/python が見つからないため各検査をスキップします。" >&2
   exit 0
 fi
+
+# --- 対象数を数える(凡例の ✓ / — を決めるため) --------------------------------
+# `_` 始まり(_template 等)は実験ではないので除く。
+count_dirs() {   # $1 = glob パターン
+  n=0
+  for d in $1; do
+    [ -d "$d" ] || continue
+    case "$(basename "$d")" in _*) continue ;; esac
+    n=$((n + 1))
+  done
+  echo "$n"
+}
+count_files() {  # $1 = glob パターン
+  n=0
+  for f in $1; do [ -e "$f" ] && n=$((n + 1)); done
+  echo "$n"
+}
+
+N_EXP=$(count_dirs 'experiments/*/')
+N_DRGATE=$(count_files 'experiments/*/.dr-gate')
+N_NUMGATE=$(count_files 'experiments/*/.numbers-gate')
+
+mark() {  # $1 = 対象数 → ✓ か —
+  [ "$1" -gt 0 ] && printf '✓' || printf '—'
+}
+SUMMARY=""
+add() { SUMMARY="${SUMMARY}${SUMMARY:+ / }$1"; }
 
 # report フロントマター ↔ INDEX.md のドリフトをコミット前に検出する。
 out=$("$PY" tools/report_meta.py --check 2>&1)
@@ -25,6 +56,7 @@ if [ "$status" -ne 0 ]; then
   echo "  → python3 tools/report_meta.py で INDEX を再生成し、変更を git add してから再コミットしてください。"
   exit 1
 fi
+add "index $(mark "$N_EXP")"
 
 # 不備を隔離してスキップした場合(report_meta.py「不備の隔離」)は、commit を止めずに
 # 通知だけする。1 実験の不備で全員の commit を止めないための意図的な非ブロッキング。
@@ -35,7 +67,6 @@ if echo "$out" | grep -q '^WARN:'; then
 fi
 
 # 図リンクが再生成出力先(_generated/ 等の gitignored)を指すか検査(三大原則#1 R3)。
-# 出力先とずれた図リンクは clone + regen でプレビューに出ない。
 out=$("$PY" tools/check_report_figures.py --check 2>&1)
 status=$?
 if [ "$status" -ne 0 ]; then
@@ -45,9 +76,10 @@ if [ "$status" -ne 0 ]; then
   echo "  → 図リンクを ../_generated/<plots>/… 等(.gitignore 済の出力先)に直してください。"
   exit 1
 fi
+add "figures $(mark "$N_EXP")"
 
-# 実験ごと opt-in の dr-audit 軽量ゲート。safe-by-construction: staged な実験が
-# .dr-gate マーカを持つときだけ走る(validate + numeric_compare + prose_check)。
+# 実験ごと opt-in の dr-audit 軽量ゲート(.dr-gate マーカのある実験だけ)。
+# safe-by-construction: staged な実験が .dr-gate マーカを持つときだけ走る。
 out=$("$PY" tools/dr/dr_gate_precommit.py 2>&1)
 status=$?
 if [ "$status" -ne 0 ]; then
@@ -57,9 +89,10 @@ if [ "$status" -ne 0 ]; then
   echo "  → 台帳を直すか、python3 tools/dr/dr_gate_precommit.py --all --verbose で確認してください。"
   exit 1
 fi
+add "dr $(mark "$N_DRGATE")"
 
-# 実験ごと opt-in の「追跡できない数値」リンタ。staged な実験が .numbers-gate
-# マーカを持つときだけ走る。値の正しさは見ない(それは上の dr ゲートの役目)。
+# 実験ごと opt-in の「追跡できない数値」リンタ(.numbers-gate のある実験だけ)。
+# 値の正しさは見ない(それは上の dr ゲートの役目)。
 out=$("$PY" tools/check_untraceable_numbers.py 2>&1)
 status=$?
 if [ "$status" -ne 0 ]; then
@@ -70,9 +103,10 @@ if [ "$status" -ne 0 ]; then
   echo "    定義上その必要が無い数値には <!-- numbers-ok: 理由 --> を付けてください。"
   exit 1
 fi
+add "numbers $(mark "$N_NUMGATE")"
 
-# ここから下はハーネス自身(① ikmstack)の検査。記録層(② ノート)には規約の正本が
-# 無いので、ソースが cwd にあるときだけ走らせる。
+# --- ここから下はハーネス自身(① ikmstack)の検査 ------------------------------
+# 記録層(② ノート)には規約の正本が無いので、ソースが cwd にあるときだけ走らせる。
 if [ -f docs/conventions/policy-registry.json ]; then
   # 規約の正本と写しのドリフト検査(1ルール=1正本+ピン留め)。
   out=$("$PY" tools/policy_gate.py 2>&1)
@@ -85,6 +119,9 @@ if [ -f docs/conventions/policy-registry.json ]; then
     echo "    写しのピンを更新(digest は --digest <id>)、マップは --write-map で再生成。"
     exit 1
   fi
+  add "policy ✓"
+else
+  add "policy skip"
 fi
 
 if [ -f docs/harness-map.md ]; then
@@ -98,6 +135,11 @@ if [ -f docs/harness-map.md ]; then
     echo "  → python3 tools/harness_map.py で再生成し、git add docs/harness-map.md してください。"
     exit 1
   fi
+  add "map ✓"
+else
+  add "map skip"
 fi
 
+# --- 成功サマリ(✓=検査した / —=対象なし / skip=ソースなし)--------------------
+echo "pre-commit: $SUMMARY"
 exit 0

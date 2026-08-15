@@ -13,6 +13,10 @@
 #                                .githooks/ from this install (gitignored) so the
 #                                harness skills' relative `tools/…` calls + the
 #                                figure/INDEX pre-commit hook work in the notebook
+#   ./setup --sync-notebook <dir>  refresh what the harness OWNS in an existing
+#                                notebook: relink experiments/_template, refresh the
+#                                managed block in .gitignore, and report doc drift.
+#                                Safe to re-run; never touches records.
 #   ./setup --forget-notebook <dir>  unregister a notebook (records untouched);
 #                                the default falls back to the last one wired
 #   ./setup --status             report install health: skills/agents symlinks,
@@ -36,6 +40,7 @@ while [ $# -gt 0 ]; do
     --prefix) PREFIX="${2:-ikm-}"; shift 2 ;;
     --prefix=*) PREFIX="${1#--prefix=}"; shift ;;
     --notebook) MODE="notebook"; NOTEBOOK="$2"; shift 2 ;;
+    --sync-notebook) MODE="sync-notebook"; NOTEBOOK="$2"; shift 2 ;;
     --init-notebook) MODE="init-notebook"; NOTEBOOK="$2"; shift 2 ;;
     --forget-notebook) MODE="forget-notebook"; NOTEBOOK="$2"; shift 2 ;;
     --status) MODE="status"; shift ;;
@@ -67,15 +72,58 @@ skill_link_name() {
 # ── wire a records notebook to this harness install ───────────────────────────
 # Symlinks tools/ + .githooks/ (gitignored) so the skills' relative `tools/…`
 # calls and the INDEX/figure pre-commit hook work from the notebook's cwd.
-wire_notebook() {
+# ハーネスが「所有」するものを記録層へ配る。symlink で配れるものは symlink にする
+# — cp で配ると更新が二度と届かない(既存ノートを更新する経路が無くなる)。
+sync_owned() {
   local NB="$1"
   _link "$SRC/tools" "$NB/tools" || true
   _link "$SRC/.githooks" "$NB/.githooks" || true
+  # 実験テンプレは「仕組み」なのでハーネスが持つ。/exp-new は symlink 越しに cp -R する。
+  if [ -d "$NB/experiments" ] || mkdir -p "$NB/experiments" 2>/dev/null; then
+    if [ -d "$NB/experiments/_template" ] && [ ! -L "$NB/experiments/_template" ]; then
+      echo "  note: experiments/_template は実体コピーです。ハーネス更新が届かないので"
+      echo "        退避して symlink に張り替えます → experiments/_template.local-backup"
+      rm -rf "$NB/experiments/_template.local-backup"
+      mv "$NB/experiments/_template" "$NB/experiments/_template.local-backup"
+    fi
+    _link "$SRC/experiments/_template" "$NB/experiments/_template" || true
+  fi
   git -C "$NB" config core.hooksPath .githooks 2>/dev/null || true
-  local gi="$NB/.gitignore" pat
-  for pat in "/tools" "/.githooks"; do
-    grep -qxF "$pat" "$gi" 2>/dev/null || printf '%s\n' "$pat" >> "$gi"
-  done
+  sync_gitignore_block "$NB"
+}
+
+# .gitignore の「ハーネス管理ブロック」をマーカ間で置換する(二重帳簿と同じ型)。
+# ノート固有の行はマーカの外に書けば保持される。
+sync_gitignore_block() {
+  local NB="$1" gi="$NB/.gitignore"
+  local START="# >>> ikmstack managed (do not edit inside) >>>"
+  local END="# <<< ikmstack managed <<<"
+  local body
+  body=$(cat <<'BLOCK'
+/tools
+/.githooks
+/experiments/_template
+experiments/INDEX.html
+experiments/**/_generated/*.readview.html
+experiments/**/verification/*.ipynb
+experiments/**/verification/*.html
+BLOCK
+)
+  touch "$gi"
+  if grep -qF "$START" "$gi" 2>/dev/null; then
+    awk -v s="$START" -v e="$END" -v b="$body" '
+      $0==s {print; print b; skip=1; next}
+      $0==e {skip=0; print; next}
+      !skip {print}' "$gi" > "$gi.tmp" && mv "$gi.tmp" "$gi"
+  else
+    printf '\n%s\n%s\n%s\n' "$START" "$body" "$END" >> "$gi"
+  fi
+  echo "  .gitignore: ハーネス管理ブロックを更新"
+}
+
+wire_notebook() {
+  local NB="$1"
+  sync_owned "$NB"
   # register this notebook so sidecar routing (tools/sidecar.py) can find it
   # from any product repo. `notebooks` = all wired (wire order, deduped);
   # `notebook` = the default = last wired (where sidecar records land).
@@ -100,9 +148,8 @@ init_notebook() {
   [ -d "$TPL" ] || { echo "missing notebook-template in $SRC" >&2; exit 1; }
 
   mkdir -p "$NB/experiments" "$NB/logs/$(date +%Y)" "$NB/tips" "$NB/decisions"
-  # experiment scaffold + empty registry come from the harness
-  cp -R "$SRC/experiments/_template" "$NB/experiments/_template"
-  rm -f "$NB/experiments/_template/.DS_Store"
+  # 実験テンプレは wire_notebook が symlink で張る(ハーネス更新が届くようにする)。
+  # INDEX は記録なのでコピー（以後ノートが育てる）。
   cp "$SRC/experiments/INDEX.md" "$NB/experiments/INDEX.md"
   : > "$NB/logs/$(date +%Y)/.gitkeep"; : > "$NB/tips/.gitkeep"; : > "$NB/decisions/.gitkeep"
 
@@ -145,6 +192,29 @@ case "$MODE" in
     echo "  install path recorded → $STATE_DIR/install-path"
     echo ""
     echo "Next: wire a records notebook with  ./setup --notebook <path-to-ikmnote>"
+    ;;
+
+  sync-notebook)
+    # ハーネスが所有するものだけを更新する。登録(既定ノート)は変更しない。
+    [ -n "$NOTEBOOK" ] || { echo "usage: ./setup --sync-notebook <dir>" >&2; exit 1; }
+    NB="$(cd "$NOTEBOOK" && pwd -P)" || { echo "notebook dir not found: $NOTEBOOK" >&2; exit 1; }
+    echo "syncing harness-owned files in: $NB"
+    sync_owned "$NB"
+    # 散文（AGENTS/CLAUDE/README）は自動マージできないので差分を報告するに留める
+    echo ""
+    echo "  ノート固有の散文はハーネスが上書きしません。テンプレとの差分:"
+    NAME="$(basename "$NB")"
+    for f in AGENTS.md CLAUDE.md README.md; do
+      [ -f "$NB/$f" ] && [ -f "$SRC/notebook-template/$f" ] || continue
+      n=$(diff <(sed "s/$NAME/{{NOTEBOOK}}/g" "$NB/$f") "$SRC/notebook-template/$f" 2>/dev/null | grep -c '^[<>]')
+      if [ "${n:-0}" -gt 0 ]; then
+        echo "    ⚠ $f: 差分 $n 行 — 必要なら手で追随（diff で確認）"
+      else
+        echo "    ✓ $f"
+      fi
+    done
+    echo ""
+    echo "  完了。記録には一切触れていません。"
     ;;
 
   notebook)

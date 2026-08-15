@@ -101,8 +101,8 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 |---|---|---|
 | 1 | `python3 tools/report_meta.py --check` | report フロントマター ↔ INDEX.md のドリフトをコミット前に検出する。 |
 | 2 | `python3 tools/check_report_figures.py --check` | 図リンクが再生成出力先(_generated/ 等の gitignored)を指すか検査(三大原則#1 R3)。 |
-| 3 | `python3 tools/dr/dr_gate_precommit.py` | 実験ごと opt-in の dr-audit 軽量ゲート。 |
-| 4 | `python3 tools/check_untraceable_numbers.py` | 実験ごと opt-in の「追跡できない数値」リンタ。 |
+| 3 | `python3 tools/dr/dr_gate_precommit.py` | 実験ごと opt-in の dr-audit 軽量ゲート(.dr-gate マーカのある実験だけ)。 |
+| 4 | `python3 tools/check_untraceable_numbers.py` | 実験ごと opt-in の「追跡できない数値」リンタ(.numbers-gate のある実験だけ)。 |
 | 5 | `python3 tools/policy_gate.py` | 規約の正本と写しのドリフト検査(1ルール=1正本+ピン留め)。 |
 | 6 | `python3 tools/harness_map.py --check` | ハーネス地図の棚卸し(生成部)がソースとずれていないかの鮮度検査。 |
 

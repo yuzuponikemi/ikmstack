@@ -70,11 +70,15 @@ cd ~/source/personal/ikmstack && ./setup           # install（1回）
 | `./setup --prefix ikm-` | skills を `ikm-<name>` で名前空間化（衝突回避したいとき） |
 | `./setup --init-notebook <dir>` | **記録層をゼロから作る**：構造＋`experiments/_template`＋INDEX＋README/AGENTS/CLAUDE＋.gitignore＋.lab-config＋`git init`＋配線。空でない dir は拒否（安全） |
 | `./setup --notebook <dir>` | **既存**記録層を配線：`tools/`＋`.githooks/` を gitignore された symlink で張り、`core.hooksPath` を設定 |
+| `./setup --sync-notebook <dir>` | **既存ノートにハーネスの更新を届ける**：`experiments/_template` の symlink 張り替え、`.gitignore` の管理ブロック更新、散文（AGENTS/CLAUDE/README）の差分報告。記録には触れない |
 | `./setup --forget-notebook <dir>` | notebook の**登録だけ**を解除（記録は消さない）。既定は直近に wire したものへ繰り上がる |
 | `./setup --status` | **install 状態を確認**：skills/agents の symlink 健全性、install-path、登録 notebook 一覧（`*` が既定）、総合判定を表示。「入ってるか分からない」時はこれ |
 | `./setup --uninstall` | この install が張った global symlink を削除 |
 
-記録層は `tools/` と `.githooks/` を**この install への gitignore された symlink**として持つ。
+記録層は `tools/`・`.githooks/`・`experiments/_template` を**この install への gitignore された
+symlink**として持つ。**ハーネスが所有するものは必ず symlink で配る** — `cp` で配ると
+更新が二度と届かず、既存ノートが静かに古くなる（実際に起きた: E003-R001）。
+`.gitignore` はノート固有の行があるので、マーカで囲った**管理ブロックだけ**を同期する。
 だから記録層の git には**記録だけ**が入り、skill の相対 `tools/…` 呼び出しと
 INDEX/図リンクの pre-commit フックはそのまま動く。
 
