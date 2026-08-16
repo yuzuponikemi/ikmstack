@@ -20,6 +20,9 @@ MD を単一の正本に保ったまま、読みやすい派生 HTML を生成�
 依存: mistune(>=3)。図生成で既にローカルは依存パッケージを使うため許容(AGENTS 三大原則は
       「図・大容量データを git に入れない」であって「依存禁止」ではない)。report_meta.py の
       フロントマターパーサを再利用する。
+      システムの python3 に mistune が無い場合は `uv run --with mistune` へ自己再実行する
+      (`experiments/_template` の作図スクリプトが matplotlib に対して使うのと同じ型)。
+      uv も無ければ exit 2 = SKIP(呼び出し側の gen_readview.py は SKIP を失敗にしない)。
 """
 from __future__ import annotations
 
@@ -33,7 +36,26 @@ from pathlib import Path
 
 from urllib.parse import unquote
 
-import mistune
+# --- mistune が無ければ uv 経由で自己再実行 ------------------------------------
+try:
+    import mistune
+except ModuleNotFoundError:
+    import os
+    import shutil
+    import subprocess
+
+    if os.environ.get("_UV_REEXEC") == "1":
+        print("mistune still missing after re-exec", file=sys.stderr)
+        raise SystemExit(1)
+    _uv = shutil.which("uv")
+    if not _uv:
+        print("mistune is missing and uv is not installed -- skipping the read view",
+              file=sys.stderr)
+        raise SystemExit(2)
+    raise SystemExit(subprocess.run(
+        [_uv, "run", "--quiet", "--with", "mistune>=3", "python", "-X", "utf8",
+         __file__, *sys.argv[1:]],
+        env={**os.environ, "_UV_REEXEC": "1"}).returncode)
 
 # report_meta.py のフロントマターパーサを再利用(重複実装を避ける)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -81,7 +103,8 @@ def _chipify(escaped: str) -> str:
 _WIKILINK_RE = re.compile(r"\[\[([^\]|]+?)\]\]")
 # 実験 ID の接頭辞はノート固有(.lab-config.json)。FL 固定にするとウィキリンクが
 # 別プレフィックスのノートで永久に解決しない(例外も出ないので気づけない)。
-_PREFIX = re.escape(str(load_config(Path.cwd()).get("experiment_id_prefix", "E")))
+_PREFIX_RAW = str(load_config(Path.cwd()).get("experiment_id_prefix", "E"))
+_PREFIX = re.escape(_PREFIX_RAW)
 _RID_RE = re.compile(rf"^{_PREFIX}\d+-R\d+$")     # レポート参照
 _EXP_RE = re.compile(rf"^{_PREFIX}\d+(_[\w-]+)?$")  # 実験参照(E### または E###_slug)
 
@@ -529,14 +552,24 @@ def _default_out(md_path: Path) -> Path:
 
 
 def _collect_reports(exp_dir: Path) -> list[Path]:
-    """実験ディレクトリ配下のレンダリング対象 MD を集める(REPORT.md + reports/FL*-R*_*.md)。"""
+    """実験ディレクトリ配下のレンダリング対象 MD を集める。
+
+    対象 = REPORT.md + reports/<prefix>###-R###_*.md。**接頭辞は .lab-config.json 由来**
+    (`experiment_id_prefix`)。ここをリテラルで固定すると、接頭辞が違うノートでは
+    一次記録が 1 件も拾われず、しかも「0 failed」と出るため**空振りが成功に見える**
+    (E003/E004 で繰り返し踏んだ欠陥の型)。保険として、接頭辞に一致しない
+    `*-R###_*.md` も拾う。
+    """
     targets: list[Path] = []
     report = exp_dir / "REPORT.md"
     if report.exists():
         targets.append(report)
     reports_dir = exp_dir / "reports"
     if reports_dir.is_dir():
-        targets += sorted(reports_dir.glob("FL*-R*_*.md"))
+        found = set(reports_dir.glob(f"{_PREFIX_RAW}*-R*_*.md"))
+        found |= {p for p in reports_dir.glob("*-R*_*.md")
+                  if not p.name.startswith(("_", "."))}
+        targets += sorted(found)
     return targets
 
 

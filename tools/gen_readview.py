@@ -35,8 +35,9 @@ def main(argv: list[str]) -> int:
     if r.returncode != 0:
         err = (r.stderr or "").strip()
         if "mistune" in err:
-            print("NOTE: mistune 未導入のため読みビューをスキップ "
-                  "(`pip install mistune` で有効化)。図・レポートには影響なし。")
+            print("NOTE: mistune 未導入 かつ uv も無いため読みビューをスキップ "
+                  "(uv を入れれば report_readview.py が自動で `uv run --with mistune` に"
+                  "再実行する)。図・レポートには影響なし。")
             return 0
         print(err, file=sys.stderr)
         print("WARN: 読みビュー生成に失敗。図・レポートには影響なし。", file=sys.stderr)
