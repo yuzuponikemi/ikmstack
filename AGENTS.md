@@ -113,7 +113,9 @@ AI コーディングエージェント向けのリポジトリ規約。
 
 ## 実験のワークフロー
 
-1. `experiments/_template/` を `experiments/E###_<topic>/` にコピーする(`/exp-new`)
+1. `experiments/_template/` を `experiments/E###_<topic>/` にコピーする(`/exp-new`)。
+   テンプレはハーネスへの symlink なので **`cp -RL experiments/_template/. <dst>/`** と書く
+   (`cp -R` だと symlink 自体が複製され、書き込みがテンプレを壊す)
 2. `PLAN.md` に 実験ID / 目的・仮説・成功基準・関与リポジトリを書く
 3. 着手時に `MANIFEST.md` へ 実験ID と関与リポジトリの commit SHA を記録する
    (`git -C ../<repo> rev-parse --short HEAD`)。再現性はこれで担保する

@@ -31,8 +31,17 @@ cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
 ## 手順
 
 1. `experiments/_template/` を `experiments/<実験ID>_<topic>/` にコピー。
+   **`experiments/_template` はハーネスへの symlink なので、必ず `-L` を付ける**:
+   ```bash
+   mkdir -p "experiments/<実験ID>_<topic>"
+   cp -RL experiments/_template/. "experiments/<実験ID>_<topic>/"
+   ```
+   ⚠️ `cp -R experiments/_template experiments/<ID>` と書くと、macOS の `cp -R` は
+   **symlink をそのままコピー**する。結果、実験ディレクトリがハーネスのテンプレを指す
+   symlink になり、**以降の書き込みが全部ハーネス側のテンプレを破壊する**（実際に起きた）。
    - 実験IDのフォーマットはデフォルトで `E###` (例: `E001_stage-tension`)。
    - 日付はディレクトリ名に付けない。
+   - コピー後に `ls -ld experiments/<ID>` で **symlink でない**ことを確かめる。
 2. **PLAN.md** に記入: 目的 / 仮説 / 手順(分かる範囲) / 関与リポジトリ / 関連チケット等 (設定されている場合)
 3. **MANIFEST.md** に関与リポジトリの commit SHA を記録:
    ```

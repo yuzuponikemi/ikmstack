@@ -379,6 +379,30 @@ def build_reports_table(
     return header + body, [], [], retraction_errors
 
 
+def check_experiment_dirs(exp_dir: Path) -> list[str]:
+    """実験ディレクトリが **symlink でない**ことを検査する。
+
+    `experiments/_template` はハーネスへの symlink なので、`cp -R _template <dst>`
+    と書くと macOS では **symlink 自体が複製**され、実験ディレクトリがテンプレを指す。
+    以降その実験へ書いたものは全部ハーネスのテンプレを破壊する（実際に起きた）。
+    正しくは `cp -RL _template/. <dst>/`。
+
+    これは記録層の構造破壊なので、隔離せず **exit code を汚す**（撤回違反と同格）。
+    """
+    errors: list[str] = []
+    for d in sorted(exp_dir.glob("*")):
+        if d.name.startswith("_") or d.name.startswith("."):
+            continue          # _template 等の雛形は symlink で正しい
+        if d.is_symlink():
+            errors.append(
+                f"{d}: 実験ディレクトリが symlink になっている"
+                f"(→ {d.resolve()})。`cp -R` でテンプレを複製した疑い。"
+                f"中身を退避して実体ディレクトリに置き換え、"
+                f"次回から `cp -RL experiments/_template/. <dst>/` を使うこと"
+            )
+    return errors
+
+
 def _as_ids(value) -> list[str]:
     """`corrects` / `superseded_by` の値を report_id のリストに正規化する。"""
     if not value:
@@ -620,6 +644,10 @@ def main(argv: list[str]) -> int:
     problems = []
     retraction_errors = []
 
+    # 0) 構造の検査。実験ディレクトリが symlink だと、そこへの書き込みが
+    #    ハーネスのテンプレを壊すので、INDEX を触る前に止める。
+    structural = check_experiment_dirs(exp_dir)
+
     # 1) experiments/INDEX.md — 表の中身は実験ごとに skip 可。ここで致命的なのは
     #    INDEX.md 自体の構造不備(マーカ欠落)だけで、それは全実験に影響するので中断する。
     table, warns, probs = build_experiments_table(exp_dir, config)
@@ -661,6 +689,12 @@ def main(argv: list[str]) -> int:
             f"\n⚠ {len(problems)} 件の不備を上記のとおりスキップして続行しました。"
             "該当分は INDEX に載りません — フロントマターを直して再実行してください。"
         )
+
+    if structural:
+        print("\nERROR: 実験ディレクトリの構造が不正です:", file=sys.stderr)
+        for e in structural:
+            print(f"    {e}", file=sys.stderr)
+        return 1
 
     # 撤回リンク・語彙の違反は隔離しない(新設キーなので既存違反が構造的に無い)。
     # ここだけは exit code を汚し、コミットを止める。

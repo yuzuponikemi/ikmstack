@@ -78,7 +78,8 @@ experiments/E###_<topic>/
 すべての実験は、以下の確定されたワークフローを辿って実行されます。
 
 1. **実験の立ち上げ (`exp-new`)**:
-   - `experiments/_template/` を `experiments/E###_<topic>/` にコピー。
+   - `experiments/_template/` を `experiments/E###_<topic>/` にコピー
+     (テンプレは symlink なので `cp -RL …/_template/. <dst>/`)。
    - 実験 ID（デフォルトで `E###`、例: `E001`）を採番。
 2. **PLAN.md の起草**:
    - 目的、仮説、関与リポジトリ、計画手順を明記。
