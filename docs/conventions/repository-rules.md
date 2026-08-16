@@ -51,7 +51,9 @@ Jupyter Notebook も **git にテキストとしてコミット**します。た
 
 ## 3. Google Drive 規約
 
-- `experiments/<id>/` と同名のフォルダを Google Drive 側の `experiments\` に作成し、構造をミラーリングします。
+- `experiments/<id>/` と同名のフォルダを Google Drive 側の `experiments/` に作成し、構造をミラーリングします。
+  マウント先は `.lab-config.json` の `google_drive_root`（macOS は
+  `~/Library/CloudStorage/GoogleDrive-<account>/My Drive/...`。**パスに空白を含むので必ずクオートする**）。
 - `MANIFEST.md` には Google Drive 上上のパス、ファイル名、おおよそのサイズ、取得日を正確に記録します。
 - ローカルで一時的に使用するデータは、実験ディレクトリ下の `data/` （`.gitignore` 済み）に置いて構いません。
 

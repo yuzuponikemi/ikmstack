@@ -4,7 +4,8 @@
   "mode": "hybrid",
   "experiment_id_pattern": "^E\\d+_[a-z0-9-]+$",
   "experiment_id_prefix": "E",
-  "google_drive_root": "~/Library/CloudStorage/GoogleDrive-<account>/共有ドライブ/<drive>/{{NOTEBOOK}}/experiments/",
+  "_google_drive_root_note": "macOS の Drive for desktop のマウント先。個人アカウントは 'My Drive'(日本語環境でも英語名)。Workspace の共有ドライブを使うなら 'Shared drives/<drive>' に差し替える。空にすると Drive 連携をスキップする",
+  "google_drive_root": "~/Library/CloudStorage/GoogleDrive-<account>/My Drive/{{NOTEBOOK}}/experiments/",
   "allowed_figure_roots": [
     "_generated",
     "figures"

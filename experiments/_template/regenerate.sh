@@ -19,10 +19,12 @@ set -u
 
 # --- Drive root --------------------------------------------------------------
 # On macOS, Google Drive for desktop mounts at
-#   ~/Library/CloudStorage/GoogleDrive-<account>/<shared drive>/...
-# Older clients use /Volumes/GoogleDrive/... instead. Put the real path in
+#   ~/Library/CloudStorage/GoogleDrive-<account>/My Drive/...
+# The folder is literally named "My Drive" even on a Japanese system. Workspace
+# accounts also get "Shared drives/<drive>/...". Put the real path in
 # .lab-config.json (google_drive_root) and override here with $LAB_DRIVE.
-DRIVE_ROOT="${LAB_DRIVE:-$HOME/Library/CloudStorage/GoogleDrive-<account>/SharedDrives/<drive>/<notebook>}"
+# NOTE: the path contains a space -- keep every expansion quoted.
+DRIVE_ROOT="${LAB_DRIVE:-$HOME/Library/CloudStorage/GoogleDrive-<account>/My Drive/<notebook>}"
 
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 cd "$script_dir" || exit 1
