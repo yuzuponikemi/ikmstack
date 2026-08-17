@@ -19,7 +19,7 @@ distrust-by-construction / エントロピー最小)。改訂手順は harness-e
 
 <!-- gen:harness-map:summary:start -->
 
-スキル **14** / エージェント **1** / 規約ルール **14**(うち実行時強制 6) / pre-commit 関門 **6** / tools **20**
+スキル **14** / エージェント **1** / 規約ルール **14**(うち実行時強制 6) / pre-commit 関門 **6** / tools **21**
 
 <!-- gen:harness-map:summary:end -->
 
@@ -171,6 +171,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | `tools/index_html.py` | index_html.py — experiments/INDEX.html(ソート/フィルタ可能な読みビュー)生成 |
 | `tools/log_draft.py` | log_draft.py — その日の commit から日次ログの**草稿**を組む(依存なし) |
 | `tools/policy_gate.py` | Policy drift gate: keep harness policy copies in sync with canonicals. |
+| `tools/pptx_preview.py` | pptx_preview.py — .pptx を目視確認用の PDF に描き起こす(GUI 不要). |
 | `tools/pr_merge_guard.py` | pr_merge_guard.py — PreToolUse guard: PR は draft 作成まで・マージはユーザー承認後。 |
 | `tools/provenance_stamp.py` | provenance_stamp.py -- burn provenance into a figure so it travels with it. |
 | `tools/report_meta.py` | report_meta.py — experiment / report metadata からの INDEX 生成・検証(依存なし) |
