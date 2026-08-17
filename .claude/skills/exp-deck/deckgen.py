@@ -86,6 +86,35 @@ ASSETS = Path(__file__).parent / "brand" / "assets"
 LOGO = ASSETS / "logo.png"
 BG_IMG = ASSETS / "background.png"
 
+_asset_warned: set = set()
+
+
+def _usable(path: Path) -> bool:
+    """ブランド画像が **実際に読める** か。`exists()` だけでは足りない。
+
+    意匠画像は差し替え前提のプレースホルダなので、壊れていても**デッキ本体の生成は
+    続行すべき**(ロゴは装飾で、成果物はスライド)。ここを `exists()` だけで守っていたため、
+    リポジトリ初版から入っていた破損 PNG で **exp-deck が表紙生成で必ず落ちていた**
+    (PIL.UnidentifiedImageError)。存在と使用可能は別物。
+    """
+    if not path.exists():
+        return False
+    try:
+        from PIL import Image  # python-pptx の依存として入っている
+    except ImportError:
+        return True          # 判定できないなら従来どおり任せる
+    try:
+        with Image.open(path) as im:
+            im.load()
+        return True
+    except Exception as e:                                    # noqa: BLE001
+        if path not in _asset_warned:
+            _asset_warned.add(path)
+            print(f"WARN: ブランド画像を読めないので省略します: {path} ({e})",
+                  file=sys.stderr)
+        return False
+
+
 SW, SH = Inches(13.333), Inches(7.5)  # 16:9
 
 
@@ -177,7 +206,7 @@ def _footer(slide, n, full=True):
     full=False(出典スライド)はロゴ/罫を省き、下部の出典帯と衝突させない。"""
     if full:
         _rect(slide, Inches(0.0), Inches(7.05), SW, Pt(1.2), FOOTER_BG)  # hairline
-        if LOGO.exists():
+        if _usable(LOGO):
             slide.shapes.add_picture(str(LOGO), Inches(0.45), Inches(7.13), height=Inches(0.25))
     box = slide.shapes.add_textbox(Inches(11.8), Inches(7.08), Inches(1.4), Inches(0.35))
     p = box.text_frame.paragraphs[0]
@@ -207,9 +236,14 @@ def _title_slide(prs, c):
     s = _blank(prs)
     BAND_H = Inches(4.05)
     _rect(s, 0, 0, SW, BAND_H, PURPLE)
-    if BG_IMG.exists():
-        iw = Inches(6.13)  # 高さ≈BAND_H になる幅(ほぼ無歪み)
+    if _usable(BG_IMG):
+        # 幅 6.13" は「標準ブランド画像なら高さ≈BAND_H になる」値。差し替え画像の
+        # 縦横比が違うとバンドを越えて META 行に被るので、越えたら高さで入れ直す。
+        iw = Inches(6.13)
         pic = s.shapes.add_picture(str(BG_IMG), int(SW - iw), 0, width=iw)
+        if pic.height > BAND_H:
+            pic._element.getparent().remove(pic._element)
+            pic = s.shapes.add_picture(str(BG_IMG), int(SW - iw), 0, height=BAND_H)
         pic.left = int(SW - pic.width); pic.top = 0
     # タイトル(白)はバンド左、虹彩(left≈7.2")に被らない幅に
     tb = s.shapes.add_textbox(Inches(0.8), Inches(1.05), Inches(6.1), Inches(2.6))
@@ -224,8 +258,56 @@ def _title_slide(prs, c):
     mtf = mb.text_frame; mtf.word_wrap = True
     rm = mtf.paragraphs[0].add_run(); rm.text = getattr(c, "META", "")
     set_font(rm, size=14, color=INK)
-    if LOGO.exists():
+    if _usable(LOGO):
         s.shapes.add_picture(str(LOGO), Inches(0.8), Inches(6.82), height=Inches(0.32))
+
+
+def _figure_roots(exp_dir: Path) -> list[str]:
+    """図の探索先を .lab-config.json の `allowed_figure_roots` から取る(既定 `figures`)。
+
+    ノート根は experiments/<ID>/ の 2 つ上。見つからなければ既定にフォールバックする。
+    """
+    roots = None
+    for cand in (exp_dir.parent.parent, exp_dir.parent):
+        cfg = cand / ".lab-config.json"
+        if cfg.exists():
+            try:
+                import json
+                roots = json.loads(cfg.read_text(encoding="utf-8")).get("allowed_figure_roots")
+            except (OSError, ValueError):
+                roots = None
+            break
+    roots = [str(r).strip("/ ") for r in (roots or []) if str(r).strip()]
+    return roots or ["figures"]
+
+
+def _resolve_image(name: str, fig_dir: Path) -> Path:
+    """deck.py の `image` を実ファイルへ解決する。
+
+    `figures/` 決め打ちだと、図の出力先が `_generated/` のノートで必ず落ちる
+    (実験側が deck.py に絶対パスを書く回避策に追い込まれる — 中身は純データに保ちたい)。
+    探索順:
+      1. 絶対パス / fig_dir 直下(従来の互換動作)
+      2. `allowed_figure_roots` の各ルート配下を再帰探索(`plots/` などの入れ子に対応)
+    """
+    p = Path(name)
+    if p.is_absolute():
+        return p
+    direct = fig_dir / name
+    if direct.exists():
+        return direct
+    exp_dir = fig_dir.parent
+    for root in _figure_roots(exp_dir):
+        base = exp_dir / root
+        if not base.is_dir():
+            continue
+        cand = base / name
+        if cand.exists():
+            return cand
+        hits = sorted(base.rglob(Path(name).name))
+        if hits:
+            return hits[0]
+    return direct   # 見つからなければ従来のパスで落として、エラー文言を素直にする
 
 
 def render(content, fig_dir: Path, out_path: Path):
@@ -249,7 +331,7 @@ def render(content, fig_dir: Path, out_path: Path):
                      base_size=spec.get("size", 18), gap=spec.get("gap", 6))
 
         elif kind == "figure":
-            img = fig_dir / spec["image"]
+            img = _resolve_image(spec["image"], fig_dir)
             # when a source strip is present, cap image height so image+caption clears
             # the (taller, multi-line) provenance band at the slide bottom
             def _ih(default):
