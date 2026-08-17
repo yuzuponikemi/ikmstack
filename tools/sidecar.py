@@ -268,18 +268,64 @@ def recent(cwd: Path, limit: int = 10, override: str | None = None) -> dict:
         for p in files[:limit]
     ]
     info["total"] = len(files)
-    # 実験は常にノート根。slug に言及する実験を拾って一緒に出す
+    # 実験は常にノート根。関連の拾い方は mode で変える。
+    #   sidecar  … その repo に言及する実験（MANIFEST 本文を slug で照合）
+    #   notebook … 直近に触った実験（notebook 内には slug が無いため照合できない。
+    #              ここを空で返すと、実験が実在する唯一の場所で resurfacing が死ぬ）
+    exp_root = Path(info["experiments_dir"])
+    prefix = _experiment_prefix(Path(info["notebook"]))
+    manifests = sorted(exp_root.glob(f"{prefix}*/MANIFEST.md"))
     exps: list[str] = []
     if info["slug"]:
-        for man in Path(info["experiments_dir"]).glob("E*/MANIFEST.md"):
+        needle = info["slug"].split("-")[-1]
+        for man in manifests:
             try:
                 text = man.read_text(encoding="utf-8", errors="ignore")
             except OSError:
                 continue
-            if info["slug"].split("-")[-1] in text:
+            if needle in text:
                 exps.append(man.parent.name)
-    info["related_experiments"] = sorted(exps)
+        exps.sort()
+    else:
+        by_mtime = sorted(manifests, key=lambda p: _exp_mtime(p.parent), reverse=True)
+        exps = [p.parent.name for p in by_mtime[:limit]]
+    info["related_experiments"] = exps
     return info
+
+
+def _experiment_prefix(notebook: Path) -> str:
+    """実験ディレクトリの接頭辞を .lab-config.json から読む（既定 "E"）。
+
+    ここをリテラルで固定すると、接頭辞の違うノートで実験が 1 件も拾われず、
+    しかも「関連なし」と静かに出るだけなので気づけない。
+    """
+    try:
+        cfg = json.loads((notebook / ".lab-config.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return "E"
+    return str(cfg.get("experiment_id_prefix") or "E")
+
+
+def _exp_mtime(exp_dir: Path) -> float:
+    """実験の「最後に触った時刻」。**md ファイルだけ**を見る（全走査はしない）。
+
+    ディレクトリ自身の mtime は使わない。`_generated/` を作り直しただけで親ディレクトリの
+    mtime が進むので、「図を再生成した」が「実験を進めた」と同じ重みになり、
+    本当に作業した実験が押し出される（実測で踏んだ）。
+    """
+    times = []
+    for pat in ("*.md", "reports/*.md"):
+        for p in exp_dir.glob(pat):
+            try:
+                times.append(p.stat().st_mtime)
+            except OSError:
+                continue
+    if times:
+        return max(times)
+    try:
+        return exp_dir.stat().st_mtime
+    except OSError:
+        return 0.0
 
 
 def main(argv=None) -> int:
