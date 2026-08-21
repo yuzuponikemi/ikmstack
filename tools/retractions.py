@@ -146,6 +146,23 @@ def render(entries: list[Entry]) -> list[str]:
     lines += ["", "上位の類型が、次に事前チェックへ変換する候補("
               "正本: docs/conventions/reporting.md「改訂・撤回の記録」)。", ""]
 
+    # `other` は「該当なし」= 語彙不足のシグナル。正本が「多発は語彙不足のシグナルと
+    # して扱う」と定めているのに、表の上では他の類型と同じ 1 行にしか見えない。
+    # 語彙の増設は年 1 回の見直しでのみ行う規律なので、その見直しが証拠に辿り着けるよう
+    # **明細への導線をここで出す**(語彙をその場で足さないための受け皿)。
+    n_other = by_type.get("other", 0)
+    if n_other:
+        others = [e for e in entries if e.rtype == "other"]
+        ids = "・".join(f"`{e.ref}`({e.experiment})" for e in others)
+        lines += [
+            f"> ⚠️ **`other` が {n_other} 件**。`other` は「既存の型に当てはまらない」印で、"
+            "**多発は語彙不足のシグナル**(正本: reporting.md「改訂・撤回の記録」)。"
+            "語彙の増設は**年 1 回の見直しでのみ**行うので、その場で型を足さず"
+            "ここに溜める。見直しでは次の記録を読み、共通する型があるかを判断する:",
+            f"> {ids}",
+            "",
+        ]
+
     # --- 時系列 ---
     by_month = Counter(e.month for e in entries)
     lines += ["### 月別", "", "| 月 | 件数 |", "|---|---:|"]
