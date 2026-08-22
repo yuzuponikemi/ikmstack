@@ -74,14 +74,16 @@ cwd の slug に紐づく過去ログ（新しい順）と、`MANIFEST.md` が�
 
 ```markdown
 <!-- harness-skills:begin -->
-… `/exp-new` `/lab-log` … （網羅一覧。skill は `/name` 形式で書く）
+… `/exp-new` `/lab-log` … （網羅一覧。skill は `` `/name` `` 形式で書く）
 <!-- harness-skills:end -->
 ```
 
 - 宣言された領域だけを `tools/notebook_map.py` が実体（`.claude/skills/*/SKILL.md`）と
   照合する。囲まれていない言及（README の例示など）は検査しない。
   「網羅のつもり」と「例として挙げただけ」は機械に区別できないので、書き手が宣言する。
-- 領域内では skill を **`/name` 形式**で書く。これが列挙の目印になる。
+- 領域内では skill を **`` `/name` `` 形式**（バッククォートで囲み、スラッシュ始まり）
+  で書く。これが列挙の目印になる。`ikmstack/tools/foo.py` のようなパスを
+  skill 名と誤認しないため、バッククォート直後がスラッシュであることまで要求する。
 - 検査は **① ハーネス側の pre-commit** で走る。ドリフトを作った側のコミットで
   気づかせるため。ノートは別 repo で、そこでは直せないので**警告のみ**（コミットは通る）。
 

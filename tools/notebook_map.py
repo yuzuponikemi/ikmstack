@@ -16,8 +16,9 @@
 検査しない — 「網羅のつもりの一覧」と「例として挙げただけ」は機械には区別できず、
 区別を書き手に宣言させるのが唯一壊れない方法だから(policy の写しがピンを持つのと同じ型)。
 
-領域内で skill は **`/name` 形式**で書く。これが列挙の目印になる
-(バラ書きの散文中の単語を skill 名と誤認しないため)。
+領域内で skill は **`` `/name` `` 形式**(バッククォートで囲み、スラッシュ始まり)で書く。
+これが列挙の目印になる。散文中の単語や `ikmstack/tools/foo.py` のようなパスを
+skill 名と誤認しないよう、バッククォート直後がスラッシュであることまで要求する。
 
 ノートは別 repo でありコミットを止める筋合いが無いので、既定は**警告のみ**(exit 0)。
 
@@ -38,7 +39,7 @@ STATE_DIR = Path(os.environ.get("IKMSTACK_STATE", Path.home() / ".ikmstack"))
 
 BEGIN = "<!-- harness-skills:begin -->"
 END = "<!-- harness-skills:end -->"
-SKILL_REF = re.compile(r"/([a-z0-9][a-z0-9-]*)")
+SKILL_REF = re.compile(r"`/([a-z0-9][a-z0-9-]*)`")
 
 
 def parse_frontmatter(text: str) -> dict:
