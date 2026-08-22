@@ -24,11 +24,38 @@ set -u
 # accounts also get "Shared drives/<drive>/...". Put the real path in
 # .lab-config.json (google_drive_root) and override here with $LAB_DRIVE.
 # NOTE: the path contains a space -- keep every expansion quoted.
-DRIVE_ROOT="${LAB_DRIVE:-$HOME/Library/CloudStorage/GoogleDrive-<account>/My Drive/<notebook>}"
-
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 cd "$script_dir" || exit 1
 export MPLBACKEND=Agg   # write figures to files only; never open a window
+
+# Resolved in this order so nothing has to be hand-edited per experiment:
+#   1. $LAB_DRIVE                      (per-machine override)
+#   2. google_drive_root in the notebook's .lab-config.json  (the single source)
+#   3. a placeholder that fails loudly (never silently guesses a path)
+# Hardcoding the path here is what left E003/E004 shipping "<account>" forever:
+# regenerate.sh only ever ran with LAB_DRIVE set, so the broken default was invisible.
+DRIVE_ROOT="${LAB_DRIVE:-}"
+if [ -z "$DRIVE_ROOT" ]; then
+  # Relative to THIS script, not to the caller's cwd: regenerate.sh is run from
+  # the notebook root as often as from the experiment directory.
+  for cfg in "$script_dir/../../.lab-config.json" "$script_dir/../.lab-config.json"; do
+    [ -f "$cfg" ] || continue
+    DRIVE_ROOT=$(python3 -c "
+import json,sys
+d=json.load(open(sys.argv[1]))
+r=(d.get('google_drive_root') or '').rstrip('/')
+# google_drive_root points at .../experiments; this script appends its own
+# 'experiments/<id>' below, so hand back the level above it.
+print(r[:-len('/experiments')] if r.endswith('/experiments') else r)
+" "$cfg" 2>/dev/null)
+    [ -n "$DRIVE_ROOT" ] && break
+  done
+fi
+if [ -z "$DRIVE_ROOT" ]; then
+  echo "Drive root unknown: set \$LAB_DRIVE, or put google_drive_root in .lab-config.json." >&2
+  exit 1
+fi
+
 
 # --- input = the Drive (R1) --------------------------------------------------
 # Point this at wherever this experiment's raw data lives (MANIFEST.md records it).
