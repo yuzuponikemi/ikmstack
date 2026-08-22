@@ -186,10 +186,14 @@ case "$MODE" in
       _link "$a" "$AGENTS_DST/$(basename "$a")" || true
     done
     printf '%s\n' "$SRC" > "$STATE_DIR/install-path"
+    # ハーネス自身にもコミット関門を張る。ここを忘れると policy gate / harness map /
+    # notebook map が「① で編集したときだけ」走らない = 一番効かせたい場所で無効になる。
+    git -C "$SRC" config core.hooksPath .githooks 2>/dev/null || true
     echo "ikmstack installed."
     echo "  skills → $SKILLS_DST : ${linked[*]}"
     echo "  agents → $AGENTS_DST : $(ls "$SRC"/.claude/agents 2>/dev/null | tr '\n' ' ')"
     echo "  install path recorded → $STATE_DIR/install-path"
+    echo "  commit gates          → core.hooksPath=.githooks (this repo)"
     echo ""
     echo "Next: wire a records notebook with  ./setup --notebook <path-to-ikmnote>"
     ;;
@@ -257,6 +261,14 @@ case "$MODE" in
       echo "  install-path        : $ip ✓"
     else
       echo "  install-path        : $ip ⚠ この repo と不一致（別の場所を install 済み）"
+    fi
+    # ハーネス自身のコミット関門(ここが未設定だと policy/map/nbmap が一度も走らない)
+    hp=$(git -C "$SRC" config --get core.hooksPath 2>/dev/null || echo "")
+    if [ "$hp" = ".githooks" ]; then
+      echo "  commit gates        : core.hooksPath=.githooks ✓"
+    else
+      echo "  commit gates        : ✗ 未設定 — ハーネス側の関門が走りません（./setup で修復）"
+      miss=$((miss+1))
     fi
     # skills
     echo "  skills (~/.claude/skills):"

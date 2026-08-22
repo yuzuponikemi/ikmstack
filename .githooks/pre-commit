@@ -140,6 +140,22 @@ else
   add "map skip"
 fi
 
+if [ -d .claude/skills ] && [ -f tools/notebook_map.py ]; then
+  # ② 記録層の地図に手書きされた skill 一覧の鮮度検査。skill の増減は必ずここ(①)で
+  # 起きるので、**ドリフトを作った側のコミットで**気づかせる。ノートは別 repo であり
+  # ここで直せない(=止めても直せない)ので、警告のみでコミットは通す。
+  out=$("$PY" tools/notebook_map.py 2>&1)
+  if printf '%s' "$out" | grep -q '⚠'; then
+    echo "$out"
+    echo "⚠ 記録層の地図の skill 一覧がハーネスの実体とずれています(コミットは通します)。"
+    add "nbmap ⚠"
+  else
+    add "nbmap ✓"
+  fi
+else
+  add "nbmap skip"
+fi
+
 # --- 成功サマリ(✓=検査した / —=対象なし / skip=ソースなし)--------------------
 echo "pre-commit: $SUMMARY"
 exit 0

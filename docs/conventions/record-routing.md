@@ -64,6 +64,35 @@ cwd の slug に紐づく過去ログ（新しい順）と、`MANIFEST.md` が�
 関連実験を返す。`/lab-log` は Step 0 でこれを見て、**同日同トピックなら追記**・
 継続作業なら前回ログを踏まえる。
 
+## ノート側の地図が持つ skill 一覧（harness-skills マーカ）
+
+記録層の地図（`workspace-map.CLAUDE.md` や `CLAUDE.md`）は、ハーネスの skill 一覧を
+**手書きの写し**として持つことがある。この写しは構造的に腐る — skill の増減は必ず
+① ハーネス側で起きるが、そのとき ② ノートの地図は別 repo にあって視界に入らない。
+
+そこで、**網羅のつもりの一覧はマーカで宣言する**：
+
+```markdown
+<!-- harness-skills:begin -->
+… `/exp-new` `/lab-log` … （網羅一覧。skill は `/name` 形式で書く）
+<!-- harness-skills:end -->
+```
+
+- 宣言された領域だけを `tools/notebook_map.py` が実体（`.claude/skills/*/SKILL.md`）と
+  照合する。囲まれていない言及（README の例示など）は検査しない。
+  「網羅のつもり」と「例として挙げただけ」は機械に区別できないので、書き手が宣言する。
+- 領域内では skill を **`/name` 形式**で書く。これが列挙の目印になる。
+- 検査は **① ハーネス側の pre-commit** で走る。ドリフトを作った側のコミットで
+  気づかせるため。ノートは別 repo で、そこでは直せないので**警告のみ**（コミットは通る）。
+
+```bash
+python3 tools/notebook_map.py           # 検査（警告のみ）
+python3 tools/notebook_map.py --strict  # 差分があれば exit 1
+```
+
+一覧を写さずに済むならそれが最善（正本は `./setup --status`）。
+マーカは「それでも読み物として一覧を置きたい」場合の担保である。
+
 ## 設計の背景
 
 - E001_sidecar-routing（v1）で `/lab-log` のサイドカー分岐を実装・検証した。

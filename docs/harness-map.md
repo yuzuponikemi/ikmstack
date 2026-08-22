@@ -19,7 +19,7 @@ distrust-by-construction / エントロピー最小)。改訂手順は harness-e
 
 <!-- gen:harness-map:summary:start -->
 
-スキル **14** / エージェント **1** / 規約ルール **14**(うち実行時強制 6) / pre-commit 関門 **6** / tools **21**
+スキル **14** / エージェント **1** / 規約ルール **14**(うち実行時強制 6) / pre-commit 関門 **7** / tools **22**
 
 <!-- gen:harness-map:summary:end -->
 
@@ -105,6 +105,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | 4 | `python3 tools/check_untraceable_numbers.py` | 実験ごと opt-in の「追跡できない数値」リンタ(.numbers-gate のある実験だけ)。 |
 | 5 | `python3 tools/policy_gate.py` | 規約の正本と写しのドリフト検査(1ルール=1正本+ピン留め)。 |
 | 6 | `python3 tools/harness_map.py --check` | ハーネス地図の棚卸し(生成部)がソースとずれていないかの鮮度検査。 |
+| 7 | `python3 tools/notebook_map.py` | ② 記録層の地図に手書きされた skill 一覧の鮮度検査。 |
 
 <!-- gen:harness-map:gates:end -->
 
@@ -170,6 +171,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | `tools/harness_map.py` | harness_map.py — docs/harness-map.md の棚卸し(生成部)を再生成/検証する。 |
 | `tools/index_html.py` | index_html.py — experiments/INDEX.html(ソート/フィルタ可能な読みビュー)生成 |
 | `tools/log_draft.py` | log_draft.py — その日の commit から日次ログの**草稿**を組む(依存なし) |
+| `tools/notebook_map.py` | notebook_map.py — 記録層(ノート)の地図に手書きされた skill 一覧の鮮度検査。 |
 | `tools/policy_gate.py` | Policy drift gate: keep harness policy copies in sync with canonicals. |
 | `tools/pptx_preview.py` | pptx_preview.py — .pptx を目視確認用の PDF に描き起こす(GUI 不要). |
 | `tools/pr_merge_guard.py` | pr_merge_guard.py — PreToolUse guard: PR は draft 作成まで・マージはユーザー承認後。 |
