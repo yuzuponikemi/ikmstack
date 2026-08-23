@@ -1,0 +1,29 @@
+#!/bin/sh
+# opt-in の自動 push。**既定は無効。**
+#
+# 多台運用でいちばん痛いのは衝突そのものではなく「A機で push し忘れ、B機で
+# 作業を始めて分岐する」こと。記録層は追記中心でマシンごとに触るファイルが
+# 違う(experiments/E###/ ・ logs/YYYY/<日付>_<topic>.md)ため、自動 push の
+# 衝突リスクは低く、分岐を防ぐ利得が上回る。
+#
+# 有効化(ノートごと): git config --bool ikmstack.autopush true
+# 無効化              : git config --bool ikmstack.autopush false
+#
+# ハーネス(① ikmstack)では既定のまま無効にしておくのが安全。ハーネスの変更は
+# 他マシン・他ノートへ即座に波及するので、push は意図的に行う。
+
+[ "$(git config --bool ikmstack.autopush 2>/dev/null)" = "true" ] || exit 0
+
+b=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || exit 0
+[ "$b" = "HEAD" ] && exit 0                       # detached HEAD では押さない
+git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1 || {
+  echo "post-commit: upstream 未設定のため push しません(ikmstack.autopush=true)"
+  exit 0
+}
+
+if git push --quiet 2>/dev/null; then
+  echo "post-commit: push しました(ikmstack.autopush=true)"
+else
+  echo "post-commit: push に失敗しました。手動で git push してください(ikmstack.autopush=true)"
+fi
+exit 0

@@ -1,0 +1,32 @@
+#!/bin/sh
+# マージ直後に、生成物である experiments/INDEX.md を作り直す。
+#
+# INDEX は experiments/*/REPORT.md のフロントマターから決定論で生成される。
+# つまり「行を突き合わせた結果」ではなく「作り直した結果」だけが正しい。
+# 二重帳簿パターンをマージにも適用する = 生成物はマージせず再生成する。
+#
+# .gitattributes の `experiments/INDEX.md merge=union` が衝突を起こさず素通しし、
+# その直後にこのフックが正しい内容へ上書きする。多台運用で INDEX が毎回
+# 衝突するのを防ぐのが目的（片方のマシンでしか実験を作らないなら発火しない）。
+
+PY=$(command -v python3 || command -v python || true)
+[ -n "$PY" ] || exit 0
+[ -f tools/report_meta.py ] || exit 0
+[ -f experiments/INDEX.md ] || exit 0
+
+# `_` 始まり(_template 等)は実験ではないので数えない。実験が0件なら何もしない。
+n=0
+for d in experiments/*/; do
+  [ -d "$d" ] || continue
+  case "$(basename "$d")" in _*) continue ;; esac
+  n=$((n + 1))
+done
+[ "$n" -gt 0 ] || exit 0
+
+"$PY" tools/report_meta.py >/dev/null 2>&1 || exit 0
+
+if ! git diff --quiet -- experiments/INDEX.md 2>/dev/null; then
+  echo "post-merge: experiments/INDEX.md を再生成しました(マージ結果を上書き)。"
+  echo "  → git add experiments/INDEX.md && git commit  で確定してください。"
+fi
+exit 0

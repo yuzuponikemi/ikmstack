@@ -19,8 +19,12 @@
 #                                Safe to re-run; never touches records.
 #   ./setup --forget-notebook <dir>  unregister a notebook (records untouched);
 #                                the default falls back to the last one wired
+#   ./setup --sync               multi-machine: fetch + ff-only pull the harness
+#                                and every registered notebook, then report what
+#                                is still unpushed. One command instead of N.
 #   ./setup --status             report install health: skills/agents symlinks,
-#                                install-path, registered notebooks, verdict
+#                                install-path, registered notebooks, git state,
+#                                verdict
 #   ./setup --uninstall          remove the global symlinks this script created
 #
 # The harness is never vendored into the notebook's git history — the notebook
@@ -44,6 +48,7 @@ while [ $# -gt 0 ]; do
     --init-notebook) MODE="init-notebook"; NOTEBOOK="$2"; shift 2 ;;
     --forget-notebook) MODE="forget-notebook"; NOTEBOOK="$2"; shift 2 ;;
     --status) MODE="status"; shift ;;
+    --sync) MODE="sync"; shift ;;
     --uninstall) MODE="uninstall"; shift ;;
     *) echo "unknown arg: $1" >&2; exit 1 ;;
   esac
@@ -90,6 +95,7 @@ sync_owned() {
   fi
   git -C "$NB" config core.hooksPath .githooks 2>/dev/null || true
   sync_gitignore_block "$NB"
+  sync_gitattributes_block "$NB"
 }
 
 # .gitignore の「ハーネス管理ブロック」をマーカ間で置換する(二重帳簿と同じ型)。
@@ -119,6 +125,78 @@ BLOCK
     printf '\n%s\n%s\n%s\n' "$START" "$body" "$END" >> "$gi"
   fi
   echo "  .gitignore: ハーネス管理ブロックを更新"
+}
+
+# .gitattributes の「ハーネス管理ブロック」。生成物をマージさせないための宣言。
+# INDEX.md は experiments/*/REPORT.md から決定論で作られる生成物なので、行を
+# 突き合わせても正しくならない。union で衝突を起こさず素通しし、post-merge が
+# 作り直す(= 生成物はマージせず再生成する)。
+sync_gitattributes_block() {
+  local NB="$1" ga="$NB/.gitattributes"
+  local START="# >>> ikmstack managed (do not edit inside) >>>"
+  local END="# <<< ikmstack managed <<<"
+  local body
+  body=$(cat <<'BLOCK'
+experiments/INDEX.md merge=union
+BLOCK
+)
+  touch "$ga"
+  if grep -qF "$START" "$ga" 2>/dev/null; then
+    awk -v s="$START" -v e="$END" -v b="$body" '
+      $0==s {print; print b; skip=1; next}
+      $0==e {skip=0; print; next}
+      !skip {print}' "$ga" > "$ga.tmp" && mv "$ga.tmp" "$ga"
+  else
+    printf '\n%s\n%s\n%s\n' "$START" "$body" "$END" >> "$ga"
+  fi
+  echo "  .gitattributes: ハーネス管理ブロックを更新(生成物はマージせず再生成)"
+}
+
+# ── git の同期状態(多台運用の可視化)────────────────────────────────
+# fetch はしない(遅い・ネットワークが要る)。--status は「前回 fetch 時点」の
+# 差分と、ネットワーク不要な未コミット数を出す。fetch するのは --sync だけ。
+git_state() {   # $1 = dir, $2 = "fresh" なら fetch 済みなので注記を付けない
+  local d="$1" fresh="${2:-}" up ahead behind dirty out
+  git -C "$d" rev-parse --git-dir >/dev/null 2>&1 || { printf 'git 管理外'; return; }
+  dirty=$(git -C "$d" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+  up=$(git -C "$d" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)
+  if [ -n "$up" ]; then
+    local counts
+    counts=$(git -C "$d" rev-list --left-right --count "@{u}...HEAD" 2>/dev/null || echo "0 0")
+    behind=$(printf '%s' "$counts" | awk '{print $1}')
+    ahead=$(printf '%s' "$counts" | awk '{print $2}')
+    out="未push ${ahead:-0} / 未pull ${behind:-0}"
+    if [ "$fresh" != "fresh" ] && { [ "${behind:-0}" != "0" ] || [ "${ahead:-0}" != "0" ]; }; then
+      out="$out (前回fetch時点)"
+    fi
+  else
+    out="upstream 未設定"
+  fi
+  [ "${dirty:-0}" != "0" ] && out="$out / 未コミット $dirty"
+  printf '%s' "$out"
+}
+
+# 1 repo を fetch して ff-only で pull する。汚れていれば触らない(記録優先)。
+sync_repo() {   # $1 = ラベル, $2 = dir
+  local label="$1" d="$2" dirty
+  if ! git -C "$d" rev-parse --git-dir >/dev/null 2>&1; then
+    echo "  - $label: git 管理外 — スキップ"; return
+  fi
+  dirty=$(git -C "$d" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+  if [ "${dirty:-0}" != "0" ]; then
+    echo "  ⚠ $label: 未コミットが $dirty 件あるため pull しません(先にコミットしてください)"
+    return
+  fi
+  if ! git -C "$d" rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
+    echo "  - $label: upstream 未設定 — スキップ"; return
+  fi
+  git -C "$d" fetch --quiet 2>/dev/null || { echo "  ⚠ $label: fetch 失敗(ネットワーク?)"; return; }
+  if git -C "$d" pull --ff-only --quiet 2>/dev/null; then
+    echo "  ✓ $label: $(git_state "$d" fresh)"
+  else
+    echo "  ⚠ $label: ff-only で pull できません(分岐しています)。"
+    echo "      → cd $d && git status で確認し、手で解決してください"
+  fi
 }
 
 wire_notebook() {
@@ -262,6 +340,7 @@ case "$MODE" in
     else
       echo "  install-path        : $ip ⚠ この repo と不一致（別の場所を install 済み）"
     fi
+    echo "  git (harness)       : $(git_state "$SRC")"
     # ハーネス自身のコミット関門(ここが未設定だと policy/map/nbmap が一度も走らない)
     hp=$(git -C "$SRC" config --get core.hooksPath 2>/dev/null || echo "")
     if [ "$hp" = ".githooks" ]; then
@@ -312,7 +391,10 @@ case "$MODE" in
         if [ ! -d "$n" ]; then
           echo "   $mark $n ✗ 存在しない"; miss=$((miss+1))
         elif [ -L "$n/tools" ] && [ -L "$n/.githooks" ]; then
+          ap=$(git -C "$n" config --bool ikmstack.autopush 2>/dev/null || echo false)
+          [ "$ap" = "true" ] && ap=" / autopush ON" || ap=""
           echo "   $mark $n ✓ 配線済"
+          echo "       git: $(git_state "$n")$ap"
         else
           echo "   $mark $n ⚠ 未配線（./setup --notebook ${n}）"; miss=$((miss+1))
         fi
@@ -327,6 +409,30 @@ case "$MODE" in
     else
       echo "  verdict: ⚠ 一部欠落 $miss 件 → 再実行して修復:  ./setup"
     fi
+    ;;
+
+  sync)
+    echo "ikmstack sync — ハーネスと登録ノートを fetch + ff-only pull します"
+    echo ""
+    sync_repo "harness ($(basename "$SRC"))" "$SRC"
+    nb=$(cat "$STATE_DIR/notebook" 2>/dev/null || echo "")
+    all=$(cat "$STATE_DIR/notebooks" 2>/dev/null || echo "")
+    [ -n "$nb" ] && all=$(printf '%s\n%s\n' "$all" "$nb" | grep -v '^$' | awk '!seen[$0]++')
+    if [ -z "$all" ]; then
+      echo "  - notebooks: 未登録"
+    else
+      while IFS= read -r n; do
+        [ -n "$n" ] || continue
+        if [ ! -d "$n" ]; then
+          echo "  ⚠ $(basename "$n"): 存在しません(./setup --forget-notebook $n)"
+        else
+          sync_repo "$(basename "$n")" "$n"
+        fi
+      done <<< "$all"
+    fi
+    echo ""
+    echo "  未push が残っている repo は、その repo で git push してください。"
+    echo "  記録層を自動 push したい場合: cd <ノート> && git config --bool ikmstack.autopush true"
     ;;
 
   uninstall)

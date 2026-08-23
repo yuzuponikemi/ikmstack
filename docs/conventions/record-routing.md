@@ -95,6 +95,56 @@ python3 tools/notebook_map.py --strict  # 差分があれば exit 1
 一覧を写さずに済むならそれが最善（正本は `./setup --status`）。
 マーカは「それでも読み物として一覧を置きたい」場合の担保である。
 
+## 多台運用（複数マシンで同じハーネス＋ノートを使う）
+
+repo が2つあることは、実は負担の主因ではない。**ikmstack は「たまに pull するだけ」**
+（改修は1台で行う）で、毎日同期が要るのは記録層だけ。仮に1 repo に統合しても
+記録の同期は同じだけ発生する。統合は公開度（ハーネスは公開／記録は private）と
+install モデル（`~/.claude/skills` は ikmstack への symlink）を壊すので採らない。
+
+代わりに、多台運用の痛点を3つ潰す。
+
+### ① 一括同期 — `./setup --sync`
+
+```bash
+./setup --sync
+```
+
+ハーネスと `~/.ikmstack/notebooks` の全ノートを fetch し、`--ff-only` で pull する。
+**未コミットがある repo は触らない**（記録を優先し、勝手に巻き込まない）。
+ff-only で通らない＝分岐している場合は、そう報告して手作業に委ねる。
+
+### ② 状態の可視化 — `./setup --status`
+
+多台運用でいちばん痛いのは衝突そのものではなく、**A機で push し忘れて B機で
+作業を始め、分岐すること**。`--status` は各 repo の「未push / 未pull / 未コミット」を
+出す。**fetch はしない**（遅い・ネットワークが要る）ので、未pull の数は
+「前回 fetch 時点」であることを明示する。fetch するのは `--sync` だけ。
+
+### ③ 記録層の自動 push（opt-in、既定は無効）
+
+```bash
+cd <ノート> && git config --bool ikmstack.autopush true
+```
+
+`.githooks/post-commit` がコミット後に push する。記録層は追記中心で、マシンごとに
+触るファイルが違う（`experiments/E###/`・`logs/<年>/<日付>_<topic>.md`）ため、
+衝突リスクより分岐を防ぐ利得が上回る。**ハーネス側は既定のまま無効にしておく**
+—— ハーネスの変更は全マシン・全ノートへ即座に波及するので、push は意図的に行う。
+
+### 生成物はマージせず再生成する
+
+`experiments/INDEX.md` は `tools/report_meta.py` が全実験の `REPORT.md` から
+決定論で作る**生成物**。行を突き合わせても正しくならないうえ、2台で別々の実験を
+作れば毎回衝突する。そこで:
+
+- `.gitattributes`（ハーネス管理ブロック）で `experiments/INDEX.md merge=union` を宣言し、
+  **衝突させずに素通し**する。
+- 直後に `.githooks/post-merge` が `report_meta.py` を走らせ、**作り直した内容で上書き**する。
+
+二重帳簿パターン（生成部は機械が作り、人間は narrative だけ書く）を、マージにも
+適用したもの。同じ理屈が当てはまる生成物が増えたら、両ブロックに足す。
+
 ## 設計の背景
 
 - E001_sidecar-routing（v1）で `/lab-log` のサイドカー分岐を実装・検証した。
