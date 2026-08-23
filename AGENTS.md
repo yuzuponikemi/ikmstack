@@ -101,6 +101,7 @@ AI コーディングエージェント向けのリポジトリ規約。
 | [docs/conventions/repository-rules.md](docs/conventions/repository-rules.md) | ディレクトリ構成・Notebook 規約・Google Drive 規約・ログの書式を確認するとき |
 | [docs/conventions/figures-regen.md](docs/conventions/figures-regen.md) | 図・`regenerate.sh`・図リンクを書く/直すとき(R1〜R3、三大原則#1の詳細) |
 | [docs/conventions/reporting.md](docs/conventions/reporting.md) | レポート/plan を書くとき(1機能=1権威・命名/R番号・事実/仮説の分離・撤回の記録・検証ゲート・鮮度維持) |
+| [docs/conventions/research.md](docs/conventions/research.md) | **調査(ディープリサーチ)**をするとき(下位問いと決着条件・出典の格付けと独立性・反証探索の記録・網羅ゲート。実験=自分で測る、との違い) |
 | [docs/conventions/record-routing.md](docs/conventions/record-routing.md) | 記録がどの層に着地するか迷ったとき(ノート根 / sidecar の振り分け正本) |
 | [docs/conventions/policy-map.md](docs/conventions/policy-map.md) | 規約そのものを直すとき(1ルール=1正本の対応表。改訂手順は harness-edit スキル) |
 | [docs/harness-map.md](docs/harness-map.md) | ハーネスの全体像を思い出したいとき・部品(スキル/ゲート/ツール)を足すとき(棚卸しは `python3 tools/harness_map.py` が生成・pre-commit が鮮度を検査) |

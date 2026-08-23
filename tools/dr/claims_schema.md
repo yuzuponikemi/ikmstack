@@ -22,6 +22,9 @@
 | `derivation` | object\|null | `derived` で必須 | `{"formula": "...", "vars": {"s":"c002",...}, "inputs": [...]}`。`vars`(変数名→claim_id)があると `numeric_compare.py` が自動 recompute できる(下記) |
 | `citation_axes` | object | ✅ | `{"reachable": bool\|null, "relevant": bool\|null, "supports": bool\|null}`(検証の3軸) |
 | `entity_check` | object\|null | 任意(dr-verifier 産物) | `{"resolved": bool, "entity_note": "...", "quantity_note": "..."}`。値が**どの実体/量を指すか**(例: 一般用 vs -K、正味 vs 総質量)。`resolved=false` は要確認(仕様・定義の取り違え型を拾う軸) |
+| `question_id` | string\|null | 調査で必須 | 答える下位問いの ID(`questions.jsonl`)。`decision_driving` では実質必須(網羅ゲート K1 が数える) |
+| `source_id` | string\|null | 調査で推奨 | `sources.jsonl` への参照。`source_url` は従来どおり残す(dr-verifier が使う) |
+| `stance` | enum\|null | 調査で必須 | `supports` / `refutes` / `neutral`。**下位問いの作業仮説に対する立場**(K3 が反証の痕跡として数える)。`citation_axes.supports`(出典が主張本文を裏づけるか)とは別の軸 |
 | `verification` | object | ✅ | 下記 |
 
 ### `verification` ブロック
@@ -45,6 +48,12 @@
   `value_num` に解決し `formula` を評価、丸め表示を考慮して主張値と比較。**「再現しない」は
   (a)出典誤り/(b)台帳の入力リンク誤りの2因**=出典の導出基準を読んで切り分ける。
 - `decision_driving` は**全数検証必須**。`supporting` はリスク加重サンプリング(Phase 2)。
+- **調査(ディープリサーチ)では台帳を3つ持つ**。この `claims.jsonl` に加えて
+  `questions.jsonl`(下位問いと決着条件)と `sources.jsonl`(探索の記録)。スキーマは
+  [research_schema.md](research_schema.md)、運用規約は
+  [docs/conventions/research.md](../../docs/conventions/research.md)。
+  受入ゲート(`dr_gate.py` = 書いたものの正しさ)と網羅ゲート(`dr_coverage.py` = 書かなかった
+  ことの穴)の**両方**を通して受入可とする。
 
 ## 最小例
 

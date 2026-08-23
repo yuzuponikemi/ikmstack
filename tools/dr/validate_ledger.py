@@ -22,6 +22,9 @@ CLAIM_TYPES = {"fact", "inference", "derived"}
 RISKS = {"decision_driving", "supporting"}
 VERIF_STATUS = {"unverified", "verified", "refuted", "unreachable"}
 VERIF_METHODS = {None, "refetch+quote+numeric", "nli", "recompute", "sampled-skip"}
+# 調査(ディープリサーチ)用の任意フィールド。既存台帳との後方互換のため、
+# 欠けていても ERROR にはしない(網羅ゲート dr_coverage.py が必要な場面で FAIL させる)。
+STANCES = {None, "supports", "refutes", "neutral"}
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -114,6 +117,15 @@ def _check_record(rec: dict, line: int, issues: list[Issue]) -> None:
                 err(f"citation_axes.{axis} が無い(null 可)")
             elif ca[axis] not in (True, False, None):
                 err(f"citation_axes.{axis} は true/false/null (実際: {ca[axis]!r})")
+
+    # --- 調査フィールド(任意。research_schema.md / dr_coverage.py 用)---
+    for field in ("question_id", "source_id"):
+        val = rec.get(field)
+        if val is not None and not isinstance(val, str):
+            err(f"{field} は文字列か null (実際: {val!r})")
+    stance = rec.get("stance")
+    if stance not in STANCES:
+        err(f"stance は {sorted(x for x in STANCES if x)} か null (実際: {stance!r})")
 
     # --- verification ---
     v = rec.get("verification")

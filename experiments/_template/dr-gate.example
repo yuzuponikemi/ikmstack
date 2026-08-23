@@ -15,3 +15,13 @@ ledger: reports/claims.jsonl
 #         Default when omitted: 0.02 (2% — absorbs sub-1% rounding differences
 #         while still catching real mix-ups).
 # reltol: 0.02
+
+# --- 調査(ディープリサーチ)のみ。網羅ゲートを commit 時に回す ---
+# questions: path to the sub-question ledger. Setting this key turns on the
+#            coverage gate (validate_research + dr_coverage K1-K4; K5 too when
+#            `prose:` is set above). Omit it entirely for measurement experiments.
+#            Convention: docs/conventions/research.md
+# questions: reports/questions.jsonl
+#
+# sources:   path to the source ledger. Default when `questions:` is set:
+# sources:   reports/sources.jsonl

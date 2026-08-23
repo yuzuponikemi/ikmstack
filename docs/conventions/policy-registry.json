@@ -51,6 +51,9 @@
         },
         {
           "file": ".claude/skills/exp-report/references/exp_report_guide.md"
+        },
+        {
+          "file": ".claude/skills/dr-synth/SKILL.md"
         }
       ],
       "enforced_by": "tools/report_meta.py --check (pre-commit)"
@@ -105,6 +108,9 @@
         },
         {
           "file": ".claude/skills/exp-report/references/exp_report_guide.md"
+        },
+        {
+          "file": ".claude/skills/dr-synth/SKILL.md"
         }
       ]
     },
@@ -137,6 +143,12 @@
       "copies": [
         {
           "file": "AGENTS.md"
+        },
+        {
+          "file": "docs/conventions/research.md"
+        },
+        {
+          "file": ".claude/skills/dr-plan/SKILL.md"
         }
       ]
     },
@@ -226,6 +238,18 @@
       "copies": [
         {
           "file": ".claude/skills/dr-audit/references/dr_audit_protocol.md"
+        },
+        {
+          "file": "docs/conventions/research.md"
+        },
+        {
+          "file": ".claude/skills/dr-plan/SKILL.md"
+        },
+        {
+          "file": ".claude/skills/dr-collect/SKILL.md"
+        },
+        {
+          "file": ".claude/skills/dr-synth/SKILL.md"
         }
       ],
       "enforced_by": "tools/dr/dr_gate_precommit.py (pre-commit; fires only for opted-in experiments)",
@@ -243,7 +267,11 @@
       "key_lines": [
         "共有前ゲート"
       ],
-      "copies": [],
+      "copies": [
+        {
+          "file": "docs/conventions/research.md"
+        }
+      ],
       "enforced_by": "—(手順。機械強制はしない — 対象は成果物ごとに変わるため)"
     },
     {
@@ -300,6 +328,95 @@
           "file": ".claude/skills/report-checksum/SKILL.md"
         }
       ]
+    },
+    {
+      "id": "research-question-closing",
+      "title": "調査の下位問いは決着条件を先に書く(書けない問いは分解し直す)",
+      "canonical": {
+        "file": "docs/conventions/research.md",
+        "anchor": "下位問いと決着条件"
+      },
+      "key_lines": [
+        "何が観測・確認できたらこの問いを閉じてよいか",
+        "`closed` にできるのは決着条件を満たしたときだけ"
+      ],
+      "copies": [
+        {
+          "file": ".claude/skills/dr-plan/SKILL.md"
+        }
+      ],
+      "enforced_by": "tools/dr/dr_coverage.py (K1)"
+    },
+    {
+      "id": "source-tier-independence",
+      "title": "出典は格付けし、孫引きを畳んでから独立本数を数える(vendor 単独で閉じない)",
+      "canonical": {
+        "file": "docs/conventions/research.md",
+        "anchor": "出典の格付けと独立性"
+      },
+      "key_lines": [
+        "`derived_from` で畳んだ後",
+        "単独で判断駆動の問いを閉じない"
+      ],
+      "copies": [
+        {
+          "file": ".claude/skills/dr-collect/SKILL.md"
+        }
+      ],
+      "enforced_by": "tools/dr/dr_coverage.py (K2)"
+    },
+    {
+      "id": "refutation-search-record",
+      "title": "反証探索は台帳に記録する(探して見つからなかったことを成果として残す)",
+      "canonical": {
+        "file": "docs/conventions/research.md",
+        "anchor": "反証探索を記録する"
+      },
+      "key_lines": [
+        "探して見つからなかったことは",
+        "反証探索(refutation search)とは"
+      ],
+      "copies": [
+        {
+          "file": ".claude/skills/dr-collect/SKILL.md"
+        }
+      ],
+      "enforced_by": "tools/dr/dr_coverage.py (K3)"
+    },
+    {
+      "id": "ledger-before-prose",
+      "title": "調査は台帳を先に埋め、散文は台帳から導出する(事後の書き起こしにしない)",
+      "canonical": {
+        "file": "docs/conventions/research.md",
+        "anchor": "台帳を先に作る(散文は台帳から導出する)"
+      },
+      "key_lines": [
+        "読みながら台帳を埋め、台帳から散文を書く",
+        "既にある台帳を検証する作業"
+      ],
+      "copies": [
+        {
+          "file": ".claude/skills/dr-collect/SKILL.md"
+        }
+      ]
+    },
+    {
+      "id": "dr-coverage-gate",
+      "title": "調査は網羅ゲート(dr_coverage.py)を受入ゲートより先に通す",
+      "canonical": {
+        "file": "docs/conventions/research.md",
+        "anchor": "網羅ゲート"
+      },
+      "key_lines": [
+        "tools/dr/dr_coverage.py",
+        "網羅ゲートを先に通す"
+      ],
+      "copies": [
+        {
+          "file": ".claude/skills/dr-synth/SKILL.md"
+        }
+      ],
+      "enforced_by": "tools/dr/dr_coverage.py"
     }
   ]
 }

@@ -19,7 +19,7 @@ distrust-by-construction / エントロピー最小)。改訂手順は harness-e
 
 <!-- gen:harness-map:summary:start -->
 
-スキル **14** / エージェント **1** / 規約ルール **14**(うち実行時強制 6) / pre-commit 関門 **7** / tools **22**
+スキル **17** / エージェント **1** / 規約ルール **19**(うち実行時強制 10) / pre-commit 関門 **7** / tools **22**
 
 <!-- gen:harness-map:summary:end -->
 
@@ -132,6 +132,11 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | `retraction-record` | 撤回は機械可読に記録する(旧版 superseded_by 必須 / 新版 corrects・retraction_type・discovered_by) | docs/conventions/reporting.md | `tools/report_meta.py (link resolvability + vocabulary; pre-commit)` |
 | `new-term-referent-first` | 新語(造語)は初出定義+役割1つで導入する(語より先に指示対象; 検査は readability-review、定着語は terms.yaml へ昇格) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |
 | `report-input-pinning` | データ由来のレポートは入力(データ/仕様)をピン留めする(再現性・検算の前提) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |
+| `research-question-closing` | 調査の下位問いは決着条件を先に書く(書けない問いは分解し直す) | docs/conventions/research.md | `tools/dr/dr_coverage.py (K1)` |
+| `source-tier-independence` | 出典は格付けし、孫引きを畳んでから独立本数を数える(vendor 単独で閉じない) | docs/conventions/research.md | `tools/dr/dr_coverage.py (K2)` |
+| `refutation-search-record` | 反証探索は台帳に記録する(探して見つからなかったことを成果として残す) | docs/conventions/research.md | `tools/dr/dr_coverage.py (K3)` |
+| `ledger-before-prose` | 調査は台帳を先に埋め、散文は台帳から導出する(事後の書き起こしにしない) | docs/conventions/research.md | —(散文。policy gate は写し同期のみ) |
+| `dr-coverage-gate` | 調査は網羅ゲート(dr_coverage.py)を受入ゲートより先に通す | docs/conventions/research.md | `tools/dr/dr_coverage.py` |
 
 <!-- gen:harness-map:rules:end -->
 
@@ -142,6 +147,9 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | スキル | 一言(description 冒頭) |
 |---|---|
 | [dr-audit](../.claude/skills/dr-audit/SKILL.md) | レポートの事実・数値を独立検証する。 |
+| [dr-collect](../.claude/skills/dr-collect/SKILL.md) | Search for sources against a sub-question ledger and fill the source + claim ledgers as you read — recording r… |
+| [dr-plan](../.claude/skills/dr-plan/SKILL.md) | Decompose one research topic into independently-closable sub-questions with explicit closing conditions, and w… |
+| [dr-synth](../.claude/skills/dr-synth/SKILL.md) | Turn the filled research ledgers into a reasoned report — generate the skeleton from questions/sources/claims,… |
 | [exp-checkpoint](../.claude/skills/exp-checkpoint/SKILL.md) | At a milestone for an experiment, bring its uppercase living docs and INDEX up to date and write the log — in… |
 | [exp-deck](../.claude/skills/exp-deck/SKILL.md) | Generate a shareable, peer-review-ready slide deck (.pptx) from an experiment's report — restructure REPORT.md… |
 | [exp-new](../.claude/skills/exp-new/SKILL.md) | Scaffold a new experiment in this lab repo — copy experiments/_template, record involved repos' commit SHAs in… |
@@ -166,7 +174,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 |---|---|
 | `tools/check_report_figures.py` | check_report_figures.py — レポートの図リンクが「再生成出力先」を指すか検証(依存なし) |
 | `tools/check_untraceable_numbers.py` | check_untraceable_numbers.py -- flag empirical numbers that carry no provenance anchor. |
-| `tools/dr/`(6 scripts) | tools/dr — Deep Research 検証ツール (Phase 1 MVP) |
+| `tools/dr/`(9 scripts) | tools/dr — Deep Research 検証ツール (Phase 1 MVP) |
 | `tools/gen_readview.py` | gen_readview.py — 読みビュー(HTML)生成の共通ステップ。 |
 | `tools/harness_map.py` | harness_map.py — docs/harness-map.md の棚卸し(生成部)を再生成/検証する。 |
 | `tools/index_html.py` | index_html.py — experiments/INDEX.html(ソート/フィルタ可能な読みビュー)生成 |

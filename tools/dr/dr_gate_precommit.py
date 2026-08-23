@@ -13,6 +13,12 @@ Lightweight subset (NOT the full /dr-audit skill):
     numeric_compare  -> deterministic recompute of derived values
     ledger_to_prose  -> prose<->ledger tracking (only if the marker names a prose file)
 
+Research mode (only if the marker names a `questions:` ledger):
+    validate_research -> schema of questions.jsonl / sources.jsonl
+    dr_coverage       -> coverage gate K1-K4 (K5 too when `prose:` is also set)
+  See docs/conventions/research.md; this is the "what you did NOT write" half of
+  the gate, complementing the claims-side checks above.
+
 The full audit (dr-verifier web re-fetch + dr_gate acceptance gate requiring
 decision_driving all-verified) stays in the /dr-audit skill; it needs the web /
 an agent and is not deterministic enough for a commit hook.
@@ -23,6 +29,8 @@ Marker format (`experiments/<experiment_id>/.dr-gate`), all keys optional:
     prose:  reports/E001-R001_...md  # relative; enables ledger_to_prose_check
     reltol: 0.02                     # relative tolerance for numeric_compare
                                      # (default 2%)
+    questions: reports/questions.jsonl  # relative; enables the research coverage gate
+    sources:   reports/sources.jsonl    # relative; default when `questions:` is set
 An empty marker means "use reports/claims.jsonl, no prose check, reltol 2%".
 
 Usage:
@@ -92,7 +100,7 @@ def _parse_marker(marker: Path) -> dict[str, str]:
             continue
         key, _, val = line.partition(":")
         key, val = key.strip().lower(), val.split("#", 1)[0].strip()
-        if key in ("ledger", "prose", "reltol") and val:
+        if key in ("ledger", "prose", "reltol", "questions", "sources") and val:
             cfg[key] = val
     return cfg
 
@@ -167,6 +175,37 @@ def gate_ledger(label: str, ledger: Path, prose: Path | None, reltol: str | None
     return res
 
 
+DEFAULT_QUESTIONS = "reports/questions.jsonl"
+DEFAULT_SOURCES = "reports/sources.jsonl"
+
+
+def research_steps(questions: Path, sources: Path, prose: Path | None) -> list[tuple[str, bool, str]]:
+    """Coverage half of the gate: schema of the two research ledgers, then K1-K4(-K5).
+
+    Only runs when the marker opts in with `questions:` -- ordinary measurement
+    experiments never see it (safe-by-construction, same as the marker itself).
+    """
+    steps: list[tuple[str, bool, str]] = []
+    for label, path in (("questions.jsonl", questions), ("sources.jsonl", sources)):
+        if not path.is_file():
+            steps.append(("validate_research", False, f"{label} not found: {path}"))
+            return steps
+
+    rc, out = _run_tool("validate_research.py", str(questions))
+    ok_q = rc == 0
+    rc2, out2 = _run_tool("validate_research.py", str(sources))
+    steps.append(("validate_research", ok_q and rc2 == 0, out + out2))
+    if not (ok_q and rc2 == 0):
+        return steps  # schema errors: dr_coverage bails with rc=2 anyway
+
+    cov_args = [str(questions), "--sources", str(sources)]
+    if prose is not None and prose.is_file():
+        cov_args += ["--prose", str(prose)]
+    rc, out = _run_tool("dr_coverage.py", *cov_args)
+    steps.append(("dr_coverage", rc == 0, out))
+    return steps
+
+
 def gate_experiment(exp_dir: Path) -> GateResult | None:
     """Gate one experiment IF it carries a .dr-gate marker. None = not opted in."""
     marker = exp_dir / MARKER_NAME
@@ -175,7 +214,12 @@ def gate_experiment(exp_dir: Path) -> GateResult | None:
     cfg = _parse_marker(marker)
     ledger = exp_dir / cfg.get("ledger", DEFAULT_LEDGER)
     prose = (exp_dir / cfg["prose"]) if "prose" in cfg else None
-    return gate_ledger(exp_dir.name, ledger, prose, cfg.get("reltol"))
+    res = gate_ledger(exp_dir.name, ledger, prose, cfg.get("reltol"))
+    if "questions" in cfg:
+        questions = exp_dir / cfg.get("questions", DEFAULT_QUESTIONS)
+        sources = exp_dir / cfg.get("sources", DEFAULT_SOURCES)
+        res.steps.extend(research_steps(questions, sources, prose))
+    return res
 
 
 def _print_result(res: GateResult, verbose: bool) -> None:
@@ -224,7 +268,8 @@ def main() -> int:
         # case for ordinary commits and must never block them.
         return 0
 
-    print("# dr-audit lightweight gate — validate + numeric_compare + prose_check")
+    print("# dr-audit lightweight gate — validate + numeric_compare + prose_check"
+          " (+ research coverage when opted in)")
     failed = False
     for res in results:
         _print_result(res, args.verbose)
