@@ -98,14 +98,32 @@ sync_owned() {
   sync_gitattributes_block "$NB"
 }
 
+# マーカ間を本文で置換する(無ければ末尾に追記)。
+# 本文は **ファイル経由**で awk に渡す — BSD awk(macOS) は -v に改行を含む値を
+# 受け取れず「newline in string」で失敗する。GNU awk では通るため、Linux でだけ
+# 動いて macOS で黙って更新されない、という形で長く潜んでいた。
+_sync_marked_block() {   # $1=対象ファイル, $2=本文(複数行)
+  local f="$1" body="$2" tmp
+  local START="# >>> ikmstack managed (do not edit inside) >>>"
+  local END="# <<< ikmstack managed <<<"
+  touch "$f"
+  tmp="$(mktemp)"; printf '%s\n' "$body" > "$tmp"
+  if grep -qF "$START" "$f" 2>/dev/null; then
+    awk -v s="$START" -v e="$END" -v bf="$tmp" '
+      $0==s { print; while ((getline line < bf) > 0) print line; close(bf); skip=1; next }
+      $0==e { skip=0; print; next }
+      !skip { print }' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+  else
+    { printf '\n%s\n' "$START"; cat "$tmp"; printf '%s\n' "$END"; } >> "$f"
+  fi
+  rm -f "$tmp"
+}
+
 # .gitignore の「ハーネス管理ブロック」をマーカ間で置換する(二重帳簿と同じ型)。
 # ノート固有の行はマーカの外に書けば保持される。
 sync_gitignore_block() {
-  local NB="$1" gi="$NB/.gitignore"
-  local START="# >>> ikmstack managed (do not edit inside) >>>"
-  local END="# <<< ikmstack managed <<<"
-  local body
-  body=$(cat <<'BLOCK'
+  local NB="$1"
+  _sync_marked_block "$NB/.gitignore" "$(cat <<'BLOCK'
 /tools
 /.githooks
 /experiments/_template
@@ -114,16 +132,7 @@ experiments/**/_generated/*.readview.html
 experiments/**/verification/*.ipynb
 experiments/**/verification/*.html
 BLOCK
-)
-  touch "$gi"
-  if grep -qF "$START" "$gi" 2>/dev/null; then
-    awk -v s="$START" -v e="$END" -v b="$body" '
-      $0==s {print; print b; skip=1; next}
-      $0==e {skip=0; print; next}
-      !skip {print}' "$gi" > "$gi.tmp" && mv "$gi.tmp" "$gi"
-  else
-    printf '\n%s\n%s\n%s\n' "$START" "$body" "$END" >> "$gi"
-  fi
+)"
   echo "  .gitignore: ハーネス管理ブロックを更新"
 }
 
@@ -132,23 +141,11 @@ BLOCK
 # 突き合わせても正しくならない。union で衝突を起こさず素通しし、post-merge が
 # 作り直す(= 生成物はマージせず再生成する)。
 sync_gitattributes_block() {
-  local NB="$1" ga="$NB/.gitattributes"
-  local START="# >>> ikmstack managed (do not edit inside) >>>"
-  local END="# <<< ikmstack managed <<<"
-  local body
-  body=$(cat <<'BLOCK'
+  local NB="$1"
+  _sync_marked_block "$NB/.gitattributes" "$(cat <<'BLOCK'
 experiments/INDEX.md merge=union
 BLOCK
-)
-  touch "$ga"
-  if grep -qF "$START" "$ga" 2>/dev/null; then
-    awk -v s="$START" -v e="$END" -v b="$body" '
-      $0==s {print; print b; skip=1; next}
-      $0==e {skip=0; print; next}
-      !skip {print}' "$ga" > "$ga.tmp" && mv "$ga.tmp" "$ga"
-  else
-    printf '\n%s\n%s\n%s\n' "$START" "$body" "$END" >> "$ga"
-  fi
+)"
   echo "  .gitattributes: ハーネス管理ブロックを更新(生成物はマージせず再生成)"
 }
 
