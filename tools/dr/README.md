@@ -9,6 +9,10 @@
 
 - 決定論ツール(本ディレクトリ)は単体で手動実行できる。
 - 独立検証者は `.claude/agents/dr-verifier.md`(明示呼び出し=自動発火しない)。
+  道具は **WebFetch と Read** のみ。**Bash は意図的に渡していない** — シェルを渡すと
+  検証者が主張台帳そのものを読めてしまい、「執筆者の根拠は渡さない」という独立性の前提が
+  形骸化するため。大きな PDF だけは呼び出し元が `pdf_fetch.py` で取得してパスを渡す
+  (この経路は独立性が一段落ちるので、検証者は `verdict_note` にその旨を記録する)。
 - オーケストレーションは `/dr-audit` スキル(`.claude/skills/dr-audit/SKILL.md`)。
   **受入ゲートはスキルの最後で必ず実行**(skill 内強制)。
 - **グローバル Stop hook は `.claude/settings.json` に入れていない。** 理由: Stop hook は
@@ -40,6 +44,10 @@
 | `ledger_to_prose_check.py` | 散文↔台帳の追跡(参照の実在・検証済み・**数値ドリフト**・citation_error_rate) | stdlib のみ |
 | `sampling_select.py` | リスク加重サンプリング(判断駆動=全数 / 補足=Z1.4 抜き取り選定) | stdlib のみ |
 | `dr_gate.py` | 受入ゲート(手動): 判断駆動主張が全数 verified か / 不良率 / 引用整合 | stdlib のみ |
+| `pdf_fetch.py` | 出典 PDF を落とし、頁数・sha256 と**読むべきページ窓の当たり**を出す(検証者が Read で読むための下ごしらえ。抽出テキストは判定根拠にしない) | stdlib のみ |
+| `validate_research.py` | 調査の2台帳(`questions.jsonl` / `sources.jsonl`)のスキーマ検証 | stdlib のみ |
+| `dr_coverage.py` | 網羅ゲート: 書かなかったことの穴(K1〜K5)。規約は docs/conventions/research.md | stdlib のみ |
+| `dr_outline.py` | 台帳から散文の骨組みを生成(判断はしない) | stdlib のみ |
 
 スキーマ定義は [`claims_schema.md`](claims_schema.md)。
 

@@ -174,7 +174,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 |---|---|
 | `tools/check_report_figures.py` | check_report_figures.py — レポートの図リンクが「再生成出力先」を指すか検証(依存なし) |
 | `tools/check_untraceable_numbers.py` | check_untraceable_numbers.py -- flag empirical numbers that carry no provenance anchor. |
-| `tools/dr/`(9 scripts) | tools/dr — Deep Research 検証ツール (Phase 1 MVP) |
+| `tools/dr/`(10 scripts) | tools/dr — Deep Research 検証ツール (Phase 1 MVP) |
 | `tools/gen_readview.py` | gen_readview.py — 読みビュー(HTML)生成の共通ステップ。 |
 | `tools/harness_map.py` | harness_map.py — docs/harness-map.md の棚卸し(生成部)を再生成/検証する。 |
 | `tools/index_html.py` | index_html.py — experiments/INDEX.html(ソート/フィルタ可能な読みビュー)生成 |
