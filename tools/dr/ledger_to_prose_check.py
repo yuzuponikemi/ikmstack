@@ -7,6 +7,8 @@
 
   E1 壊れた参照 : 散文が台帳に無い claim_id を参照
   E2 未検証参照 : 散文が verified でない主張を確定として参照
+                  (段落に「要確認/暫定/未検証」等の明記がある場合、および補足主張を
+                   抜き取りで非選定にした場合は W3 に降格 — 正直なラベル付けを罰しない)
   E3 数値ドリフト: マーカ直前の数値が、参照先台帳行の value_num と食い違う
                   (例: 散文「8 µm (claim:c001)」だが台帳は 8.2 µm)
   W1 未追跡数値 : 数値+単位がどのマーカからも離れている(出典紐づけ漏れの疑い)
@@ -54,6 +56,26 @@ def _num_before(text: str, pos: int, window: int = 60):
     return val, unit, raw
 
 
+# 散文が「確定ではない」と明記しているかを判定する語。reporting.md「事実と仮説を分ける」の
+# 語頭ラベル(確定 / 仮説 / 暫定値(要再測) / 要確認)と、検証状態の明示表現に合わせる。
+HEDGE_WORDS = ("要確認", "暫定", "未検証", "未了", "仮説", "unverified", "unreachable")
+
+
+def _is_hedged(prose: str, pos: int) -> bool:
+    """マーカ位置を含む段落に「確定ではない」旨の明記があるか。
+
+    段落 = 空行で区切られた塊。段落単位で見るのは、語頭ラベル(『**要確認:** …』)が
+    その段落全体に掛かる書き方を規約が採っているため(行単位だと箇条書きの2行目以降を
+    取りこぼす)。
+    """
+    start = prose.rfind("\n\n", 0, pos) + 2
+    end = prose.find("\n\n", pos)
+    if end == -1:
+        end = len(prose)
+    para = prose[start:end]
+    return any(w in para for w in HEDGE_WORDS)
+
+
 def check(prose: str, by_id: dict[str, dict]) -> tuple[list[str], list[str], dict]:
     errors: list[str] = []
     warns: list[str] = []
@@ -66,9 +88,26 @@ def check(prose: str, by_id: dict[str, dict]) -> tuple[list[str], list[str], dic
         if claim is None:
             errors.append(f"[E1] 壊れた参照: 台帳に無い {cid}")
             continue
-        status = (claim.get("verification") or {}).get("status")
+        verification = claim.get("verification") or {}
+        status = verification.get("status")
         if status != "verified":
-            errors.append(f"[E2] 未検証参照: {cid} を確定として引用(status={status})")
+            # 規約(reporting.md「いつ検証するか」)は「潰せなかった数値は成果物から落とすか
+            # 『暫定』と明記する」を許している。散文がその明記をしている場合、または
+            # 補足主張を抜き取りで意図的に検証対象外にした場合は、E2(差し戻し)ではなく
+            # W3(注意)に落とす — さもないと「正直にラベルを付けた散文」が
+            # 「ラベルを外した散文」より強く罰せられ、ラベルを外す誘因が生まれる。
+            if _is_hedged(prose, m.start()):
+                warns.append(
+                    f"[W3] 未検証参照(暫定と明記あり): {cid} (status={status})"
+                )
+            elif verification.get("method") == "sampled-skip":
+                warns.append(
+                    f"[W3] 未検証参照(抜き取りで非選定): {cid} (status={status})"
+                )
+            else:
+                errors.append(
+                    f"[E2] 未検証参照: {cid} を確定として引用(status={status})"
+                )
         # E3 数値ドリフト
         found = _num_before(prose, m.start())
         vnum = claim.get("value_num")
