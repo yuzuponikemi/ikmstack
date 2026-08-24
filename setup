@@ -153,7 +153,9 @@ BLOCK
 # fetch はしない(遅い・ネットワークが要る)。--status は「前回 fetch 時点」の
 # 差分と、ネットワーク不要な未コミット数を出す。fetch するのは --sync だけ。
 git_state() {   # $1 = dir, $2 = "fresh" なら fetch 済みなので注記を付けない
-  local d="$1" fresh="${2:-}" up ahead behind dirty out
+  # autopush の有無もここで出す。呼び出し側で個別に足すと、片方だけ付け忘れる
+  # (実際 --status のハーネス行に付け忘れていた)。
+  local d="$1" fresh="${2:-}" up ahead behind dirty out ap
   git -C "$d" rev-parse --git-dir >/dev/null 2>&1 || { printf 'git 管理外'; return; }
   dirty=$(git -C "$d" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
   up=$(git -C "$d" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)
@@ -170,6 +172,8 @@ git_state() {   # $1 = dir, $2 = "fresh" なら fetch 済みなので注記を�
     out="upstream 未設定"
   fi
   [ "${dirty:-0}" != "0" ] && out="$out / 未コミット $dirty"
+  ap=$(git -C "$d" config --bool ikmstack.autopush 2>/dev/null || echo false)
+  [ "$ap" = "true" ] && out="$out / autopush ON"
   printf '%s' "$out"
 }
 
@@ -388,10 +392,8 @@ case "$MODE" in
         if [ ! -d "$n" ]; then
           echo "   $mark $n ✗ 存在しない"; miss=$((miss+1))
         elif [ -L "$n/tools" ] && [ -L "$n/.githooks" ]; then
-          ap=$(git -C "$n" config --bool ikmstack.autopush 2>/dev/null || echo false)
-          [ "$ap" = "true" ] && ap=" / autopush ON" || ap=""
           echo "   $mark $n ✓ 配線済"
-          echo "       git: $(git_state "$n")$ap"
+          echo "       git: $(git_state "$n")"
         else
           echo "   $mark $n ⚠ 未配線（./setup --notebook ${n}）"; miss=$((miss+1))
         fi
