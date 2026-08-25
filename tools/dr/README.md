@@ -11,8 +11,14 @@
 - 独立検証者は `.claude/agents/dr-verifier.md`(明示呼び出し=自動発火しない)。
   道具は **WebFetch と Read** のみ。**Bash は意図的に渡していない** — シェルを渡すと
   検証者が主張台帳そのものを読めてしまい、「執筆者の根拠は渡さない」という独立性の前提が
-  形骸化するため。大きな PDF だけは呼び出し元が `pdf_fetch.py` で取得してパスを渡す
-  (この経路は独立性が一段落ちるので、検証者は `verdict_note` にその旨を記録する)。
+  形骸化するため。**検証者が自力で原文に到達できない出典**だけは、呼び出し元が取得して
+  ローカルパスと sha256 を渡す(経路B)。対象は PDF に限らない — 取得上限超えの PDF、
+  本文がブラウザ側で組み立てられるページ(SPA)、取得経路が聞き方で答えを変えるページの
+  いずれも該当する。**この経路は独立性が一段落ちる**ので、検証者は `verdict_note` に
+  「経路B で検証した」ことと**自力で届かなかった理由**を記録する。
+  ⚠ **PDF のページ指定読解は `pdftoppm`(poppler)に依存する。**未導入だと
+  「出典が読めない」ではなく「道具が動かない」で落ちる。`./setup --status` の
+  external tools 行で見える。
   ⚠ **`tools:` を変えた直後の同一セッションでは効かない**(エージェント定義はセッション開始時に
   読み込まれる)。新しいセッションで検証すること。詳細は harness-edit スキル。
 - オーケストレーションは `/dr-audit` スキル(`.claude/skills/dr-audit/SKILL.md`)。
@@ -43,7 +49,7 @@
 |---|---|---|
 | `validate_ledger.py` | 主張台帳 `claims.jsonl` のスキーマ・必須列・enum を検証 | stdlib のみ |
 | `numeric_compare.py` | 派生値の決定論 recompute(`derivation.vars`+`formula` を評価、丸め考慮で照合) | stdlib のみ |
-| `ledger_to_prose_check.py` | 散文↔台帳の追跡(参照の実在・検証済み・**数値ドリフト**・citation_error_rate) | stdlib のみ |
+| `ledger_to_prose_check.py` | 散文↔台帳の追跡(参照の実在・検証済み・**数値ドリフト**・citation_error_rate)。数値ドリフトは**マーカと同じ文・同じ箇条書き項目・同じ表セル**の中だけを見る(境目を越えた数値は拾わない) | stdlib のみ |
 | `sampling_select.py` | リスク加重サンプリング(判断駆動=全数 / 補足=Z1.4 抜き取り選定) | stdlib のみ |
 | `dr_gate.py` | 受入ゲート(手動): 判断駆動主張が全数 verified か / 不良率 / 引用整合 | stdlib のみ |
 | `pdf_fetch.py` | 出典 PDF を落とし、頁数・sha256 と**読むべきページ窓の当たり**を出す(検証者が Read で読むための下ごしらえ。抽出テキストは判定根拠にしない) | stdlib のみ |

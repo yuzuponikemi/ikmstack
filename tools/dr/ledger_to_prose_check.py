@@ -11,6 +11,8 @@
                    抜き取りで非選定にした場合は W3 に降格 — 正直なラベル付けを罰しない)
   E3 数値ドリフト: マーカ直前の数値が、参照先台帳行の value_num と食い違う
                   (例: 散文「8 µm (claim:c001)」だが台帳は 8.2 µm)
+                  見るのは**マーカと同じ文・同じ箇条書き項目・同じ表セル**の中だけ。
+                  境目(改行 / 。 / ! / ? / ; / 表の | )を越えた数値は拾わない
   W1 未追跡数値 : 数値+単位がどのマーカからも離れている(出典紐づけ漏れの疑い)
   W2 未使用主張 : 台帳の decision_driving が散文から一度も参照されない
 
@@ -37,9 +39,29 @@ NUM_UNIT_RE = re.compile(
 )
 
 
+# マーカの手前を遡るときに越えてはいけない境目。
+# **なぜ要るか**: 距離だけで数値を拾うと、隣の文・隣の箇条書き・隣のセルの数値を
+# 主張値と突き合わせて偽の E3 を出す(実例 E007: 「51%…(2023年は41%)」の比較年の値や、
+# 直前の箇条書きの数値を拾った)。回避を書き手の配慮に頼らず、ツール側で切る。
+# ASCII のピリオドは小数点にも使うので、単独では境目にしない(後ろに空白が続く場合のみ)。
+_LOCAL_BOUNDARY_RE = re.compile(r"[\n。．！？!?；;|]|\.\s")
+
+
+def _clip_to_local_unit(seg: str) -> str:
+    """seg の末尾から見て、直近の境目より後ろ(=マーカと同じ文・同じ項目)だけを残す。"""
+    last = None
+    for m in _LOCAL_BOUNDARY_RE.finditer(seg):
+        last = m.end()
+    return seg if last is None else seg[last:]
+
+
 def _num_before(text: str, pos: int, window: int = 60):
-    """pos の手前 window 文字から、最後に出る数値(+単位)を返す。無ければ None。"""
-    seg = text[max(0, pos - window):pos]
+    """pos の手前 window 文字から、最後に出る数値(+単位)を返す。無ければ None。
+
+    window 内であっても、**マーカと同じ文・同じ箇条書き項目・同じ表セルの中**しか見ない
+    (`_clip_to_local_unit`)。境目を越えた数値は「マーカが指す値」ではないため。
+    """
+    seg = _clip_to_local_unit(text[max(0, pos - window):pos])
     last = None
     for m in NUM_UNIT_RE.finditer(seg):
         raw = m.group(1)

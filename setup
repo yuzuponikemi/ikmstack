@@ -378,6 +378,25 @@ case "$MODE" in
         echo "    ✗ $(basename "$a")"; miss=$((miss+1))
       fi
     done
+    # external tools（ハーネスが symlink できない前提 = OS 側の依存）
+    # なぜ見るか: エージェントに道具を持たせることと、その道具が動くことは別。
+    # 実例(E007): dr-verifier に Read を足しても poppler が無く、PDF 検証は
+    # "pdftoppm is not installed" で落ちた。install 健全性の表に出ていなかったので
+    # 誰も気づけなかった。欠けても install 自体は成立するので miss には数えず、
+    # 「その機能が使えない」ことだけを名指しする。
+    echo "  external tools（欠けるとその機能だけが落ちる）:"
+    ext_missing=0
+    check_ext() {  # $1=コマンド $2=これが無いと落ちる機能 $3=入れ方
+      if command -v "$1" >/dev/null 2>&1; then
+        echo "    ✓ $1 — $2"
+      else
+        echo "    ✗ $1 (未導入) — $2 が使えません → $3"
+        ext_missing=$((ext_missing+1))
+      fi
+    }
+    check_ext pdftoppm "dr-verifier の PDF 検証（Read のページ指定）" "brew install poppler"
+    check_ext soffice  "exp-deck のスライド可視検証（pptx→画像）" "brew install --cask libreoffice"
+
     # notebooks（複数対応。* が既定 = sidecar 記録の集約先）
     nb=$(cat "$STATE_DIR/notebook" 2>/dev/null || echo "")
     all=$(cat "$STATE_DIR/notebooks" 2>/dev/null || echo "")
@@ -407,6 +426,10 @@ case "$MODE" in
       echo "  verdict: ❌ 未インストール → 実行:  ./setup"
     else
       echo "  verdict: ⚠ 一部欠落 $miss 件 → 再実行して修復:  ./setup"
+    fi
+    # external tools は install の成否と別軸なので、verdict とは別行で伝える。
+    if [ "$ext_missing" -gt 0 ]; then
+      echo "  note   : external tools が $ext_missing 件未導入（./setup では直りません。上の入れ方を参照）"
     fi
     ;;
 
