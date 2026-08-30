@@ -30,7 +30,18 @@ cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
 
 ## 手順
 
-1. `experiments/_template/` を `experiments/<実験ID>_<topic>/` にコピー。
+1. **実験IDを採番する(コピーより先)** — 採番済みの最大番号を見て +1 する:
+   ```bash
+   ls -d experiments/E* 2>/dev/null | sort
+   ```
+   「直前に見た実験の次だから E010」と機械的に決めない。**並行セッションが先に採番している
+   ことがある**(実際に E010 を二重採番し、事後に E011 へ改番して復旧した)。
+   `experiments/INDEX.md` は commit 済みの `REPORT.md` から生成されるので採番直後の実験は
+   載らない — **ディレクトリ一覧が採番済みの真実**。
+   正本: AGENTS.md「実験 ID と 命名規約」
+   <!-- policy:experiment-id-numbering@df108c26 -->
+   - フォーマットはデフォルトで `E###` (例: `E001_stage-tension`)。日付は付けない。
+2. `experiments/_template/` を `experiments/<実験ID>_<topic>/` にコピー。
    **`experiments/_template` はハーネスへの symlink なので、必ず `-L` を付ける**:
    ```bash
    mkdir -p "experiments/<実験ID>_<topic>"
@@ -39,21 +50,19 @@ cd "$(python3 "$(cat ~/.ikmstack/install-path)/tools/sidecar.py" notebook)"
    ⚠️ `cp -R experiments/_template experiments/<ID>` と書くと、macOS の `cp -R` は
    **symlink をそのままコピー**する。結果、実験ディレクトリがハーネスのテンプレを指す
    symlink になり、**以降の書き込みが全部ハーネス側のテンプレを破壊する**（実際に起きた）。
-   - 実験IDのフォーマットはデフォルトで `E###` (例: `E001_stage-tension`)。
-   - 日付はディレクトリ名に付けない。
    - コピー後に `ls -ld experiments/<ID>` で **symlink でない**ことを確かめる。
-2. **PLAN.md** に記入: 目的 / 仮説 / 手順(分かる範囲) / 関与リポジトリ / 関連チケット等 (設定されている場合)
-3. **MANIFEST.md** に関与リポジトリの commit SHA を記録:
+3. **PLAN.md** に記入: 目的 / 仮説 / 手順(分かる範囲) / 関与リポジトリ / 関連チケット等 (設定されている場合)
+4. **MANIFEST.md** に関与リポジトリの commit SHA を記録:
    ```
    git -C ../<repo> rev-parse --short HEAD
    ```
    再現性はこれで担保する(サブモジュールは使わない)
-4. **Drive ミラー**を作成: `.lab-config.json` に設定されている Google Drive ルート配下の `experiments/<実験ID>_<topic>/`
+5. **Drive ミラー**を作成: `.lab-config.json` に設定されている Google Drive ルート配下の `experiments/<実験ID>_<topic>/`
    - 作成したパスを MANIFEST.md に記録。
-5. **`REPORT.md` のフロントマターを記入し `experiments/INDEX.md` を生成** —
+6. **`REPORT.md` のフロントマターを記入し `experiments/INDEX.md` を生成** —
    `REPORT.md` 冒頭に `experiment_id`(=ディレクトリ名)/ `status`(初期は `planning`)/ `period_start` / `summary` を書き、`python3 tools/report_meta.py` を実行(INDEX 行を手書きしない)。
    <!-- policy:report-meta-regen@a43c35f7 -->
-6. **次にやることは `PLAN.md`(次の計画)に書く**。
+7. **次にやることは `PLAN.md`(次の計画)に書く**。
 
 ## リマインド(立ち上げ時に必要なら案内)
 

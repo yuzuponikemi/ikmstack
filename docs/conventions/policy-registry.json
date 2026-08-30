@@ -115,6 +115,22 @@
       ]
     },
     {
+      "id": "experiment-id-numbering",
+      "title": "実験IDの番号は採番済みの最大+1(テンプレをコピーする前に experiments/ を見る)",
+      "canonical": {
+        "file": "AGENTS.md",
+        "anchor": "実験 ID と 命名規約"
+      },
+      "key_lines": [
+        "ls -d experiments/E*"
+      ],
+      "copies": [
+        {
+          "file": ".claude/skills/exp-new/SKILL.md"
+        }
+      ]
+    },
+    {
       "id": "frontmatter-schema",
       "title": "REPORT.md / 一次記録の YAML フロントマター書式",
       "canonical": {

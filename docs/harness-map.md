@@ -19,7 +19,7 @@ distrust-by-construction / エントロピー最小)。改訂手順は harness-e
 
 <!-- gen:harness-map:summary:start -->
 
-スキル **17** / エージェント **1** / 規約ルール **19**(うち実行時強制 10) / pre-commit 関門 **7** / tools **22**
+スキル **17** / エージェント **1** / 規約ルール **20**(うち実行時強制 10) / pre-commit 関門 **7** / tools **22**
 
 <!-- gen:harness-map:summary:end -->
 
@@ -121,6 +121,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | `report-meta-regen` | INDEX は手書きせず report_meta.py で再生成する | AGENTS.md | `tools/report_meta.py --check (pre-commit)` |
 | `figures-not-in-git` | 図は git に入れない(三大原則#1、R1〜R3) | docs/conventions/figures-regen.md | `tools/check_report_figures.py (pre-commit)` |
 | `report-naming-numbering` | レポート命名 <実験ID>-R### と R 番号の規律(リビング文書に R を振らない) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |
+| `experiment-id-numbering` | 実験IDの番号は採番済みの最大+1(テンプレをコピーする前に experiments/ を見る) | AGENTS.md | —(散文。policy gate は写し同期のみ) |
 | `frontmatter-schema` | REPORT.md / 一次記録の YAML フロントマター書式 | .claude/skills/exp-report/references/exp_report_guide.md | `tools/report_meta.py (schema errors fail --check)` |
 | `living-vs-primary` | リビング文書 vs 一次記録(1機能=1権威) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |
 | `central-todo-scope` | 中央 tasks/TODO.md はマネジメント観点+リポ運営専用(実験の詳細は PLAN/REPORT が正本) | docs/conventions/reporting.md | —(散文。policy gate は写し同期のみ) |
