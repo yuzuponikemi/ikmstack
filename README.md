@@ -152,7 +152,9 @@ tools/                            report_meta.py / check_report_figures.py /
                                   strip_nb_outputs.py / dr/*（dr-audit 用）
                                   policy_gate.py / harness_map.py（ハーネス自己保守）/
                                   log_draft.py / retractions.py / synthesis_*.py /
-                                  index_html.py / report_readview.py（読みビュー）
+                                  index_html.py / report_readview.py（読みビュー。
+                                  調査台帳が隣にあれば claim/問い/出典を
+                                  ホバーで確かめられる形で重ねる）
 docs/conventions/                 reporting / figures-regen / repository-rules /
                                   record-routing（どこで起動しても正しく着地する規約）/
                                   policy-map + policy-registry.json（1ルール=1正本）

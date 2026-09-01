@@ -12,9 +12,11 @@ MD を単一の正本に保ったまま、読みやすい派生 HTML を生成�
   - 表 → 横スクロール枠 + 数値列右寄せ + tabular-nums
   - 数式 $…$ / $$…$$ → 整形スパン(Unicode 主体の素数式に対応。真の LaTeX→MathML は v2)
   - `## 結論`(および要点/概要)以外の H2 セクションを <details> に畳んで段階開示
+  - 調査3台帳(questions/sources/claims.jsonl)が隣にあれば、散文中の
+    `(claim:cNNN)` / `Q<n>` / `s<nnn>` をチップ化しホバーで台帳を出す(--no-ledger で無効)
 
 使い方:
-  python3 tools/report_readview.py <report.md> [-o out.html] [--stdout] [--no-fold]
+  python3 tools/report_readview.py <report.md> [-o out.html] [--stdout] [--no-fold] [--no-ledger]
   既定の出力先: その実験の _generated/<stem>.readview.html
 
 依存: mistune(>=3)。図生成で既にローカルは依存パッケージを使うため許容(AGENTS 三大原則は
@@ -63,6 +65,7 @@ from report_meta import load_config  # noqa: E402
 from report_meta import parse_frontmatter  # noqa: E402
 
 from readview.theme import css  # noqa: E402
+from readview import ledger as _ledger  # noqa: E402
 
 _MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
          ".gif": "image/gif", ".svg": "image/svg+xml", ".webp": "image/webp"}
@@ -423,7 +426,8 @@ def _strip_leading_h1(md_body: str) -> str:
     return "\n".join(out)
 
 
-def render_html(md_path: Path, fold: bool = True, siblings: list[dict] | None = None) -> str:
+def render_html(md_path: Path, fold: bool = True, siblings: list[dict] | None = None,
+                use_ledger: bool = True) -> str:
     meta = parse_frontmatter(md_path) or {}
     if siblings is None:
         siblings = _sibling_reports(md_path)
@@ -446,6 +450,15 @@ def render_html(md_path: Path, fold: bool = True, siblings: list[dict] | None = 
     )
     body_html = md(body_md)
     body_html, toc = _process_sections(body_html, fold)
+
+    # 調査3台帳が隣にあれば、台帳参照をチップ化して読みながら確かめられるようにする
+    led = _ledger.load(md_path) if use_ledger else None
+    if led:
+        body_html = _ledger.chipify(body_html, led)
+    led_css = _ledger.css() if led else ""
+    led_pills = ("\n  " + _ledger.pills(led)) if led else ""
+    led_panel = ("\n" + _ledger.panel()) if led else ""
+    led_js = ("\n" + _ledger.script(led).strip()) if led else ""
     toc_html = "".join(
         f'<li><a href="#{sid}">{_esc(title)}</a></li>' for sid, title in toc)
 
@@ -457,11 +470,11 @@ def render_html(md_path: Path, fold: bool = True, siblings: list[dict] | None = 
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>{title} · read-view</title>
-<style>{css()}</style>
+<style>{css()}{led_css}</style>
 </head>
 <body>
 <div class="toolbar"><div class="wrap">
-  {switcher}
+  {switcher}{led_pills}
   <span class="spacer"></span>
   <button class="btn" id="rv-toc-btn" aria-expanded="false">セクション</button>
   <button class="btn" id="rv-expand">すべて展開</button>
@@ -476,7 +489,7 @@ def render_html(md_path: Path, fold: bool = True, siblings: list[dict] | None = 
 <p class="foot">Read-view · 元文書: <code>{_esc(rel)}</code> ·
 内容は Markdown 正本を忠実にレンダリングしたもの(要約・改変なし)。正本の更新はこの HTML でなく MD 側で行う。</p>
 </div>
-<button class="totop" id="rv-totop" aria-label="先頭へ戻る" hidden>↑</button>
+<button class="totop" id="rv-totop" aria-label="先頭へ戻る" hidden>↑</button>{led_panel}
 <div class="lb" id="rv-lb" hidden><img id="rv-lb-img" alt=""/></div>
 <script>
   const $ = id => document.getElementById(id);
@@ -528,7 +541,7 @@ def render_html(md_path: Path, fold: bool = True, siblings: list[dict] | None = 
     addEventListener('scroll', () => {{ totop.hidden = scrollY < 600; }}, {{passive: true}});
     totop.addEventListener('click', () => scrollTo({{top: 0, behavior: 'smooth'}}));
   }}
-</script>
+</script>{led_js}
 </body>
 </html>
 """
@@ -665,7 +678,7 @@ def _index_html(exp_dir: Path, siblings: list[dict]) -> str:
 """
 
 
-def _render_batch(exp_dir: Path, fold: bool) -> int:
+def _render_batch(exp_dir: Path, fold: bool, use_ledger: bool = True) -> int:
     targets = _collect_reports(exp_dir)
     if not targets:
         print(f"no reports under {exp_dir} (REPORT.md / reports/FL*-R*_*.md)", file=sys.stderr)
@@ -679,7 +692,8 @@ def _render_batch(exp_dir: Path, fold: bool) -> int:
         try:
             sibs = [{**s, "current": (s["stem"] == md.stem)} for s in base]
             out = out_dir / f"{md.stem}.readview.html"
-            out.write_text(render_html(md, fold=fold, siblings=sibs), encoding="utf-8")
+            out.write_text(render_html(md, fold=fold, siblings=sibs, use_ledger=use_ledger),
+                           encoding="utf-8")
             n_ok += 1
         except Exception as e:  # 1件の失敗で全体を止めない
             print(f"  FAIL {md.name}: {e}", file=sys.stderr)
@@ -707,6 +721,8 @@ def main(argv=None) -> int:
     ap.add_argument("-o", "--out", type=Path, help="出力 HTML パス(単体時のみ)")
     ap.add_argument("--stdout", action="store_true", help="標準出力へ(単体時のみ)")
     ap.add_argument("--no-fold", action="store_true", help="セクションを畳まない")
+    ap.add_argument("--no-ledger", action="store_true",
+                    help="調査台帳(questions/sources/claims.jsonl)の重ね表示を無効化")
     args = ap.parse_args(argv)
 
     if not args.md.exists():
@@ -714,8 +730,10 @@ def main(argv=None) -> int:
         return 2
     # ディレクトリなら一括モード
     if args.md.is_dir():
-        return _render_batch(args.md, fold=not args.no_fold)
-    html_out = render_html(args.md, fold=not args.no_fold)
+        return _render_batch(args.md, fold=not args.no_fold,
+                             use_ledger=not args.no_ledger)
+    html_out = render_html(args.md, fold=not args.no_fold,
+                           use_ledger=not args.no_ledger)
     if args.stdout:
         sys.stdout.write(html_out)
         return 0
