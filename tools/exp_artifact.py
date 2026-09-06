@@ -43,6 +43,9 @@ RECORD_RE = re.compile(r"\bE\d{3}-R\d{3}\b")
 # 記事本文では実験IDを省いて R033 と書くことが多いので、そちらも拾う。
 SHORT_RE = re.compile(r"(?<![-\w])R\d{3}\b")
 FIGURE_RE = re.compile(r"<figure\b.*?</figure>", re.S | re.I)
+# data URI(base64)は英数字の塊なので、その中に R023 のような並びが偶然できる。
+# 走査の前に落とす(E010 で実際に誤検知した)。
+DATAURI_RE = re.compile(r"data:[a-z0-9.+-]+/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+", re.I)
 # 一次記録のファイル名: <実験ID>-R###_YYYYMMDD_<slug>_<種別>.md
 FNAME_RE = re.compile(r"^(?P<id>E\d{3}-R\d{3})_(?P<date>\d{8})_(?P<slug>.+)_(?P<type>[^_]+)\.md$")
 
@@ -139,16 +142,25 @@ def skeleton(exp: Path) -> dict:
     }
 
 
-def find_problems(html: str, known_full: set[str], known_short: set[str]) -> list[str]:
-    """HTML と実在する一次記録 ID から違反を列挙する(純関数 — selftest はここを叩く)。"""
+def find_problems(html: str, known_full: set[str], known_short: set[str],
+                  resolve_foreign=lambda rid: False) -> list[str]:
+    """HTML と実在する一次記録 ID から違反を列挙する(純関数 — selftest はここを叩く)。
+
+    resolve_foreign: 他実験の一次記録 ID が実在するかを返す。実験をまたぐ参照は
+    正当(E010 の REPORT.md は E004-R002 を引いている)なので、捏造と区別する。
+    """
+    html = DATAURI_RE.sub(" ", html)
     problems: list[str] = []
 
     # (a) 存在しない一次記録を引いていないか。
     #     E013 自身の知見 —— 逐語引用65件のうち3件が出典に存在しない合成文だった。
     #     派生成果物でも同じことが起きるので、機械で弾く。
     for cited in sorted(set(RECORD_RE.findall(html))):
-        if cited not in known_full:
-            problems.append(f"存在しない一次記録を参照: {cited}")
+        if cited in known_full:
+            continue
+        if resolve_foreign(cited):
+            continue  # 他実験の実在する一次記録。正当な参照
+        problems.append(f"存在しない一次記録を参照: {cited}")
     for cited in sorted(set(SHORT_RE.findall(html))):
         if cited not in known_short:
             problems.append(f"存在しない一次記録を参照: {cited}")
@@ -161,14 +173,24 @@ def find_problems(html: str, known_full: set[str], known_short: set[str]) -> lis
     return problems
 
 
+def _foreign_exists(experiments_root: Path, rid: str) -> bool:
+    """<実験ID>-R### が別の実験に実在するか。experiments/E###_*/reports/ を見る。"""
+    exp_num = rid.split("-")[0]                       # "E004"
+    for d in sorted(experiments_root.glob(f"{exp_num}_*")):
+        if any((d / "reports").glob(f"{rid}_*.md")):
+            return True
+    return False
+
+
 def check(exp: Path, html_path: Path) -> int:
     html = html_path.read_text(encoding="utf-8")
     records = collect_records(exp)
     known_full = {r["id"] for r in records}
     known_short = {r["id"].split("-")[-1] for r in records}
 
-    problems = find_problems(html, known_full, known_short)
-    figures = FIGURE_RE.findall(html)
+    problems = find_problems(html, known_full, known_short,
+                             lambda rid: _foreign_exists(exp.parent, rid))
+    figures = FIGURE_RE.findall(DATAURI_RE.sub(" ", html))
 
     print(f"実験 {exp.name}: 一次記録 {len(records)} 本 / 記事の図 {len(figures)} 点", flush=True)
     if problems:
@@ -198,15 +220,23 @@ FIXTURES: list[tuple[str, str, int]] = [
      '<figure><span>R012</span></figure><figure><p>なし</p></figure>', 1),
     ("figure の外の散文は出典を要求しない",
      '<p>変形は対照側からしか出ていない。</p>', 0),
+    # E010 で実際に出た誤検知2件の回帰テスト
+    ("data URI の中の偶然の一致は拾わない",
+     '<figure><span>R012</span><img src="data:image/png;base64,AAAR023BBBCCC="></figure>', 0),
+    ("実験をまたぐ実在の参照は通る",
+     '<p>E004-R002 の教訓に足した。</p><figure><span>R012</span></figure>', 0),
+    ("実験をまたぐ参照でも実在しなければ落ちる",
+     '<p>E404-R002 による。</p>', 1),
 ]
 
 
 def selftest() -> int:
     known_full = {"E013-R012", "E013-R031"}
     known_short = {"R012", "R031"}
+    foreign = lambda rid: rid == "E004-R002"   # noqa: E731 (fixture 用の固定解決)
     failed = 0
     for name, html, want in FIXTURES:
-        got = len(find_problems(html, known_full, known_short))
+        got = len(find_problems(html, known_full, known_short, foreign))
         ok = (got > 0) == (want > 0)
         print(f"  [{'ok' if ok else 'NG'}] {name}" + ("" if ok else f" (期待 {want} 件相当 / 実際 {got} 件)"))
         failed += 0 if ok else 1
