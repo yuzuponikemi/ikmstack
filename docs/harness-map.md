@@ -19,7 +19,7 @@ distrust-by-construction / エントロピー最小)。改訂手順は harness-e
 
 <!-- gen:harness-map:summary:start -->
 
-スキル **17** / エージェント **1** / 規約ルール **20**(うち実行時強制 10) / pre-commit 関門 **7** / tools **22**
+スキル **18** / エージェント **1** / 規約ルール **20**(うち実行時強制 10) / pre-commit 関門 **7** / tools **23**
 
 <!-- gen:harness-map:summary:end -->
 
@@ -151,6 +151,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | [dr-collect](../.claude/skills/dr-collect/SKILL.md) | Search for sources against a sub-question ledger and fill the source + claim ledgers as you read — recording r… |
 | [dr-plan](../.claude/skills/dr-plan/SKILL.md) | Decompose one research topic into independently-closable sub-questions with explicit closing conditions, and w… |
 | [dr-synth](../.claude/skills/dr-synth/SKILL.md) | Turn the filled research ledgers into a reasoned report — generate the skeleton from questions/sources/claims,… |
+| [exp-artifact](../.claude/skills/exp-artifact/SKILL.md) | Publish an experiment's REPORT.md as a readable, self-contained web article (an Artifact on claude.ai) and han… |
 | [exp-checkpoint](../.claude/skills/exp-checkpoint/SKILL.md) | At a milestone for an experiment, bring its uppercase living docs and INDEX up to date and write the log — in… |
 | [exp-deck](../.claude/skills/exp-deck/SKILL.md) | Generate a shareable, peer-review-ready slide deck (.pptx) from an experiment's report — restructure REPORT.md… |
 | [exp-new](../.claude/skills/exp-new/SKILL.md) | Scaffold a new experiment in this lab repo — copy experiments/_template, record involved repos' commit SHAs in… |
@@ -176,6 +177,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | `tools/check_report_figures.py` | check_report_figures.py — レポートの図リンクが「再生成出力先」を指すか検証(依存なし) |
 | `tools/check_untraceable_numbers.py` | check_untraceable_numbers.py -- flag empirical numbers that carry no provenance anchor. |
 | `tools/dr/`(10 scripts) | tools/dr — Deep Research 検証ツール (Phase 1 MVP) |
+| `tools/exp_artifact.py` | exp_artifact.py — 実験を「読み物 Artifact」にするための抽出と検査(依存なし) |
 | `tools/gen_readview.py` | gen_readview.py — 読みビュー(HTML)生成の共通ステップ。 |
 | `tools/harness_map.py` | harness_map.py — docs/harness-map.md の棚卸し(生成部)を再生成/検証する。 |
 | `tools/index_html.py` | index_html.py — experiments/INDEX.html(ソート/フィルタ可能な読みビュー)生成 |

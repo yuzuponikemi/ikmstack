@@ -22,7 +22,7 @@ remote が無ければ toplevel のディレクトリ名。
 
 ## skill 側の作法
 
-**実験系 skill**（`/exp-new` `/exp-report` `/exp-checkpoint` `/exp-deck` `/regen-outputs`）は
+**実験系 skill**（`/exp-new` `/exp-report` `/exp-checkpoint` `/exp-deck` `/exp-artifact` `/regen-outputs`）は
 相対パスで `tools/…` `experiments/…` を呼ぶ。プロダクト repo から起動されるとそこに
 `experiments/` を作ってしまう（＝③ を汚す）ので、**必ず先にノート根へ cd する**：
 

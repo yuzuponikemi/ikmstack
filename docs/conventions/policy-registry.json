@@ -286,6 +286,9 @@
       "copies": [
         {
           "file": "docs/conventions/research.md"
+        },
+        {
+          "file": ".claude/skills/exp-artifact/SKILL.md"
         }
       ],
       "enforced_by": "—(手順。機械強制はしない — 対象は成果物ごとに変わるため)"
@@ -308,6 +311,9 @@
         },
         {
           "file": ".claude/skills/exp-checkpoint/SKILL.md"
+        },
+        {
+          "file": ".claude/skills/exp-artifact/SKILL.md"
         }
       ],
       "enforced_by": "tools/report_meta.py (link resolvability + vocabulary; pre-commit)"

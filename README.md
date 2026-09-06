@@ -106,6 +106,7 @@ INDEX/図リンクの pre-commit フックはそのまま動く。
 | `/kb-promote` | 確定知見を共有ナレッジベースへ昇格 |
 <!-- policy:kb-promotion@d1b964ea -->
 | `/exp-deck` | レポートから共有用スライド（.pptx）を生成 |
+| `/exp-artifact` | レポートを読み物 HTML 記事にして Artifact で公開（リンクで渡す） |
 | `/regen-outputs` | 図・自動レポートをローカル再生成（図は git に入れない） |
 | `/report-checksum` | レポート1本の数値と図の計算過程を独立再計算で検算（左右2ペイン HTML） |
 | `/readability-review` | そのレポート1本だけで読めるか（自走性）を隔離レビューで検査 |
@@ -117,7 +118,7 @@ INDEX/図リンクの pre-commit フックはそのまま動く。
 agent：`dr-verifier`（主張を独立検証、`/dr-audit` が使う）。
 
 **どこで起動しても正しい場所に着地する**（[記録のルーティング規約](docs/conventions/record-routing.md)）：
-実験系（`/exp-new` `/exp-report` `/exp-checkpoint` `/exp-deck` `/regen-outputs`）は
+実験系（`/exp-new` `/exp-report` `/exp-checkpoint` `/exp-deck` `/exp-artifact` `/regen-outputs`）は
 起動元がどこでも**ノート根**で動く（プロダクト repo に `experiments/` を作らない）。
 `/lab-log` だけは起動元に紐づけ、プロダクト repo なら `sidecar/<slug>/logs/` に集約する。
 
