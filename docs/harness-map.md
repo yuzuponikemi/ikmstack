@@ -19,7 +19,7 @@ distrust-by-construction / エントロピー最小)。改訂手順は harness-e
 
 <!-- gen:harness-map:summary:start -->
 
-スキル **18** / エージェント **1** / 規約ルール **20**(うち実行時強制 10) / pre-commit 関門 **7** / tools **23**
+スキル **18** / エージェント **1** / 規約ルール **21**(うち実行時強制 10) / pre-commit 関門 **7** / tools **23**
 
 <!-- gen:harness-map:summary:end -->
 
@@ -136,6 +136,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 | `research-question-closing` | 調査の下位問いは決着条件を先に書く(書けない問いは分解し直す) | docs/conventions/research.md | `tools/dr/dr_coverage.py (K1)` |
 | `source-tier-independence` | 出典は格付けし、孫引きを畳んでから独立本数を数える(vendor 単独で閉じない) | docs/conventions/research.md | `tools/dr/dr_coverage.py (K2)` |
 | `refutation-search-record` | 反証探索は台帳に記録する(探して見つからなかったことを成果として残す) | docs/conventions/research.md | `tools/dr/dr_coverage.py (K3)` |
+| `inference-scope-discipline` | 推論の述語は証拠の件数に合わせる(消去法で残った説を結論にしない / 自分の台帳の反例を先に引く) | docs/conventions/research.md | `—(執筆前チェック。機械強制はしない — 述語の強さは意味判定のため)` |
 | `ledger-before-prose` | 調査は台帳を先に埋め、散文は台帳から導出する(事後の書き起こしにしない) | docs/conventions/research.md | —(散文。policy gate は写し同期のみ) |
 | `dr-coverage-gate` | 調査は網羅ゲート(dr_coverage.py)を受入ゲートより先に通す | docs/conventions/research.md | `tools/dr/dr_coverage.py` |
 

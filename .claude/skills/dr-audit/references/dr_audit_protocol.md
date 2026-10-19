@@ -43,6 +43,13 @@
 - 重要度が `risk=decision_driving` の主張について、独立検証サブエージェント `dr-verifier` を呼び出します。
 - **重要**: 独立性を担保するため、検証者には `claim_id`, `subject`, `attribute`, `value_raw`, `value_num`, `unit`, `source_url` **のみ**を渡し、執筆者の `verbatim_quote`（引用）や注記は渡しません。
 - 返された検証結果 JSON (`verification`, `citation_axes`, `entity_check`) を台帳に書き戻します。
+- **`claim_type: inference` の主張は、出典の再取得ではなく「提示した事実から導けるか」を検証します。**
+  検証者には推論の文面と、それが参照する**事実主張だけ**を渡し(執筆者の論証文は渡さない)、
+  `method: nli` で判定させます。見るのは述語の強さです — 1〜2事例の整合を
+  「実証されている」「交換されている」「〜に限る」「〜が原因」と書いていないか。
+  崩れたら狭めて再検証し、埋まらない穴は `questions.jsonl` に `open` で戻します。
+  正本: ../../../../docs/conventions/research.md「推論の射程を証拠に合わせる」
+  <!-- policy:inference-scope-discipline@72d2e63a -->
 - 補足的主張 (`risk=supporting`) は、サンプリング選定スクリプトを実行して選ばれた行のみを検証します：
   ```sh
   python3 tools/dr/sampling_select.py <台帳パス>/claims.jsonl

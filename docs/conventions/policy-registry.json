@@ -406,6 +406,29 @@
       "enforced_by": "tools/dr/dr_coverage.py (K3)"
     },
     {
+      "id": "inference-scope-discipline",
+      "title": "推論の述語は証拠の件数に合わせる(消去法で残った説を結論にしない / 自分の台帳の反例を先に引く)",
+      "canonical": {
+        "file": "docs/conventions/research.md",
+        "anchor": "推論の射程を証拠に合わせる"
+      },
+      "key_lines": [
+        "消去法で残った説を結論にしない",
+        "仮説を書いた直後に、自分の台帳の中の反例を検索する",
+        "「実例が無い」を「できない」に強めない",
+        "証拠の件数を数えてから述語を選ぶ"
+      ],
+      "copies": [
+        {
+          "file": ".claude/skills/dr-synth/SKILL.md"
+        },
+        {
+          "file": ".claude/skills/dr-audit/references/dr_audit_protocol.md"
+        }
+      ],
+      "enforced_by": "—(執筆前チェック。機械強制はしない — 述語の強さは意味判定のため)"
+    },
+    {
       "id": "ledger-before-prose",
       "title": "調査は台帳を先に埋め、散文は台帳から導出する(事後の書き起こしにしない)",
       "canonical": {

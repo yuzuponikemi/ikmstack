@@ -28,6 +28,7 @@
 | `research-question-closing` | 調査の下位問いは決着条件を先に書く(書けない問いは分解し直す)(実行時強制: tools/dr/dr_coverage.py (K1)) | docs/conventions/research.md「下位問いと決着条件」 | .claude/skills/dr-plan/SKILL.md | `@64ec663f` |
 | `source-tier-independence` | 出典は格付けし、孫引きを畳んでから独立本数を数える(vendor 単独で閉じない)(実行時強制: tools/dr/dr_coverage.py (K2)) | docs/conventions/research.md「出典の格付けと独立性」 | .claude/skills/dr-collect/SKILL.md | `@e6b3fc5c` |
 | `refutation-search-record` | 反証探索は台帳に記録する(探して見つからなかったことを成果として残す)(実行時強制: tools/dr/dr_coverage.py (K3)) | docs/conventions/research.md「反証探索を記録する」 | .claude/skills/dr-collect/SKILL.md | `@e752a626` |
+| `inference-scope-discipline` | 推論の述語は証拠の件数に合わせる(消去法で残った説を結論にしない / 自分の台帳の反例を先に引く)(実行時強制: —(執筆前チェック。機械強制はしない — 述語の強さは意味判定のため)) | docs/conventions/research.md「推論の射程を証拠に合わせる」 | .claude/skills/dr-synth/SKILL.md<br>.claude/skills/dr-audit/references/dr_audit_protocol.md | `@72d2e63a` |
 | `ledger-before-prose` | 調査は台帳を先に埋め、散文は台帳から導出する(事後の書き起こしにしない) | docs/conventions/research.md「台帳を先に作る(散文は台帳から導出する)」 | .claude/skills/dr-collect/SKILL.md | `@deb0a7fb` |
 | `dr-coverage-gate` | 調査は網羅ゲート(dr_coverage.py)を受入ゲートより先に通す(実行時強制: tools/dr/dr_coverage.py) | docs/conventions/research.md「網羅ゲート」 | .claude/skills/dr-synth/SKILL.md | `@111ff218` |
 
