@@ -113,6 +113,7 @@ INDEX/図リンクの pre-commit フックはそのまま動く。
 | `/procedure-new` | 手順書を3層（Runbook / Principles / Notes）に起こす |
 | `/runbook-review` | Runbook が「知らない人でも実行できる」原子性を満たすか関門にする |
 | `/pr-review-doc` | 実装 PR を図解 HTML のレビューガイドにする（読者レベル較正あり） |
+| `/course-build` | 知識体系を章別インタラクティブ HTML 学習コースに仕立てる（企画相談→一次資料→章仕様の関門→並行執筆→独立レビュー） |
 | `/harness-edit` | ハーネス自身（skill・AGENTS・conventions）を正本/写しの規律で改訂する |
 
 agent：`dr-verifier`（主張を独立検証、`/dr-audit` が使う）。

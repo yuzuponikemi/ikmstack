@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cxx 章タイトル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/course.css">
+<!-- MATH (profile.math = katex): keep these 3 lines; delete them if the course has no formulas. -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" defer></script>
+<script src="../assets/course-config.js" defer></script>
+<script src="../assets/course.js" defer></script>
+<style>
+/* chapter-specific styles (prefix with cxx-) */
+</style>
+</head>
+<body data-ch="Cxx">
+<div class="wrap">
+<header class="ch">
+  <div class="eyebrow">{COURSE_TAG} · Part n · Cxx</div>
+  <h1>章タイトル — 副題</h1>
+  <div class="goals"><b>到達目標</b>
+    <ul>
+      <li>〜を{ANCHOR}の数値で計算できる。</li>
+      <li>〜の理由を説明できる。</li>
+      <li>〜の事例をこの章の概念で説明できる。</li>
+    </ul>
+  </div>
+  <div class="meta"><span>所要 60〜80 分</span><span>前提: Cxx</span><span>主な出典: S1 §x、S2 §y</span></div>
+</header>
+<nav class="intoc"></nav>
+<main>
+
+<h2 id="intro">1. 導入 — {ANCHOR}で出会う疑問</h2>
+<p>…</p>
+
+<h2 id="p1">2. 原理 1</h2>
+<p>出発点 → 概念 … 記号は本文でも必ず数式で書く: \( \hat\theta = \bar X \)、\[ \Var(\bar X)=\frac{\sigma^2}{n} \]</p>
+<figure>
+  <div class="paper"><svg viewBox="0 0 800 300" role="img" aria-label="図の説明">
+    <!-- hand-drawn diagram; .paper for charts, .stage for dark "bench" diagrams -->
+  </svg></div>
+  <figcaption><b>図 1.</b> 説明。S1 §x を基に作図。</figcaption>
+</figure>
+<div class="lab" id="cxx-lab1">
+  <div class="lh"><span class="tagm">LAB 1</span><b>演習タイトル</b></div>
+  <div class="lab-split">
+    <div class="stage"><canvas id="cxx-cv1"></canvas></div>
+    <div>
+      <div class="ctrls col">
+        <label class="rng">値 <input type="range" id="cxx-r1" min="0" max="100" value="50"><output for="cxx-r1"></output></label>
+        <button class="btn" id="cxx-reset1">リセット</button>
+      </div>
+      <div class="readout"><div><span>読み値</span><b id="cxx-o1">—</b></div></div>
+    </div>
+  </div>
+  <p class="small"><b>やってみること</b>: ① … ② …</p>
+  <div class="obs"><b>気づくこと</b> …</div>
+</div>
+<div class="box ex"><span class="bh">計算例</span>
+  <p>…</p>
+  <div class="calc">\[ \begin{aligned} \hat\lambda &= \frac{1}{\bar x} = \frac{1}{0.46} \\ &= 2.174 \end{aligned} \]</div>
+</div>
+<div class="box mis"><span class="bh">よくある誤解</span><p>…</p></div>
+
+<h2 id="anchor">n. {ANCHOR_HEADING}</h2>
+<div class="tbl"><table><thead><tr><th>項目</th><th>値</th><th>出典</th></tr></thead><tbody>
+  <tr><td>…</td><td class="num">…</td><td class="src">S1 §x</td></tr>
+</tbody></table></div>
+<div class="box why"><span class="bh">{WHY_LABEL}</span><p>… <span class="badge b-hyp">推測</span></p></div>
+
+<h2 id="cases">n. {CASES_HEADING}</h2>
+<div class="box case"><span class="bh">事例: …</span><p>状況 → 数値 → 機序 → 確度 <span class="badge b-fact">確定</span></p><p class="src">出典: …</p></div>
+
+<h2 id="quiz">n. 確認問題</h2>
+<ol class="quiz">
+  <li>問題文 <span class="lv">基本</span>
+    <details><summary>解答と解説</summary><div>…</div></details></li>
+</ol>
+
+<h2 id="summary">n. まとめ</h2>
+<ul><li>…</li></ul>
+
+<h2 id="glossary">n. 用語集</h2>
+<dl class="gloss"><dt>用語</dt><dd>意味</dd></dl>
+
+<h2 id="refs">n. 参考資料</h2>
+<ul class="refs"><li>一次資料: …</li><li>外部: …</li></ul>
+
+</main>
+<footer>{COURSE_TITLE} · 正本 {COURSE_DIR}/chapters/Cxx.html</footer>
+</div>
+<script>
+// Chapter-specific interactive code (prefix ids with cxx-).
+// All scripts are `defer`, so wait for DOMContentLoaded before using TC.*.
+// Do NOT call renderMathInElement here: course.js renders math once with the shared macros (\\Var, \\E, ...).
+// If a lab inserts new text containing \\( \\), call TC.renderMath(thatElement) after inserting it.
+document.addEventListener("DOMContentLoaded", () => {
+  // ...
+});
+</script>
+</body>
+</html>

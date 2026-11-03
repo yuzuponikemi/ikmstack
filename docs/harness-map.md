@@ -19,7 +19,7 @@ distrust-by-construction / エントロピー最小)。改訂手順は harness-e
 
 <!-- gen:harness-map:summary:start -->
 
-スキル **18** / エージェント **1** / 規約ルール **21**(うち実行時強制 10) / pre-commit 関門 **7** / tools **23**
+スキル **19** / エージェント **1** / 規約ルール **21**(うち実行時強制 10) / pre-commit 関門 **7** / tools **23**
 
 <!-- gen:harness-map:summary:end -->
 
@@ -148,6 +148,7 @@ runbook-review / dr-audit)と改訂手順(harness-edit)で守る。
 
 | スキル | 一言(description 冒頭) |
 |---|---|
+| [course-build](../.claude/skills/course-build/SKILL.md) | 任意の知識体系(自分たちの装置・システム・資格試験・学問分野)を、単元ごとの章別 HTML 学習ページ(各章にインタラクティブ図 3〜5 個・題材の数値での計算例・確認問題 8 問以上)と入口ページからなる学習コースに仕… |
 | [dr-audit](../.claude/skills/dr-audit/SKILL.md) | レポートの事実・数値を独立検証する。 |
 | [dr-collect](../.claude/skills/dr-collect/SKILL.md) | Search for sources against a sub-question ledger and fill the source + claim ledgers as you read — recording r… |
 | [dr-plan](../.claude/skills/dr-plan/SKILL.md) | Decompose one research topic into independently-closable sub-questions with explicit closing conditions, and w… |

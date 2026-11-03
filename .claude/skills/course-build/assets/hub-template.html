@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{COURSE_TITLE}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/course.css">
+<script src="assets/course-config.js" defer></script>
+<style>
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:16px 0}
+.cards a{display:block;text-decoration:none;color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.cards a:hover{border-color:var(--accent)}
+.cards .id{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.cards b{display:block;color:var(--accent);margin:.1em 0 .2em}
+.cards p{font-size:.85rem;margin:0;color:var(--muted)}
+.cards .todo{opacity:.55;pointer-events:none}
+</style>
+</head>
+<body data-ch="HUB">
+<div class="wrap">
+<header class="ch">
+  <div class="eyebrow">{COURSE_TAG}</div>
+  <h1>{COURSE_TITLE}</h1>
+  <div class="goals"><b>このコースで言えるようになること</b>
+    <ul><li>…</li></ul>
+  </div>
+  <div class="meta"><span>読者: …</span><span>前提: …</span><span>更新: YYYY-MM-DD</span></div>
+</header>
+<main>
+<h2 id="chapters">章</h2>
+<div class="cards" id="hub-cards"></div>
+
+<h2 id="howto">使い方</h2>
+<ul>
+  <li>各章は「導入 → 原理(図・操作演習・計算例)→ {ANCHOR_HEADING} → 事例 → 確認問題 → まとめ」の順です。</li>
+  <li>バッジ: <span class="badge b-fact">確定</span> 出典で裏付けあり / <span class="badge b-hyp">推測</span> 解釈・仮説 / <span class="badge b-unk">確認が必要</span> / <span class="badge b-c">S2-C1</span> 資料間の食い違い・記法の流儀差(下の台帳。章番号と紛れないよう S2- を付ける)。</li>
+</ul>
+
+<h2 id="ledger">食い違い・記法の台帳</h2>
+<div class="tbl"><table><thead><tr><th>#</th><th>項目</th><th>食い違い</th><th>状態</th></tr></thead><tbody>
+  <tr><td>S2-C1</td><td>…</td><td>…</td><td>…</td></tr>
+</tbody></table></div>
+
+<h2 id="sources">一次資料</h2>
+<ul class="refs"><li>S1 …</li></ul>
+</main>
+<footer>{COURSE_TITLE} · 正本 {COURSE_DIR}/</footer>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const C = window.COURSE || { chapters: [] };
+  const sum = C.summaries || {};
+  document.getElementById("hub-cards").innerHTML = C.chapters.map((c) => {
+    const href = c[2].replace(/^(?!\.\.\/|https?:)/, "chapters/").replace(/^\.\.\//, "");
+    const todo = c[3] === "todo";
+    return `<a class="${todo ? "todo" : ""}" href="${href}"><span class="id">${c[0]}${todo ? " · 未作成" : ""}</span><b>${c[1]}</b><p>${sum[c[0]] || ""}</p></a>`;
+  }).join("");
+});
+</script>
+</body>
+</html>

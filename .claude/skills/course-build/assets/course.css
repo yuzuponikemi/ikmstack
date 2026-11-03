@@ -1,0 +1,166 @@
+/* Shared stylesheet for course-build chapters (tokens mirror the hub page). */
+:root{
+  --bg:#fbfafc; --surface:#ffffff; --fg:#26222b; --muted:#6a6372; --line:#e3dee8;
+  --accent:#531872; --accent-2:#6c2a87; --accent-soft:#f1e9f5;
+  --green:#3f8a5a; --green-soft:#e6f2ea; --warn:#9a4c12; --warn-soft:#fdf2e2;
+  --blue:#1f5f8f; --blue-soft:#e7f0f7;
+  --l405:#7b3fd1; --l488:#1f86c9; --l637:#c83a2c;
+  --f-body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  /* optical bench: dark in both themes so laser colors read as light */
+  --stage:#141119; --stage-2:#1d1824; --stage-fg:#ebe6f1; --stage-mute:#9d94a8; --stage-line:#3a3345;
+  --b405:#a374ff; --b488:#2fb8f5; --b637:#ff5544; --bwhite:#f4f1f8;
+  /* generic series colors on the dark stage (non-optics courses use these instead of laser names) */
+  --c1:var(--b488); --c2:#ffb547; --c3:var(--b637); --c4:var(--b405); --c5:#5fd08a;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17141b; --surface:#201c25; --fg:#ece8f0; --muted:#a59cae; --line:#36303d;
+  --accent:#c79be0; --accent-2:#d8b5ec; --accent-soft:#2c2235;
+  --green:#7cc796; --green-soft:#1d2c23; --warn:#f0b27a; --warn-soft:#2e2318;
+  --blue:#8cc3ea; --blue-soft:#1a2733;
+  --l405:#b18cf0; --l488:#6fbbe9; --l637:#f08377; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17141b; --surface:#201c25; --fg:#ece8f0; --muted:#a59cae; --line:#36303d;
+  --accent:#c79be0; --accent-2:#d8b5ec; --accent-soft:#2c2235;
+  --green:#7cc796; --green-soft:#1d2c23; --warn:#f0b27a; --warn-soft:#2e2318;
+  --blue:#8cc3ea; --blue-soft:#1a2733;
+  --l405:#b18cf0; --l488:#6fbbe9; --l637:#f08377; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.85;margin:0}
+.wrap{max-width:880px;margin:0 auto;padding:0 16px 72px}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,summary:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1,h2,h3,h4{text-wrap:balance;line-height:1.35}
+h2{font-size:1.4rem;color:var(--accent);margin:2.2em 0 .5em;padding-top:.6em;border-top:1px solid var(--line);scroll-margin-top:60px}
+h3{font-size:1.1rem;margin:1.6em 0 .4em;scroll-margin-top:60px}
+h4{font-size:1rem;margin:1.2em 0 .3em}
+p{margin:.6em 0}
+ul,ol{padding-left:1.4em}
+li{margin:.25em 0}
+code,.mono{font-family:var(--f-mono);font-size:.92em;font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)} .small{font-size:.875rem}
+
+/* top bar + header */
+.topbar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -16px;padding:6px 16px;display:flex;gap:10px;align-items:center;font-size:.85rem}
+.topbar a{text-decoration:none}
+.topbar .sp{flex:1}
+.topbar select{font:inherit;font-size:.82rem;max-width:52vw;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+header.ch{padding:28px 0 8px}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+header.ch h1{font-size:clamp(1.6rem,4vw,2.2rem);margin:.15em 0 .25em}
+.goals{background:var(--accent-soft);border-radius:12px;padding:12px 18px;margin:14px 0}
+.goals b{color:var(--accent)}
+.goals ul{margin:.3em 0}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.82rem;color:var(--muted)}
+nav.intoc{border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin:16px 0;background:var(--surface);font-size:.9rem}
+nav.intoc ol{margin:.2em 0;columns:2;column-gap:28px}
+@media (max-width:640px){nav.intoc ol{columns:1}}
+
+/* tables */
+.tbl{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:8px 11px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font-weight:700;font-size:.8rem;color:var(--muted);background:var(--accent-soft);white-space:nowrap}
+td.num{font-family:var(--f-mono);white-space:nowrap}
+
+/* content boxes */
+.box{border-radius:10px;padding:12px 16px;margin:14px 0;border-left:4px solid}
+.box > .bh{display:block;font-weight:700;font-size:.85rem;letter-spacing:.04em;margin-bottom:2px}
+.box p:first-of-type{margin-top:.2em}
+.ex{background:var(--blue-soft);border-color:var(--blue)} .ex > .bh{color:var(--blue)}
+.why{background:var(--accent-soft);border-color:var(--accent)} .why > .bh{color:var(--accent)}
+.dev{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--l405)} .dev > .bh{color:var(--l405)}
+.case{background:var(--green-soft);border-color:var(--green)} .case > .bh{color:var(--green)}
+.warn{background:var(--warn-soft);border-color:var(--warn)} .warn > .bh{color:var(--warn)}
+.mis{background:var(--warn-soft);border-color:var(--warn)} .mis > .bh{color:var(--warn)}
+pre.calc{font-family:var(--f-mono);font-size:.86rem;line-height:1.65;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;overflow-x:auto;margin:8px 0}
+.eq{font-family:var(--f-mono);text-align:center;font-size:1.05rem;margin:12px 0;padding:8px;background:var(--surface);border-radius:8px;overflow-x:auto}
+
+/* evidence badges */
+.badge{display:inline-block;font-size:.7rem;font-weight:700;padding:0 6px;border-radius:4px;vertical-align:.12em;margin:0 2px;white-space:nowrap}
+.b-fact{background:var(--green-soft);color:var(--green)}
+.b-hyp{background:var(--warn-soft);color:var(--warn)}
+.b-unk{background:var(--line);color:var(--muted)}
+.b-c{background:var(--warn-soft);color:var(--warn);font-family:var(--f-mono)}
+.src{font-size:.78rem;color:var(--muted)}
+
+/* figures */
+figure{margin:18px 0}
+figure .stage{background:var(--stage);color:var(--stage-fg);border-radius:12px;overflow:hidden;padding:8px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-size:.84rem;color:var(--muted);margin-top:6px;line-height:1.6}
+figcaption b{color:var(--fg)}
+.stage text{fill:var(--stage-fg);font-family:var(--f-body)}
+.stage .mute{fill:var(--stage-mute)}
+.stage .ln{stroke:var(--stage-line)}
+/* paper-style figure (charts on the page background): use instead of .stage */
+figure .paper{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px}
+.paper text{fill:var(--fg);font-family:var(--f-body)}
+.paper .mute{fill:var(--muted)}
+
+/* interactive lab */
+.lab{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0;background:var(--surface)}
+.lab > .lh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.lab > .lh b{color:var(--accent)}
+.lab > .lh .tagm{font-family:var(--f-mono);font-size:.72rem;padding:1px 8px;border-radius:999px;background:var(--accent);color:var(--surface)}
+.lab .stage{background:var(--stage);color:var(--stage-fg);border-radius:10px;overflow:hidden;margin-top:10px}
+.lab canvas{display:block;width:100%}
+.lab-split{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;margin-top:10px}
+.lab-split .stage{margin-top:0;align-self:start} /* do not stretch to the controls column (left a dark gap under the canvas) */
+@media (max-width:720px){.lab-split{grid-template-columns:minmax(0,1fr)}}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;margin-top:10px}
+.ctrls.col{flex-direction:column;align-items:stretch}
+.rng{display:flex;align-items:center;gap:8px;font-size:.85rem;flex-wrap:wrap}
+.rng input[type=range]{flex:1;min-width:120px;accent-color:var(--accent)}
+.rng output{font-family:var(--f-mono);font-variant-numeric:tabular-nums;min-width:6em;color:var(--accent);font-weight:700}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px}
+.seg button,.btn{font:inherit;font-size:.84rem;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.seg button[aria-pressed="true"],.btn.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn:hover,.seg button:hover{border-color:var(--accent)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+.readout div{background:var(--accent-soft);border-radius:8px;padding:7px 11px}
+.readout > div > span{display:block;font-size:.74rem;color:var(--muted)}
+.readout b{font-family:var(--f-mono);font-size:1rem;font-variant-numeric:tabular-nums}
+.obs{font-size:.9rem;background:var(--green-soft);border-radius:8px;padding:9px 13px;margin-top:10px}
+.obs b{color:var(--green)}
+.note{font-size:.78rem;color:var(--muted);margin-top:6px}
+
+/* quiz */
+ol.quiz{padding-left:0;list-style:none;counter-reset:q}
+ol.quiz > li{counter-increment:q;border:1px solid var(--line);border-radius:10px;padding:10px 14px 10px 46px;margin:10px 0;position:relative;background:var(--surface)}
+ol.quiz > li::before{content:"Q" counter(q);position:absolute;left:12px;top:10px;font-family:var(--f-mono);font-weight:700;color:var(--accent);font-size:.85rem}
+ol.quiz .lv{font-size:.7rem;padding:0 6px;border-radius:4px;background:var(--accent-soft);color:var(--accent);margin-left:4px}
+ol.quiz details{margin-top:6px}
+ol.quiz summary{cursor:pointer;font-size:.85rem;color:var(--green);font-weight:700}
+ol.quiz details > div{background:var(--green-soft);border-radius:8px;padding:8px 12px;margin-top:6px;font-size:.92rem}
+
+/* glossary / refs / pager */
+dl.gloss{display:grid;grid-template-columns:minmax(7em,auto) minmax(0,1fr);gap:6px 16px}
+dl.gloss dt{font-weight:700}
+dl.gloss dd{margin:0}
+@media (max-width:560px){dl.gloss{grid-template-columns:1fr}dl.gloss dd{margin-bottom:6px}}
+.refs li{font-size:.88rem}
+nav.pager{display:flex;justify-content:space-between;gap:12px;margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:.9rem}
+nav.pager a{display:block;max-width:48%;text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:8px 14px;background:var(--surface)}
+nav.pager a span{display:block;font-size:.75rem;color:var(--muted)}
+footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+/* math (KaTeX): long display formulas scroll instead of widening the page at 360 px */
+.katex{position:relative} /* contain KaTeX hidden MathML so it cannot widen the page */
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:2px 0}
+main{overflow-wrap:anywhere}
+/* series colors on paper figures (darker than the stage versions so they read on white) */
+.paper{--c1:var(--blue);--c2:var(--warn);--c3:#b8382b;--c4:var(--accent);--c5:var(--green)}
+/* math typography (chapter-spec §2.5): KaTeX's default 1.21em is too large next to Japanese body text */
+.katex{font-size:1.08em}
+.box .calc{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 12px;margin:8px 0;overflow-x:auto}
+.box .calc .katex-display{margin:.5em 0}
+/* math symbols where KaTeX cannot run (form labels, readouts, SVG text): serif italic like KaTeX variables */
+.m{font-family:KaTeX_Math,"Times New Roman",serif;font-style:italic}
+.mu{font-family:KaTeX_Main,"Times New Roman",serif;font-style:normal}
+svg text.m{font-family:KaTeX_Math,"Times New Roman",serif;font-style:italic}
