@@ -93,13 +93,16 @@ figure .stage{background:var(--stage);color:var(--stage-fg);border-radius:12px;o
 figure svg{display:block;width:100%;height:auto}
 figcaption{font-size:.84rem;color:var(--muted);margin-top:6px;line-height:1.6}
 figcaption b{color:var(--fg)}
-.stage text{fill:var(--stage-fg);font-family:var(--f-body)}
-.stage .mute{fill:var(--stage-mute)}
+.stage text{font-family:var(--f-body)}
+/* default colour only when the text has no fill attribute (fill="var(--c1)" must win) */
+.stage text:not([fill]){fill:var(--stage-fg)}
+.stage .mute,.stage text.mute:not([fill]){fill:var(--stage-mute)}
 .stage .ln{stroke:var(--stage-line)}
 /* paper-style figure (charts on the page background): use instead of .stage */
 figure .paper{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px}
-.paper text{fill:var(--fg);font-family:var(--f-body)}
-.paper .mute{fill:var(--muted)}
+.paper text{font-family:var(--f-body)}
+.paper text:not([fill]){fill:var(--fg)}
+.paper .mute,.paper text.mute:not([fill]){fill:var(--muted)}
 
 /* interactive lab */
 .lab{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0;background:var(--surface)}
