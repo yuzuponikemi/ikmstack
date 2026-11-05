@@ -158,7 +158,7 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted)}
 .katex-display{overflow-x:auto;overflow-y:hidden;padding:2px 0}
 main{overflow-wrap:anywhere}
 /* series colors on paper figures (darker than the stage versions so they read on white) */
-.paper{--c1:var(--blue);--c2:var(--warn);--c3:#b8382b;--c4:var(--accent);--c5:var(--green)}
+.paper{--c1:var(--blue);--c2:var(--warn);--c3:var(--l637);--c4:var(--accent);--c5:var(--green)}
 /* math typography (chapter-spec §2.5): KaTeX's default 1.21em is too large next to Japanese body text */
 .katex{font-size:1.08em}
 .box .calc{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 12px;margin:8px 0;overflow-x:auto}
