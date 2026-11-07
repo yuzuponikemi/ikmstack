@@ -163,6 +163,34 @@ python3 "$(cat ~/.ikmstack/install-path)/tools/dr/dr_coverage.py" <reports>/ques
 (K5 は `prose:` も併記したときだけ)。opt-in の仕組みそのものは reporting.md
 「検証ゲート(.dr-gate)と claim マーカ」が正本。
 
+## 撤回した主張は活きた台帳から退避する
+
+受入ゲート `dr_gate.py` の R2 は、**`risk: decision_driving` の `refuted` が1件でもあれば即 FAIL**
+する(AQL 閾値が効くのは `supporting` だけ)。`risk` を `supporting` に落としても、
+検証を試みた中の不良率でやはり落ちる。**撤回済みの行を活きた台帳に置いたままでは、
+ゲートが永久に通らない。**
+
+- 撤回した主張は `reports/claims.retracted.jsonl` へ移し、`claims.jsonl` には残さない
+- 撤回そのものの記録は、reporting.md「改訂・撤回の記録」が正本。**新しい一次記録の
+  frontmatter** に書き、台帳側には残さない
+- 退避すると、その問いの **K3(反証の痕跡)が FAIL する**。実質的な留保を
+  `stance: neutral` / `refutes` の主張として活きた台帳に残す。ゲート通しのための形だけの行ではなく、
+  本当の射程の限界を書く
+
+ゲート周りで実際に踏んだ他の落とし穴(E021):
+
+- `.dr-gate` を**台帳が無い計画段階で置くと pre-commit が落ちる**。`/dr-plan` で
+  questions/sources/claims が揃ってから置く
+- `ledger_to_prose_check.py` の引数は**散文が先、台帳が後**。逆にすると
+  「台帳にスキーマエラー」という誤解を招くメッセージが出る
+- `reports/` 直下に frontmatter の無い `.md` を置くと `report_meta.py` が INDEX 生成を
+  丸ごとスキップする。解説文書は実験直下のリビング文書にする
+- 日付の数字が `(claim:cNNN)` の近傍にあると E3(数値ドリフト)の偽陽性になる。
+  金額をマーカの直前に置き、日付は前に出す
+
+サブエージェントに検証を委譲するときの運用(結果は出典群ごとに書き戻し、台帳の実ファイルで
+確認する)は ikmnote の tips「method-subagent-delegation-verify-on-disk」。
+
 ## いつ回すか
 
 <!-- policy:verify-before-sharing@38a1a7de -->
