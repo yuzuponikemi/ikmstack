@@ -1,0 +1,24 @@
+/* Code colours in the style of VS Code: Light+ on the light theme, Dark+ on the dark theme.
+   Used with hl.js (highlight.js 11.9.0). The block background stays the course's own. */
+:root{
+  --hl-kw:#0000ff; --hl-ctl:#af00db; --hl-str:#a31515; --hl-cm:#008000; --hl-num:#098658;
+  --hl-fn:#795e26; --hl-type:#267f99; --hl-var:#001080; --hl-meta:#795e26; --hl-op:#26222b;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --hl-kw:#569cd6; --hl-ctl:#c586c0; --hl-str:#ce9178; --hl-cm:#6a9955; --hl-num:#b5cea8;
+  --hl-fn:#dcdcaa; --hl-type:#4ec9b0; --hl-var:#9cdcfe; --hl-meta:#dcdcaa; --hl-op:#d4d4d4}}
+:root[data-theme="dark"]{
+  --hl-kw:#569cd6; --hl-ctl:#c586c0; --hl-str:#ce9178; --hl-cm:#6a9955; --hl-num:#b5cea8;
+  --hl-fn:#dcdcaa; --hl-type:#4ec9b0; --hl-var:#9cdcfe; --hl-meta:#dcdcaa; --hl-op:#d4d4d4}
+
+pre.hlc{color:var(--hl-op)}
+pre.hlc .hljs-keyword,pre.hlc .hljs-literal,pre.hlc .hljs-symbol{color:var(--hl-kw)}
+pre.hlc .hljs-built_in,pre.hlc .hljs-type,pre.hlc .hljs-title.class_{color:var(--hl-type)}
+pre.hlc .hljs-string,pre.hlc .hljs-regexp,pre.hlc .hljs-char.escape_{color:var(--hl-str)}
+pre.hlc .hljs-comment,pre.hlc .hljs-quote,pre.hlc .cm{color:var(--hl-cm)}
+pre.hlc .hljs-number{color:var(--hl-num)}
+pre.hlc .hljs-title.function_,pre.hlc .hljs-title{color:var(--hl-fn)}
+pre.hlc .hljs-params,pre.hlc .hljs-variable,pre.hlc .hljs-attr,pre.hlc .hljs-property{color:var(--hl-var)}
+pre.hlc .hljs-meta,pre.hlc .hljs-meta .hljs-keyword{color:var(--hl-meta)}
+pre.hlc .hljs-subst{color:inherit}
+pre.hlc .ln{color:var(--muted)}

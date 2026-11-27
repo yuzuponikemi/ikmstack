@@ -26,7 +26,8 @@ description: 任意の知識体系(自分たちの装置・システム・資格
 | `scripts/new_course.py` | コースのひな形を作る(既存ファイルは上書きしない) |
 | `scripts/check_chapter.py` | 静的関門(構成・問題数と区分・LAB 要素・id 重複・`node --check`・**記法**) |
 | `scripts/browser_check.mjs` | 実行時関門(Playwright。例外・360px 横溢れ・KaTeX エラー・スクリーンショット。`SECTIONS=1` で節ごとの画像) |
-| `scripts/setup_katex.sh` | クラウドで cdnjs が遮断されているとき、KaTeX をローカルに入れて `KATEX_DIST` を出力する |
+| `scripts/vendor_assets.sh` | KaTeX 0.16.9 と highlight.js 11.9.0(コードの色付け)をコースの `assets/` に同梱する。`new_course.py` が呼ぶ。既存コースには手で 1 回流す |
+| `scripts/setup_katex.sh` | 旧方式(cdnjs から読む章)の検査用。cdnjs の要求をローカルから返すための `KATEX_DIST` を出力する |
 | `scripts/selftest.py` | このスキル自身の自己検査(lint が全規則で落とせるか、全プロファイルの雛形生成、course.js)。スキルを編集したら必ず実行 |
 
 以下のコマンドは `<プロジェクト>/.claude/skills/course-build/` に置いた場合のパスです。`~/.claude/skills/course-build/` に置いた場合は読み替えてください。
@@ -74,8 +75,7 @@ python .claude/skills/course-build/scripts/check_chapter.py <course>/chapters/C*
 node .claude/skills/course-build/scripts/browser_check.mjs <scratchpad>/shots <course>/chapters/C*.html <course>/index.html
 ```
 
-サンドボックスで cdnjs が遮断されていると数式が描画されず TeX の誤りを検出できない。その場合は
-`eval "$(sh .claude/skills/course-build/scripts/setup_katex.sh <scratchpad>/katex)"` で `KATEX_DIST` を設定してから browser_check を実行する(cdnjs の要求をローカルから返す)。info の `katex=` が 0 なら数式は未検証。
+KaTeX はコースの `assets/katex/` に同梱する(`scripts/vendor_assets.sh`)。claude.ai の Artifact は Google Fonts 以外の外部 CSS を読み込まないので、cdnjs から読むと公開版の数式が崩れる。info の `katex=` が 0 なら数式は未検証(`assets/katex/` が無いか、章が cdnjs を読んでいる。後者は `setup_katex.sh` で `KATEX_DIST` を設定すれば検査だけはできる)。
 
 両方 PASS + 計算の再計算(`authoring/verify/Cxx_verify.py` を残す)+ **節ごとの目視**:
 `SECTIONS=1` を付けて browser_check を回し、`<name>-sNN.png` を 1 枚ずつ Read で見る。全体の縮小画像では数式の書体の混在・大きさ・行間は判断できない。

@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/course.css">
 <script src="assets/course-config.js" defer></script>
+<script src="assets/course.js" defer></script>
 <style>
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:16px 0}
 .cards a{display:block;text-decoration:none;color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
@@ -29,6 +30,7 @@
   <div class="meta"><span>読者: …</span><span>前提: …</span><span>更新: YYYY-MM-DD</span></div>
 </header>
 <main>
+<div class="hub-bar" id="hub-status-bar"></div>
 <h2 id="chapters">章</h2>
 <div class="cards" id="hub-cards"></div>
 
@@ -49,15 +51,8 @@
 <footer>{COURSE_TITLE} · 正本 {COURSE_DIR}/</footer>
 </div>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const C = window.COURSE || { chapters: [] };
-  const sum = C.summaries || {};
-  document.getElementById("hub-cards").innerHTML = C.chapters.map((c) => {
-    const href = c[2].replace(/^(?!\.\.\/|https?:)/, "chapters/").replace(/^\.\.\//, "");
-    const todo = c[3] === "todo";
-    return `<a class="${todo ? "todo" : ""}" href="${href}"><span class="id">${c[0]}${todo ? " · 未作成" : ""}</span><b>${c[1]}</b><p>${sum[c[0]] || ""}</p></a>`;
-  }).join("");
-});
+// Cards with quiz progress and the status bar come from course.js (TC.renderHub).
+document.addEventListener("DOMContentLoaded", () => { if (window.TC && TC.renderHub) TC.renderHub(); });
 </script>
 </body>
 </html>

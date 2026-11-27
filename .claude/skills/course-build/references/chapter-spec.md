@@ -26,7 +26,7 @@
 - 雛形: `chapters/_template.html`。head・構造・クラス名・**h2 の id**(`intro` / `p1`〜`p6` / `anchor` / `cases` / `quiz` / `summary` / `glossary` / `refs`)はこれに合わせる(`check_chapter.py` が id で検査する)。
   - `<body data-ch="Cxx">`、`<div class="wrap">` の中に `header.ch` → `nav.intoc`(空でよい)→ `main` → `footer`。
   - `../assets/course-config.js` → `../assets/course.js` の順に `defer` で読む。章固有のスクリプトは本文末尾にインラインで置き、`DOMContentLoaded` の中で `TC.*` を使う(先に走ると `TC` 未定義)。
-  - 外部ライブラリは使わない。例外は Google Fonts と、プロファイルが `math: katex` のときの KaTeX 0.16.9(cdnjs、雛形の 3 行)だけ。localStorage に依存しない。
+  - 外部から読み込むのは Google Fonts だけ。プロファイルが `math: katex` のときの KaTeX 0.16.9 と、コードの色付け(highlight.js 11.9.0)は `assets/` に同梱したものを雛形の行で読む(`scripts/vendor_assets.sh`)。章の内容が localStorage に依存しない(読者の表示設定と問題の記録は course.js が任意で保存する)。
   - 幅 360px で横スクロールが出ないこと(表は `.tbl` で包む、SVG は viewBox 指定で幅 100%、長い式は `.eq` か display 数式)。
 - 文体は「です・ます」。コードコメントは英語。
 - 図はすべて **自作のインライン SVG / canvas**。他者の図・本文・問題は貼らない(著作権)。資料の図を参考にした場合は描き直し、figcaption に「〇〇(S1 §D)を基に作図」と書く。

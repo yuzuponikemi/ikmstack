@@ -16,7 +16,7 @@ Claude Code で「〇〇の学習教材を作って」「単元ごとの学習�
 - Python 3.9 以上
 - Node.js 18 以上
 - Playwright(ブラウザ検査用。`npm i playwright` と `npx playwright install chromium`)
-- 数式を描画するための KaTeX。通常は CDN から読み込まれます。ネットワークが遮断された環境では `sh scripts/setup_katex.sh <保存先>` でローカルに入れます(npm が必要)
+- 数式を描画する KaTeX と、コードに色を付ける highlight.js。`new_course.py` が `scripts/vendor_assets.sh` でコースの `assets/` に同梱します(npm が必要。オフラインなら `--no-vendor` で作って後で流す)
 - 統計・数値計算の教材の検算には numpy / scipy(スキル自体には不要)
 
 ## 中身
@@ -37,5 +37,6 @@ python scripts/selftest.py --browser
 ## 注意
 
 - 公開されている教科書・試験問題の本文・図・問題は転載しない前提で作られています(`references/profiles/exam-cert.md`)。
-- 章の HTML は Google Fonts と(数式のある章では)cdnjs の KaTeX を読み込みます。外部読み込みを避けたい場合は、フォントと KaTeX を同梱して `assets/` のリンクを書き換えてください。
+- 章の HTML が外部から読み込むのは Google Fonts だけです。KaTeX と highlight.js は `assets/` に同梱します(claude.ai の Artifact は Google Fonts 以外の外部 CSS を読み込まないため)。
+- 読者向けの調整(文字サイズ・図の文字サイズ・スマホでの図の幅・確認問題の「理解した/要復習」の記録)は `course.js` が足します。記録は読者のブラウザの localStorage にだけ残ります。
 - 配布・再配布の条件は、このスキルを配布する組織が決めてください(このファイルにはライセンスを含めていません)。
