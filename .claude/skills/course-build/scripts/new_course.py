@@ -9,6 +9,7 @@ Creates (never overwrites existing files):
   <course_dir>/index.html                 hub page (from hub-template.html)
   <course_dir>/assets/course.css|js       shared runtime (copied from the skill)
   <course_dir>/assets/course-config.js    chapter list (all chapters marked "todo")
+  <course_dir>/assets/katex/, highlight/  pinned KaTeX / highlight.js (scripts/vendor_assets.sh; needs npm)
   <course_dir>/chapters/_template.html    chapter skeleton with placeholders filled from the profile
   <course_dir>/authoring/CHAPTER-SPEC.md  copy of references/chapter-spec.md + the profile appended
   <course_dir>/authoring/sources/  authoring/review/  authoring/verify/
@@ -17,6 +18,7 @@ import argparse
 import json
 import re
 import shutil
+import subprocess
 from pathlib import Path
 
 SKILL = Path(__file__).resolve().parent.parent
@@ -51,6 +53,8 @@ def main():
     ap.add_argument("--profile", choices=sorted(PROFILE_SLOTS), required=True)
     ap.add_argument("--chapters", nargs="+", required=True, help='"C01:タイトル" ...')
     ap.add_argument("--no-math", action="store_true", help="drop KaTeX lines from the chapter template")
+    ap.add_argument("--no-code", action="store_true", help="drop code-colouring lines from the chapter template")
+    ap.add_argument("--no-vendor", action="store_true", help="skip scripts/vendor_assets.sh (offline; run it later)")
     a = ap.parse_args()
 
     root = Path(a.course_dir)
@@ -86,8 +90,14 @@ def main():
     tpl = fill((SKILL / "assets" / "_template.html").read_text(encoding="utf-8"))
     if a.no_math:
         tpl = re.sub(r"<!-- MATH.*?auto-render\.min\.js\" defer></script>\n", "", tpl, flags=re.S)
+    if a.no_code:
+        tpl = re.sub(r"<!-- CODE.*?hl\.js\" defer></script>\n", "", tpl, flags=re.S)
     write_new(root / "chapters" / "_template.html", tpl)
     write_new(root / "index.html", fill((SKILL / "assets" / "hub-template.html").read_text(encoding="utf-8")))
+
+    if not a.no_vendor:
+        flags = (["--no-math"] if a.no_math else []) + (["--no-code"] if a.no_code else [])
+        subprocess.run(["sh", str(SKILL / "scripts" / "vendor_assets.sh"), str(root), *flags], check=True)
 
     spec = (SKILL / "references" / "chapter-spec.md").read_text(encoding="utf-8")
     prof = (SKILL / "references" / "profiles" / f"{a.profile}.md").read_text(encoding="utf-8")

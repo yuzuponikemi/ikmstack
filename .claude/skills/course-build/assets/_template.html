@@ -7,10 +7,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../assets/course.css">
-<!-- MATH (profile.math = katex): keep these 3 lines; delete them if the course has no formulas. -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" defer></script>
+<!-- MATH (profile.math = katex): keep these 3 lines; delete them if the course has no formulas.
+     KaTeX is bundled in assets/katex/ (scripts/vendor_assets.sh): Artifacts block CDN stylesheets. -->
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script src="../assets/katex/katex.min.js" defer></script>
+<script src="../assets/katex/auto-render.min.js" defer></script>
+<!-- CODE: keep these 5 lines when the chapter has code blocks (<pre class="code">, <pre class="cxx-code">);
+     colours follow VS Code. Language is guessed per block; set <pre data-lang="python"> to fix it, "none" to skip. -->
+<link rel="stylesheet" href="../assets/highlight/hl.css">
+<script src="../assets/highlight/highlight.min.js" defer></script>
+<script src="../assets/highlight/verilog.min.js" defer></script>
+<script src="../assets/highlight/tcl.min.js" defer></script>
+<script src="../assets/highlight/hl.js" defer></script>
 <script src="../assets/course-config.js" defer></script>
 <script src="../assets/course.js" defer></script>
 <style>
